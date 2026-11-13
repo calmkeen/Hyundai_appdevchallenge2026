@@ -26,3 +26,7 @@ finally:
  stop.set();thread.join();api('/browser/session?client=carcue-ux-validation&closing=1','POST')
 text=subprocess.check_output(adb+['logcat','-d','-s','CarCueVehicle:I'],text=True)
 Path('output/qa/pleos-ux-events.txt').write_text(text);print(text)
+required=['UX:GET:requires=false','UX:CALLBACK:requires=true','UX:CALLBACK:requires=false']
+if not all(value in text for value in required):
+ raise SystemExit('UX change/restore evidence missing; inspect output/qa/pleos-ux-events.txt')
+print('PASS: actual UX initial read, restriction callback and parked restore')
