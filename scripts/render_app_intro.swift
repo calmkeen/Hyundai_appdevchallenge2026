@@ -21,6 +21,7 @@ private struct Plan: Decodable {
     let output: String, source: String, audio: String, music_credit: String
     let audio_start: Double
     let audio_volume: Float
+    let model_hero: String
     let segments: [Shot]
 }
 private struct Overlay { let shot: Shot, start: Double; var duration: Double }
@@ -46,7 +47,7 @@ private func bitmap(_ draw: () -> Void) -> CGImage {
     NSGraphicsContext.restoreGraphicsState()
     return b.cgImage!
 }
-private func overlayImage(_ shot: Shot, credit: String) -> CGImage {
+private func overlayImage(_ shot: Shot, credit: String, hero: String) -> CGImage {
     bitmap {
         if shot.kind == "video" {
             pale.setFill(); NSRect(x: 0, y: 0, width: W, height: H).fill()
@@ -68,15 +69,15 @@ private func overlayImage(_ shot: Shot, credit: String) -> CGImage {
         } else if shot.kind == "intro" {
             NSColor.white.setFill(); NSRect(x: 0, y: 0, width: W, height: H).fill()
             rounded(NSRect(x: 1140, y: 166, width: 620, height: 740), pale, radius: 52)
-            let carPhoto = NSImage(contentsOfFile: "content/illustrations/ioniq5-real.jpg")!
+            let carPhoto = NSImage(contentsOfFile: hero)!
             let photoHeight = 552 * carPhoto.size.height / carPhoto.size.width
             let photoRect = NSRect(x: 1174, y: 342 + (430 - photoHeight) / 2, width: 552, height: photoHeight)
             NSGraphicsContext.saveGraphicsState()
             NSBezierPath(roundedRect: photoRect, xRadius: 24, yRadius: 24).addClip()
             carPhoto.draw(in: photoRect)
             NSGraphicsContext.restoreGraphicsState()
-            text("HYUNDAI IONIQ 5", NSRect(x: 1180, y: 278, width: 540, height: 44), 26, blue, .semibold, center: true)
-            text("Photo: crash71100 · CC0", NSRect(x: 1180, y: 240, width: 540, height: 30), 17, muted, center: true)
+            text("IONIQ 5 STYLE · 3D", NSRect(x: 1180, y: 278, width: 540, height: 44), 26, blue, .semibold, center: true)
+            text("실제 앱의 3D 렌더링 화면", NSRect(x: 1180, y: 240, width: 540, height: 30), 17, muted, center: true)
             text("CarCue", NSRect(x: 112, y: 884, width: 800, height: 100), 70, blue, .bold)
             text(shot.title, NSRect(x: 112, y: 477, width: 960, height: 260), 83, ink, .bold, line: 112)
             text(shot.subtitle, NSRect(x: 118, y: 343, width: 920, height: 70), 34, muted)
@@ -167,7 +168,7 @@ private func blankMovie(_ url: URL, duration: Double) async throws {
         let parent = CALayer(); parent.frame = CGRect(x: 0, y: 0, width: W, height: H); parent.backgroundColor = pale.cgColor
         let renderedVideo = CALayer(); renderedVideo.frame = parent.bounds; parent.addSublayer(renderedVideo)
         for overlay in overlays {
-            let layer = CALayer(); layer.frame = parent.bounds; layer.contents = overlayImage(overlay.shot, credit: plan.music_credit); layer.opacity = 0
+            let layer = CALayer(); layer.frame = parent.bounds; layer.contents = overlayImage(overlay.shot, credit: plan.music_credit, hero: plan.model_hero); layer.opacity = 0
             let s = overlay.start / cursor, end = (overlay.start + overlay.duration) / cursor, fade = 0.14 / cursor
             let animation = CAKeyframeAnimation(keyPath: "opacity")
             if overlay.shot.kind == "outro" {

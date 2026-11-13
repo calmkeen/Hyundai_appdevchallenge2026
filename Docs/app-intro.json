@@ -12,107 +12,132 @@
     {
       "kind": "video",
       "duration": 2,
-      "start": 1.19,
+      "start": 1.22,
       "chapter": "01  시작하기",
       "title": "내 차량에 맞춰\n시작하세요",
-      "subtitle": "차종과 연식을 확인하고\n편한 언어를 선택해요"
+      "subtitle": "차종과 연식을 확인하고\n편한 언어를 선택해요",
+      "source_scene": "차량 선택"
     },
     {
       "kind": "video",
       "duration": 2,
-      "start": 4.38,
+      "start": 3.59,
       "chapter": "01  시작하기",
       "title": "내 차량에 맞춰\n시작하세요",
-      "subtitle": "차종과 연식을 확인하고\n편한 언어를 선택해요"
+      "subtitle": "차종과 연식을 확인하고\n편한 언어를 선택해요",
+      "source_scene": "세 언어 선택"
     },
     {
       "kind": "video",
       "duration": 2,
-      "start": 9.57,
-      "chapter": "02  차량 상태",
-      "title": "지금 받은 상태를\n한눈에",
-      "subtitle": "문 위치와 수신 정보를\n함께 확인해요"
+      "start": 9.58,
+      "chapter": "02  문 개폐",
+      "title": "문이 열리고 닫히는\n모습까지",
+      "subtitle": "앱에서 실제로 움직이는\n앞좌석 왼쪽 문을 확인해요",
+      "source_scene": "차량 상태 · 문 열림"
     },
     {
       "kind": "video",
       "duration": 2,
-      "start": 11.68,
-      "chapter": "02  차량 상태",
-      "title": "지금 받은 상태를\n한눈에",
-      "subtitle": "문 위치와 수신 정보를\n함께 확인해요"
+      "start": 11.01,
+      "chapter": "02  문 개폐",
+      "title": "문이 열리고 닫히는\n모습까지",
+      "subtitle": "앱에서 실제로 움직이는\n앞좌석 왼쪽 문을 확인해요",
+      "source_scene": "차량 상태 · 문 닫힘",
+      "lead_in_seconds": 0.8
     },
     {
       "kind": "video",
       "duration": 2,
-      "start": 13.69,
-      "chapter": "03  실차 사진",
-      "title": "실제 차량을 보며\n확인하세요",
-      "subtitle": "IONIQ 5 실차 참고사진과\n수신 상태를 구분해 표시해요"
+      "start": 13.23,
+      "chapter": "02  문 개폐",
+      "title": "문이 열리고 닫히는\n모습까지",
+      "subtitle": "IONIQ 5 스타일 3D로\n수신 상태를 표시해요",
+      "source_scene": "3D 문 열리는 애니메이션",
+      "lead_in_seconds": 0.8
     },
     {
       "kind": "video",
       "duration": 2,
-      "start": 18.15,
+      "start": 15.09,
+      "chapter": "03  3D 차량 모델",
+      "title": "차량을 돌려 보며\n확인하세요",
+      "subtitle": "앱 안의 3D 모델을\n드래그해 살펴봐요",
+      "source_scene": "3D 모델 · 드래그 회전",
+      "lead_in_seconds": 1.0
+    },
+    {
+      "kind": "video",
+      "duration": 2,
+      "start": 22.22,
       "chapter": "04  사용 가이드",
       "title": "사진과 함께\n단계별로",
-      "subtitle": "필요한 안내를 열고\n한 단계씩 살펴봐요"
+      "subtitle": "필요한 안내를 열고\n한 단계씩 살펴봐요",
+      "source_scene": "가이드 목록 · 앱 내 사진"
     },
     {
       "kind": "video",
       "duration": 2,
-      "start": 22.42,
+      "start": 28.11,
       "chapter": "04  사용 가이드",
       "title": "사진과 함께\n단계별로",
-      "subtitle": "필요한 안내를 열고\n한 단계씩 살펴봐요"
+      "subtitle": "필요한 안내를 열고\n한 단계씩 살펴봐요",
+      "source_scene": "가이드 2단계 · 앱 내 사진"
     },
     {
       "kind": "video",
       "duration": 2,
-      "start": 24.54,
+      "start": 30.33,
       "chapter": "05  질문 화면",
       "title": "궁금한 순간,\n바로 질문",
       "subtitle": "살펴보던 가이드에서\n질문 화면으로 이어져요",
-      "detail": "AI 답변 연결 준비 중"
+      "detail": "AI 답변 연결 준비 중",
+      "source_scene": "AI 질문 화면"
     },
     {
       "kind": "video",
       "duration": 2,
-      "start": 27.22,
+      "start": 32.74,
       "chapter": "06  언어 선택",
       "title": "익숙한 언어로\n이어지는 경험",
-      "subtitle": "한국어\nEnglish\n日本語"
+      "subtitle": "한국어\nEnglish\n日本語",
+      "source_scene": "언어 변경 · 영어 선택"
     },
     {
       "kind": "video",
       "duration": 2,
-      "start": 29.42,
+      "start": 35.09,
       "chapter": "06  언어 선택",
       "title": "익숙한 언어로\n이어지는 경험",
-      "subtitle": "한국어\nEnglish\n日本語"
+      "subtitle": "한국어\nEnglish\n日本語",
+      "source_scene": "English · Home"
     },
     {
       "kind": "video",
       "duration": 2,
-      "start": 34.0,
+      "start": 39.51,
       "chapter": "06  언어 선택",
       "title": "익숙한 언어로\n이어지는 경험",
-      "subtitle": "한국어\nEnglish\n日本語"
+      "subtitle": "한국어\nEnglish\n日本語",
+      "source_scene": "언어 변경 · 일본어 선택"
     },
     {
       "kind": "video",
       "duration": 2,
-      "start": 36.16,
+      "start": 42.28,
       "chapter": "06  언어 선택",
       "title": "익숙한 언어로\n이어지는 경험",
-      "subtitle": "한국어\nEnglish\n日本語"
+      "subtitle": "한국어\nEnglish\n日本語",
+      "source_scene": "日本語 · ホーム"
     },
     {
       "kind": "video",
       "duration": 2,
-      "start": 40.7,
+      "start": 47.31,
       "chapter": "07  이용 마치기",
       "title": "이용이 끝나면\n가볍게 마무리",
-      "subtitle": "이번 이용의 선택과\n임시 기록을 정리해요"
+      "subtitle": "이번 이용의 선택과\n임시 기록을 정리해요",
+      "source_scene": "이용 종료 확인"
     },
     {
       "kind": "outro",
@@ -123,5 +148,6 @@
   ],
   "audio_start": 12,
   "audio_volume": 0.32,
-  "music_credit": "'A Kind Of Hope' by Scott Buckley - released under CC-BY 4.0. www.scottbuckley.com.au"
+  "music_credit": "'A Kind Of Hope' by Scott Buckley - released under CC-BY 4.0. www.scottbuckley.com.au",
+  "model_hero": "output/qa/ioniq5-app-3d.png"
 }

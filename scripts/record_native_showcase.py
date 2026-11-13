@@ -94,6 +94,10 @@ assert "OK (1 test)" in result, result[-3000:]
 video = OUT / "carcue-native-run.mp4"
 adb("pull", remote, str(video))
 assert video.stat().st_size > 100000
+hero = subprocess.run([str(ADB), "-s", SERIAL, "exec-out", "run-as", PACKAGE, "cat", f"{MARKERS}/model-hero.png"],
+                      capture_output=True, check=True).stdout
+assert hero.startswith(b"\x89PNG\r\n\x1a\n")
+(OUT / "ioniq5-app-3d.png").write_bytes(hero)
 events = [json.loads(line) for line in marker("events.jsonl").splitlines()]
 info = {
     "type": "UNEDITED_REAL_APK_SCREENRECORD",
@@ -103,7 +107,10 @@ info = {
     "avd": adb("shell", "getprop", "ro.boot.qemu.avd_name"), "display": adb("shell", "wm", "size"),
     "hold_seconds_per_function": 2, "scenes": events,
     "recording_started_device_ms_approx": started,
-    "graphics": "Bundled CC0 IONIQ 5 / IONIQ 5 N real photographs; generic 3D remains an optional location illustration",
+    "graphics": "Native depth-tested OpenGL IONIQ 5 inspired articulated mesh; real door animation and drag rotation",
+    "model": json.loads((ROOT / "content/models/ioniq5-articulated.json").read_text()),
+    "model_hero": "output/qa/ioniq5-app-3d.png",
+    "model_hero_sha256": sha(OUT / "ioniq5-app-3d.png"),
     "inserted_external_frames": False, "pleos_system_ui_inserted": False,
     "vehicle_data": "MOCK", "external_ai_called": False,
 }

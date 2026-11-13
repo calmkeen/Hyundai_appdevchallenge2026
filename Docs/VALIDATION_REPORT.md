@@ -8,14 +8,14 @@
 | --- | --- | --- |
 | 서버 회귀 | `.venv/bin/python -m pytest backend/tests -q` | 26개 통과 (세 언어의 자료 부족 응답 포함) |
 | Android 단위 | `:app:testDemoDebugUnitTest` | 6개 통과, 실패/건너뜀 0 |
-| Mock 기기 회귀 | API 35 / 1280×800 / `CarCueFlowTest` | 4개 통과 (실차 사진·차종·언어 매핑 포함) |
-| 실제 APK 연속 촬영 | API 35 / `NativeShowcaseTest` | 1개 통과, 실제 앱의 19개 화면·동작 |
+| Mock 기기 회귀 | API 35 / 1280×800 / `CarCueFlowTest` | 5개 통과 (실제 GPU 개폐·회전·미확인 자세·보조 사진 포함) |
+| 실제 APK 연속 촬영 | API 35 / `NativeShowcaseTest` | 1개 통과, 실제 앱의 20개 화면·동작 |
 | 실제 SDK 기기 회귀 | Pleos 2.1 / API 34 / SDK 2.3.2 / Service 2.3.22 / `PleosSdkTest` | 1개 통과 |
 | SDK 전체 검증 도구 | `.venv/bin/python scripts/validate_pleos.py` | Capability·GET·변경 콜백·화면·unregister·release 조건 모두 통과 |
 | 앱 빌드 | `assembleDemoDebug`, `assemblePleosDebug` | APK 2종 성공 |
 | 기기 테스트 빌드 | `assembleDemoDebugAndroidTest`, `assemblePleosDebugAndroidTest` | 성공 |
 | 계약 | `scripts/check_contracts.py` | Schema 3종과 제공 예제 3개, UI 문자열 키 검사 통과 |
-| 앱 소개 영상 | 실제 APK 녹화 기반 편집·AAC 디코딩 | 32초·1920×1080·30fps, 15개 장면 프레임과 오디오 확인 |
+| 앱 소개 영상 | 실제 APK 녹화 기반 편집·AAC 디코딩 | 34초·1920×1080·30fps, 실제 3D 개폐·회전·언어 전환 |
 | 인계 패키지 | SHA256SUMS 전체 대조 | 일치 |
 
 최종 기준 JDK는 Temurin 17.0.21+9 ARM64, Gradle 8.10.2, AGP 8.8.2, Kotlin 2.0.0이다. compile/target SDK 35, min SDK 28이다.
@@ -23,6 +23,18 @@
 세 언어로 Mock 범위를 조정한 뒤 서버 26개·Mock 기기 3개·계약 검사를 다시 통과했고 두 APK를 재빌드했다. 일본어 홈과 세 언어 선택 캡처를 육안으로 확인했다. SDK·CarUx 수신과 Android 단위 시험은 같은 날 언어 변경 전에 확보한 결과이며, 이번 변경에서 재실행하지 않았다.
 
 앱 내 시각 요소를 추가한 뒤 demo·pleos·기기 테스트 APK를 빌드했다. Mock 회귀 3개에는 3D 열림·닫힘·미수신·오래된 값과 가이드 사진 검사도 추가해 통과했다. 3D 가림을 다듬은 최종 APK로 `NativeShowcaseTest`의 19개 실제 UI 동작을 통과하고 연속 녹화했다. SDK 수신과 서버 코드는 이번 UI 변경에서 수정하지 않았다. UI 문구 129개의 세 언어 누락·치환 변수를 검사했다.
+
+## 최신 3D 변경 검증
+
+새 모델은 자체 제작 IONIQ 5 스타일 외형 참고 메시다. 현대 공식 CAD나 특정 연식·트림의 정확한 복제는 아니다. `validate_3d_model.py`로 두 파일의 해시·정상 GLB·유한 정점·물리적 왼쪽 문·경첩 축·바깥 방향 개폐를 검사했다. 모델은 14,734삼각형이며 문/차체는 독립 노드다.
+
+최종 demo/pleos/기기 테스트 APK를 빌드했다(`3d-final-build.txt`). 기기 회귀 5개가 통과했다(`3d-final-instrumentation.txt`). 실제 TextureView가 렌더링한 프레임과 열린 문 62도→닫힌 문 0도, 화면 픽셀 변경, 드래그 회전, STALE의 회색 설명 자세 22도를 검사했다. 열린 문·닫힌 문 모두 GPU 비트맵 위·아래 경계의 어두운 차체/바퀴 픽셀이 없는지도 검사했다. 기존 세 언어·미수신/오류/미지원·UX 입력 제한·가이드 복귀·실제 로컬 HTTP Mock 왕복·사진 차종 매핑도 통과했다. 첫 시험의 상태 반영 전 대기와 고정 메뉴 스크롤 요청은 시험 동기화를 수정해 해결했다.
+
+실제 APK 연속 촬영 1개가 통과했다. 20개 화면·동작의 원본 녹화와 설치 base.apk=전달 APK 해시 일치를 `carcue-native-run.json`에 보관한다. 소개 영상의 모든 기능 장면은 이 원본에서 자르며, 문 닫힘·다시 열림·회전은 각 2초다. 시작 카드 3D도 같은 APK의 GPU 뷰 비트맵이다. 최종 프레임 검수에서 하단 버튼 여백을 보완해 재빌드·재촬영했다. 이전 사진 중심 버전과 APK를 보존했다.
+
+최종 소개 영상은 34초·1920×1080·30fps다. 개폐와 회전은 원본의 실제 터치 직전부터 편집해 움직이는 과정을 유지했다. 시작·개폐 전후와 중간 자세·회전·가이드·영어·일본어·마무리 프레임을 디코딩하고 육안 확인했다. `3d-intro-video-check-final.txt`, `3d-intro-motion-check.txt`, `3d-intro-midpoint-check.txt`에 시각을 보관한다. AAC를 PCM으로 디코딩한 결과는 34초, stereo 44,100Hz, peak 0.23239, RMS 0.01932, 클리핑 0이다. `3d-intro-audio-check.json`은 최종 MP4 해시도 기록한다. 외부 음원 원본·모델·설치/전달 APK·원본/최종 영상의 해시 일치를 확인했다. 최종 기기 5개는 17.86초, 촬영 1개는 54.224초에 통과했다.
+
+이번 변경에서 backend/OpenAI/실제 Pleos 수신 어댑터는 바꾸지 않았다. 서버 26개, Android 단위 6개, 실제 SDK/CarUx 수신 결과는 이전에 확보한 검증이다. 이번에는 일반 AVD의 Mock 데이터와 실제 OpenGL/UI 동작을 검증했다. 물리 차량·새로운 실제 AI 호출을 검증한 것은 아니다.
 
 ## SDK 실제 수신 증거
 
@@ -95,15 +107,15 @@ LIVE provider 시험은 **메서드/HTTP transport 대역**이다. 실제 OpenAI
 
 이전 28초 편집본과 두 녹화 원본도 보존했다. 이전 구성은 `history/VIDEO_STORYBOARD_EDITED.md`, 구간·확대 영역은 `video-short.json`, 파일별 해시는 `carcue-mock-visuals-3d.json`에서 관리한다.
 
-### 최신: 실제 앱 안의 시각 요소와 연속 실행
+### 이전: 일반 Canvas 모형과 연속 실행
 
 사용자의 의도에 맞춰 사진·3D를 실제 APK 안에 구현했다. 홈·상태·상세의 일반 차량 위치 모형은 Compose Canvas에서 원근 투영하며 드래그로 회전한다. 신선한 문 상태만 열림·닫힘으로 연결하고 미수신·미지원·오류·오래된 값은 미확인으로 표시한다. 가이드 사진도 APK의 자산을 읽어 실제 Image 컴포넌트로 표시한다. 모델은 차종의 정확한 외형이 아니다. 세부 구현과 출처는 `NATIVE_VISUALS.md`에 있다.
 
 `carcue-native-run.mp4`는 동일 APK에서 19개 기능 화면·동작을 실제로 실행한 연속 screenrecord 원본이다. 각 화면은 2초 유지하며 영상에 다른 이미지·Pleos 시스템 UI를 삽입하지 않는다. 설치 APK 해시를 전달 APK와 대조했다. 촬영 중 고정 메뉴에 스크롤을 요청한 자동화 실패는 표시 중인 메뉴를 바로 누르도록 수정했다. 종료 직전 대화상자 잔상이 최종 프레임으로 남지 않도록 실제 앱의 마지막 터치까지 녹화한다.
 
-### 최신 앱 소개 영상
+### 이전: 실차 사진 중심 소개 영상
 
-최신 수정은 외부 무료 음원과 실차 사진을 사용한다. Scott Buckley의 **A Kind Of Hope**를 원작자 페이지의 CC BY 4.0·출처 표기 조건으로 확인해 내려받았다. 영상 크레딧과 별도 게시용 텍스트를 만들었다. 음원 합성 코드는 제거했고, 원곡을 구간 선택·음량 조정·페이드만 적용한다. 차량 기본 화면과 시작 카드에는 CC0 IONIQ 5 실차 사진을 사용하고 N 프로필에는 별도 N 사진을 매핑했다. 출처는 `MEDIA_CREDITS.md`에 정리했다.
+이전 수정은 외부 무료 음원과 실차 사진을 사용했다. Scott Buckley의 **A Kind Of Hope**를 원작자 페이지의 CC BY 4.0·출처 표기 조건으로 확인해 내려받았다. 영상 크레딧과 별도 게시용 텍스트를 만들었다. 음원 합성 코드는 제거했고, 원곡을 구간 선택·음량 조정·페이드만 적용한다. 차량 기본 화면과 시작 카드에는 CC0 IONIQ 5 실차 사진을 사용하고 N 프로필에는 별도 N 사진을 매핑했다. 출처는 `MEDIA_CREDITS.md`에 정리했다.
 
 demo·pleos·기기 테스트 APK 빌드가 성공했다. 기기 회귀 4개와 실제 촬영 1개가 통과했다. 새 테스트에서는 IONIQ 5에서 N으로 변경 후 일본어를 선택해도 N 사진·GB 시장이 유지됨을 확인했다. 136개 UI 자원의 세 언어 누락·치환 변수 검사도 통과했다. 사진 변경 전의 영상·APK는 별도 파일로 보존했다.
 

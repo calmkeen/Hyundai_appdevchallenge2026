@@ -595,9 +595,9 @@
     "ja-JP": "車種は未確認 · 状態の読み取り専用"
   },
   "ui_visual_title": {
-    "ko-KR": "3D 차량 위치 보기",
-    "en": "3D vehicle location",
-    "ja-JP": "3Dで車両の位置を確認"
+    "ko-KR": "IONIQ 5 스타일 · 3D",
+    "en": "IONIQ 5 inspired · 3D",
+    "ja-JP": "IONIQ 5スタイル · 3D"
   },
   "ui_visual_open": {
     "ko-KR": "앞좌석 왼쪽 문 · 열림",
@@ -615,14 +615,14 @@
     "ja-JP": "ドア状態は未確認 · 位置のみ表示"
   },
   "ui_visual_drag": {
-    "ko-KR": "드래그해 돌려보기 · 차량 형상은 예시입니다",
-    "en": "Drag to rotate · illustrative vehicle shape",
-    "ja-JP": "ドラッグで回転 · 車両の形状は一例です"
+    "ko-KR": "드래그해 돌려보기 · 자체 제작 외형 모델",
+    "en": "Drag to rotate · original appearance model",
+    "ja-JP": "ドラッグで回転 · 独自制作の外観モデル"
   },
   "ui_visual_shape": {
-    "ko-KR": "차량 형상은 위치 설명을 위한 예시입니다",
-    "en": "Illustrative shape for identifying a location",
-    "ja-JP": "位置を示すための車両イメージです"
+    "ko-KR": "IONIQ 5 외형 참고 모델 · 연식·트림 일치 미검증",
+    "en": "IONIQ 5 appearance illustration · year/trim unverified",
+    "ja-JP": "IONIQ 5の外観イメージ · 年式・グレードは未検証"
   },
   "ui_visual_demo_open": {
     "ko-KR": "MOCK · 열림 시연",
@@ -655,9 +655,9 @@
     "ja-JP": "実車写真"
   },
   "ui_model_tab": {
-    "ko-KR": "3D 위치 예시",
-    "en": "3D location example",
-    "ja-JP": "3D位置の例"
+    "ko-KR": "3D 모델",
+    "en": "3D model",
+    "ja-JP": "3Dモデル"
   },
   "ui_photo_notice": {
     "ko-KR": "외관 참고사진 · 연식·옵션과 현재 상태는 사진으로 판단하지 않아요",

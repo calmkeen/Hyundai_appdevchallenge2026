@@ -36,5 +36,44 @@
       "sha256": "3a70efbc200c5fc372a7e8918e05cbd7983b65a3bc22f357ca72518321495eb1",
       "display": "fit"
     }
-  ]
+  ],
+  "vehicle_3d": {
+    "name": "CarCue IONIQ 5 inspired articulated illustration",
+    "author": "CarCue project (original geometry)",
+    "official_hyundai_asset": false,
+    "verified_trim_or_cad": false,
+    "reference_dimensions_m": [
+      4.635,
+      1.89,
+      1.605
+    ],
+    "wheelbase_m": 3.0,
+    "front_axis": "-Z",
+    "physical_left_axis": "-X",
+    "hinge_m": [
+      -0.932,
+      0,
+      -1.12
+    ],
+    "door_open_degrees": 62,
+    "parts": [
+      {
+        "name": "Body",
+        "vertices": 43728,
+        "triangles": 14576
+      },
+      {
+        "name": "FrontLeftDoor",
+        "vertices": 474,
+        "triangles": 158
+      }
+    ],
+    "reference": "https://ioniq5.hyundai.co.in/ioniq-5-brochure.pdf",
+    "source": "scripts/build_ioniq5_model.py",
+    "geometry_downloaded": false,
+    "files": {
+      "ioniq5-articulated.ccmesh": "cbf003433152b3394c8d107446ab08e40a42c1b12a92899509a944bc572a0e8f",
+      "ioniq5-articulated.glb": "cb3129de2d65e6cea24a7ae3f0f073a6346549e9c278e830b39efbfe8f730401"
+    }
+  }
 }
