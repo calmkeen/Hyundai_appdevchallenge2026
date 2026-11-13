@@ -26,25 +26,31 @@ class CarCueFlowTest {
         rule.onNodeWithText("한국어").performScrollTo().performClick()
         rule.onNodeWithText("무엇을 확인할까요?").assertIsDisplayed()
     }
+    private fun settleDoorVisual() {
+        val until = android.os.SystemClock.elapsedRealtime() + 850
+        while (android.os.SystemClock.elapsedRealtime() < until) {
+            rule.mainClock.advanceTimeByFrame()
+            Thread.sleep(16)
+        }
+        rule.waitForIdle()
+    }
     @Test fun navigationStatusFailureUxAndSessionClear() {
         image("01-profile")
         begin()
         image("02-home")
         rule.onNodeWithText("현재 차량 상태 보기 →").performScrollTo().performClick()
         rule.onNodeWithText("앞좌석 왼쪽 문이 열려 있어요").assertIsDisplayed()
-        rule.onNodeWithTag("vehicle_photo").assertExists()
-        rule.onNodeWithText("3D 모델").performScrollTo().performClick()
-        rule.onNodeWithTag("vehicle_3d").assertContentDescriptionEquals("앞좌석 왼쪽 문 · 열림")
+        rule.onNodeWithTag("seatbelt_visual").assertExists()
+        rule.onNodeWithTag("pleos_vehicle_visual").assertContentDescriptionEquals("앞좌석 왼쪽 문 · 열림")
         rule.onNodeWithText("MOCK · 닫힘 시연").performScrollTo().performClick()
-        rule.onNodeWithTag("vehicle_3d").assertContentDescriptionEquals("앞좌석 왼쪽 문 · 닫힘")
+        rule.onNodeWithTag("pleos_vehicle_visual").assertContentDescriptionEquals("앞좌석 왼쪽 문 · 닫힘")
         rule.onNodeWithText("MOCK · 열림 시연").performScrollTo().performClick()
         image("03-mock-door-open")
         rule.onNodeWithText("앞좌석 왼쪽 문이 열려 있어요").performClick()
         image("04-door-detail")
         rule.runOnIdle { vm.scenario("UNAVAILABLE"); vm.go(Page.STATUS) }
         rule.onNodeWithText("아직 차량 정보를 읽지 못했어요").assertIsDisplayed()
-        rule.onNodeWithText("3D 모델").performScrollTo().performClick()
-        rule.onNodeWithTag("vehicle_3d").assertContentDescriptionEquals("문 상태 미확인 · 위치만 표시")
+        rule.onNodeWithTag("pleos_vehicle_visual").assertContentDescriptionEquals("문 상태 미확인 · 위치만 표시")
         image("05-no-value")
         rule.runOnIdle { vm.scenario("CHECK_FAILED") }
         rule.onNodeWithText("지원 여부를 확인하지 못했어요").assertIsDisplayed()
@@ -52,7 +58,7 @@ class CarCueFlowTest {
         rule.onNodeWithText("이 차량에서 제공하지 않는 항목이에요").assertIsDisplayed()
         rule.runOnIdle { vm.scenario("STALE") }
         rule.onNodeWithText("이전에 받은 정보예요 · 현재값은 확인하지 못했어요").assertIsDisplayed()
-        rule.onNodeWithTag("vehicle_3d").assertContentDescriptionEquals("문 상태 미확인 · 위치만 표시")
+        rule.onNodeWithTag("pleos_vehicle_visual").assertContentDescriptionEquals("문 상태 미확인 · 위치만 표시")
         rule.runOnIdle { vm.openAssistant(); vm.scenario("RESTRICTED") }
         rule.onNodeWithTag("question_input").assertDoesNotExist()
         rule.onNodeWithText("주차한 뒤 이용해 주세요").assertIsDisplayed()
@@ -116,72 +122,41 @@ class CarCueFlowTest {
         rule.runOnIdle { assertNull(vm.state.value.profile) }
         image("11-invalid-qr")
     }
-    private fun assertModelFits(bitmap: Bitmap) {
-        for (x in 0 until bitmap.width) for (y in listOf(0,bitmap.height-1)) {
-            assertTrue("Car must fit vertically in its real GPU viewport", android.graphics.Color.red(bitmap.getPixel(x,y))>150)
-        }
-    }
-    private fun renderedScene(): ArticulatedVehicleView {
-        fun find(v: android.view.View): ArticulatedVehicleView? {
-            if (v is ArticulatedVehicleView) return v
-            if (v is android.view.ViewGroup) for (i in 0 until v.childCount) find(v.getChildAt(i))?.let { return it }
-            return null
-        }
-        var scene: ArticulatedVehicleView? = null
-        rule.runOnIdle { scene = find(rule.activity.window.decorView) }
-        return checkNotNull(scene)
-    }
-    @Test fun actualGpuDoorAnimationAndRotation() {
+    @Test fun originalReferenceFramesFollowDoorReading() {
         begin()
         rule.onNodeWithText("현재 차량 상태 보기 →").performScrollTo().performClick()
-        rule.onNodeWithText("3D 모델").performScrollTo().performClick()
-        val scene = renderedScene()
-        rule.waitForIdle()
-        Thread.sleep(850)
-        lateinit var open: Bitmap
-        rule.runOnIdle {
-            assertTrue(scene.renderedFrames > 0)
-            assertEquals(62f, scene.renderedDoorAngle, .5f)
-            open = checkNotNull(scene.bitmap)
-            assertModelFits(open)
-        }
+        rule.onNodeWithTag("seatbelt_visual").assertExists()
+        rule.onNodeWithText("안내 이미지 예시 · 착용 상태 미연결").assertIsDisplayed()
+        settleDoorVisual()
+        val open = rule.onNodeWithTag("pleos_vehicle_visual").captureToImage().asAndroidBitmap()
         rule.onNodeWithText("MOCK · 닫힘 시연").performScrollTo().performClick()
-        rule.waitForIdle()
-        Thread.sleep(850)
-        rule.runOnIdle {
-            assertEquals(0f, scene.renderedDoorAngle, .5f)
-            val closed = checkNotNull(scene.bitmap)
-            assertModelFits(closed)
-            assertFalse("GPU output must change when the door closes", open.sameAs(closed))
-            val pixels = IntArray(closed.width*closed.height)
-            closed.getPixels(pixels,0,closed.width,0,0,closed.width,closed.height)
-            assertTrue("Mesh must occupy a meaningful part of the viewport", pixels.count { android.graphics.Color.red(it)<200 } > pixels.size/15)
-        }
-        val before = scene.renderedYaw
-        rule.onNodeWithTag("vehicle_3d").performTouchInput { swipe(center, center + androidx.compose.ui.geometry.Offset(120f,0f), 650) }
-        Thread.sleep(150)
-        rule.runOnIdle { assertTrue(kotlin.math.abs(before-scene.renderedYaw)>15f) }
+        settleDoorVisual()
+        val closed = rule.onNodeWithTag("pleos_vehicle_visual").captureToImage().asAndroidBitmap()
+        assertFalse("Original open/closed reference frames must differ", open.sameAs(closed))
+        rule.onNodeWithTag("pleos_vehicle_visual").assertContentDescriptionEquals("앞좌석 왼쪽 문 · 닫힘")
+        rule.onNodeWithText("MOCK · 열림 시연").performClick()
+        settleDoorVisual()
+        rule.onNodeWithTag("pleos_vehicle_visual").assertContentDescriptionEquals("앞좌석 왼쪽 문 · 열림")
+        image("13-original-pleos-visuals")
         rule.runOnIdle { vm.scenario("STALE") }
-        rule.waitForIdle()
-        Thread.sleep(850)
-        rule.runOnIdle { assertEquals(22f, scene.renderedDoorAngle, .5f) }
-        rule.onNodeWithTag("vehicle_3d").assertContentDescriptionEquals("문 상태 미확인 · 위치만 표시")
-        image("13-actual-gpu-unknown")
+        rule.onNodeWithTag("pleos_vehicle_visual").assertContentDescriptionEquals("문 상태 미확인 · 위치만 표시")
+        rule.onNodeWithText("안내 이미지 예시 · 착용 상태 미연결").assertIsDisplayed()
     }
-    @Test fun primaryPhotosFollowVehicleProfileAndLanguage() {
+    @Test fun referenceVisualsPreserveVehicleProfileAndLanguage() {
         begin()
-        rule.onNodeWithTag("vehicle_photo").assertContentDescriptionEquals("IONIQ 5 실차 참고사진")
-        rule.onNodeWithTag("vehicle_3d").assertDoesNotExist()
+        rule.onNodeWithTag("pleos_vehicle_visual").assertExists()
+        rule.onNodeWithTag("seatbelt_visual").assertExists()
+        rule.onNodeWithTag("vehicle_photo").assertDoesNotExist()
         rule.onNodeWithText("현재 차량 상태 보기 →").performScrollTo().performClick()
-        rule.onNodeWithText("실차 사진").performScrollTo().performClick()
-        rule.onNodeWithTag("vehicle_photo").assertContentDescriptionEquals("IONIQ 5 실차 참고사진")
+        rule.onNodeWithTag("pleos_vehicle_visual").assertExists()
         rule.onNodeWithText("이용 설정 · 이용 마치기").performClick()
         rule.onNodeWithText("차량 다시 선택").performScrollTo().performClick()
         rule.onNodeWithText("IONIQ 5 N · 2025").performScrollTo().performClick()
         rule.onNodeWithText("日本語").performScrollTo().performClick()
         rule.onNodeWithText("現在の車両状態を見る →").performScrollTo().performClick()
-        rule.onNodeWithText("実車写真").performScrollTo().performClick()
-        rule.onNodeWithTag("vehicle_photo").assertContentDescriptionEquals("IONIQ 5 Nの実車参考写真")
+        rule.onNodeWithTag("pleos_vehicle_visual").assertExists()
+        rule.onNodeWithTag("seatbelt_visual").assertContentDescriptionEquals("Pleos原本のシートベルト案内画像")
+        rule.onNodeWithText("表示例 · 装着状態は未接続").assertIsDisplayed()
         rule.runOnIdle { assertEquals("GB", vm.state.value.profile?.market) }
         image("12-ioniq5n-real-photo")
     }

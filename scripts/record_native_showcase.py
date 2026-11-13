@@ -57,11 +57,18 @@ with tempfile.TemporaryDirectory(dir=ROOT / ".tooling") as temp:
     adb("pull", base, str(installed))
     installed_hash = sha(installed)
     assert installed_hash == sha(apk)
-    hero_asset = "content/illustrations/ioniq5-real.jpg"
+    hero_asset = "content/illustrations/pleos-reference/car/frame-020.png"
+    safety_asset = "content/illustrations/pleos-reference/seatbelt.png"
+    reference = json.loads((ROOT / "content/illustrations/pleos-reference/manifest.json").read_text())
+    assert sha(ROOT / reference["source"]) == reference["source_sha256"], "Preserve the user's original recording"
     with zipfile.ZipFile(installed) as archive:
-        hero_bytes = archive.read("assets/illustrations/ioniq5-real.jpg")
-    assert hero_bytes == (ROOT / hero_asset).read_bytes()
-    hero_sha256 = hashlib.sha256(hero_bytes).hexdigest()
+        for path, expected in reference["output_sha256"].items():
+            data = archive.read("assets/" + path)
+            assert data == (ROOT / "content" / path).read_bytes()
+            assert hashlib.sha256(data).hexdigest() == expected
+        assert archive.read("assets/illustrations/pleos-reference/manifest.json") == (ROOT / "content/illustrations/pleos-reference/manifest.json").read_bytes()
+    hero_sha256 = sha(ROOT / hero_asset)
+    safety_sha256 = sha(ROOT / safety_asset)
 adb("shell", "pm", "clear", PACKAGE)
 OUT.mkdir(parents=True, exist_ok=True)
 log = (OUT / "native-showcase-instrumentation.txt").open("w")
@@ -109,8 +116,11 @@ info = {
     "avd": adb("shell", "getprop", "ro.boot.qemu.avd_name"), "display": adb("shell", "wm", "size"),
     "hold_seconds_per_function": 2, "scenes": events,
     "recording_started_device_ms_approx": started,
-    "graphics": "Bundled CC0 real IONIQ 5 / IONIQ 5 N photos; received status displayed separately; 3D remains an optional app tab",
+    "graphics": "Native app Image components using exact car frames and seat belt crop from the user-specified Pleos recording; not a live SDK 3D widget",
     "hero_asset": hero_asset, "hero_asset_sha256": hero_sha256,
+    "safety_asset": safety_asset, "safety_asset_sha256": safety_sha256,
+    "reference_visuals": reference,
+    "seatbelt_status_connected": False,
     "model_shown_in_recording": False,
     "inserted_external_frames": False, "pleos_system_ui_inserted": False,
     "vehicle_data": "MOCK", "external_ai_called": False,

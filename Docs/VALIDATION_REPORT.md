@@ -1,21 +1,21 @@
 # 검증 결과
 
-2026-11-13. 실차, 공식 전용 AVD의 실제 SDK, 일반 AVD의 Mock, 외부 AI 대역을 구분한다.
+2026-11-14. 실차, 공식 전용 AVD의 실제 SDK, 일반 AVD의 Mock, 외부 AI 대역을 구분한다.
 
-## 최종 통과 결과
+## 검증 상태
 
 | 구분 | 명령/환경 | 결과 |
 | --- | --- | --- |
-| 서버 회귀 | `.venv/bin/python -m pytest backend/tests -q` | 26개 통과 (세 언어의 자료 부족 응답 포함) |
-| Android 단위 | `:app:testDemoDebugUnitTest` | 6개 통과, 실패/건너뜀 0 |
-| Mock 기기 회귀 | API 35 / 1280×800 / `CarCueFlowTest` | 5개 통과 (실제 GPU 개폐·회전·미확인 자세·보조 사진 포함) |
-| 실제 APK 연속 촬영 | API 35 / `NativeShowcaseTest` | 1개 통과, 실제 앱의 19개 화면·동작 |
-| 실제 SDK 기기 회귀 | Pleos 2.1 / API 34 / SDK 2.3.2 / Service 2.3.22 / `PleosSdkTest` | 1개 통과 |
-| SDK 전체 검증 도구 | `.venv/bin/python scripts/validate_pleos.py` | Capability·GET·변경 콜백·화면·unregister·release 조건 모두 통과 |
+| 서버 회귀 | `.venv/bin/python -m pytest backend/tests -q` | 이전 26개 통과 (세 언어의 자료 부족 응답 포함), 서버 코드 변경 없음 |
+| Android 단위 | `:app:testDemoDebugUnitTest` | 이전 6개 통과, 실패/건너뜀 0 |
+| Mock 기기 회귀 | API 35 / 1280×800 / `CarCueFlowTest` | 5개 통과, 원본 개폐 프레임 픽셀 차이·안전벨트 미연결·세 언어·기존 흐름 |
+| 실제 APK 연속 촬영 | API 35 / `NativeShowcaseTest` | 1개 통과, 20개 실제 화면·개폐·세 언어 전환 |
+| 실제 SDK 기기 회귀 | Pleos 2.1 / API 34 / SDK 2.3.2 / Service 2.3.22 / `PleosSdkTest` | 이전 1개 통과. 이번 재시험은 실행 전 프로세스 종료 |
+| SDK 전체 검증 도구 | `.venv/bin/python scripts/validate_pleos.py` | 이전 Capability·GET·변경 콜백·화면·unregister·release 통과. 이번 재검증 미완료 |
 | 앱 빌드 | `assembleDemoDebug`, `assemblePleosDebug` | APK 2종 성공 |
 | 기기 테스트 빌드 | `assembleDemoDebugAndroidTest`, `assemblePleosDebugAndroidTest` | 성공 |
 | 계약 | `scripts/check_contracts.py` | Schema 3종과 제공 예제 3개, UI 문자열 키 검사 통과 |
-| 앱 소개 영상 | 실제 APK 녹화 기반 편집·AAC 디코딩 | 32초·1920×1080·30fps, 실차 사진·상태 표시·언어 전환 |
+| 앱 소개 영상 | 실제 APK 녹화 기반 편집·AAC 디코딩 | 34초·1920×1080·30fps, 원본 차량·안전벨트·개폐·세 언어, 외부 음악 |
 | 인계 패키지 | SHA256SUMS 전체 대조 | 일치 |
 
 최종 기준 JDK는 Temurin 17.0.21+9 ARM64, Gradle 8.10.2, AGP 8.8.2, Kotlin 2.0.0이다. compile/target SDK 35, min SDK 28이다.
@@ -24,7 +24,21 @@
 
 앱 내 시각 요소를 추가한 뒤 demo·pleos·기기 테스트 APK를 빌드했다. Mock 회귀 3개에는 3D 열림·닫힘·미수신·오래된 값과 가이드 사진 검사도 추가해 통과했다. 3D 가림을 다듬은 최종 APK로 `NativeShowcaseTest`의 19개 실제 UI 동작을 통과하고 연속 녹화했다. SDK 수신과 서버 코드는 이번 UI 변경에서 수정하지 않았다. UI 문구 129개의 세 언어 누락·치환 변수를 검사했다.
 
-## 최신: 실차 사진 중심으로 복원 · 2026-11-14
+## 최신: 사용자 지정 Pleos 원본 차량·안전벨트 · 2026-11-14
+
+사용자가 정확히 지정한 `carcue-pleos-sdk.mp4`의 안전벨트와 은색 차량 렌더 장면을 앱 내부 이미지로 넣었다. 입력 MP4의 SHA256은 `3657b7a2a8105066980b1f27ee3b78bb1e4dac57caa3383a01770cf446fa8a6e`로 유지한다. 차량은 19~20초의 21개 프레임, 안전벨트는 4초의 원본 부분이다. SDK 바이너리·원본 그래픽 리소스를 추출하지 않았다. 별도 공개 SDK 3D 위젯 연결이 아니라 원본 프레임 애니메이션이며, 안전벨트 착용 상태는 미연결이다.
+
+demo·pleos와 두 테스트 APK 빌드가 성공했다(`pleos-reference-build.txt`, `pleos-reference-test-build.txt`). 두 전달 APK 안의 22개 PNG와 manifest가 저장소와 바이트 단위로 일치하고, 원본 MP4 해시·PNG 크기·개폐 프레임 차이를 검사했다(`pleos-reference-assets-check.txt`). 세 언어 145개 UI 자원과 참조/치환 변수 검사가 통과했다(`pleos-reference-contracts.txt`).
+
+Mock 기기 시험 5개가 14.345초에 통과했다(`pleos-reference-flow-test.txt`). 실제 개폐 화면 픽셀 차이, 문 미확인 처리, 안전벨트 미연결 표시, 차종/시장 보존과 일본어, 기존 오류·UX 제한·가이드 복귀·로컬 HTTP Mock 왕복을 확인했다. 첫 픽셀 비교 실패는 테스트가 잠든 동안 Compose 시험 시계가 프레임을 진행하지 않는 문제였다. 실제 시간 동안 시험 프레임을 진행하도록 보완한 뒤 다시 통과했다. 홈·상태·일본어 캡처에서 원본 차량과 안전벨트 및 표시/버튼 경계를 육안 확인했다.
+
+실제 APK 연속 촬영 1개가 49.646초에 통과했고 20개 장면을 기록했다. 전달 APK와 설치 base.apk 해시, 22개 원본 PNG/manifest의 바이트 일치를 대조했다(`carcue-native-run.json`). 기능 화면은 해당 APK 녹화에서만 가져왔다. 시작 카드도 동봉한 차량·안전벨트 PNG다. 차량 개폐 중간과 닫힘/열림, 안전벨트, 충전 가이드, AI 준비 중 표시, 영어·일본어 홈, 마무리 프레임을 디코딩하고 육안 확인했다(`pleos-reference-video-check.txt`, `pleos-reference-motion-check.txt`).
+
+최종 소개 영상은 34초·1920×1080·30fps다. AAC를 PCM으로 디코딩해 34초·stereo 44,100Hz, peak 0.23239, RMS 0.019323, 클리핑 0을 확인했다(`pleos-reference-audio-check.json`). Scott Buckley의 기존 외부 음원 파일/해시를 유지하며 음악을 새로 합성하지 않았다. 결과별 MP4·APK 별칭과 체크섬을 갱신했다. 원본 기준 영상과 이전 앱·사진 중심 영상은 그대로 보존했다. 출처·사용 범위는 `PLEOS_VISUAL_SOURCE.md`에 기록한다.
+
+기존 실제 SDK 문 수신 어댑터는 변경하지 않았다. 이번 Pleos AVD 재시험은 설치 서비스 지연으로 전용 AVD를 재시작하고 새 APK 설치까지 성공했지만, instrumentation이 `shortMsg=Process crashed`로 종료해 최초 GET/콜백 검증을 새로 완료하지 못했다. 이를 새 SDK 통과로 보고하지 않는다. 실패 시도는 `pleos-reference-sdk-attempt/`, 이전 성공 로그는 `archive-before-pleos-reference/sdk/` 및 기존 기본 SDK 로그에 보존한다. 서버 26개·Android 단위 6개·실제 SDK/CarUx 성공 결과는 이전 검증이며, 실차·실제 OpenAI 호출을 새로 검증하지 않았다.
+
+## 이전: 실차 사진 중심으로 복원 · 2026-11-14
 
 사용자가 초기 사진 중심 영상의 완성도를 선호해 홈·상태·문 상세·Mock 가이드 차량 자리를 실제 IONIQ 5/N 사진으로 복원했다. 사진은 외관 참고용으로 두고 문 수신 상태를 별도 표시한다. 기존 3D 개폐·회전·미확인 처리와 라이선스는 보조 탭에 유지한다. 소개 영상에는 3D를 넣지 않는다.
 

@@ -278,10 +278,10 @@ private fun Reading.description(ko: UiCopy): String = when {
     if (guide.locale != s.locale) Notice(ko.get("ui_original_locale").replace("{locale}", guide.locale))
     if (guide.id == "__layout_preview__") BoxWithConstraints {
         if (maxWidth >= 760.dp) Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            Box(Modifier.weight(1f)) { if (s.guideStep == 1) GuidePreviewPhoto(ko) else VehicleRealPhoto(s.profile, ko, Modifier.fillMaxWidth(), height = 180) }
+            Box(Modifier.weight(1f)) { if (s.guideStep == 1) GuidePreviewPhoto(ko) else PleosVehicleVisual(s.reading, ko, Modifier.fillMaxWidth().height(180.dp)) }
             Column(Modifier.weight(1f)) { step?.let { Panel(it.first, it.second) } }
         } else Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            if (s.guideStep == 1) GuidePreviewPhoto(ko) else VehicleRealPhoto(s.profile, ko, Modifier.fillMaxWidth(), height = 180)
+            if (s.guideStep == 1) GuidePreviewPhoto(ko) else PleosVehicleVisual(s.reading, ko, Modifier.fillMaxWidth().height(180.dp))
             step?.let { Panel(it.first, it.second) }
         }
     } else step?.let { Panel(it.first, it.second) }
@@ -350,7 +350,7 @@ private fun Reading.description(ko: UiCopy): String = when {
     Notice(ko.get("ui_b791275db7bd"))
     Action(ko.get("ui_48af33bc151c")) { confirm = true }
     if (s.deletionPending) Text(ko.get("ui_cc3578c46b23"), color = Muted)
-    Panel(ko.get("ui_model_credit_title"), "3D: andikapratamaw (2022), Dogan Ulus (2026)\nMPL-2.0 AND CC-BY-4.0\nhttps://github.com/vevalabs/openx-assets\nhttps://sketchfab.com/andikapratamaw\nhttps://www.mozilla.org/MPL/2.0/\nhttps://creativecommons.org/licenses/by/4.0/\n" + ko.get("ui_model_credit_notice"))
+    Panel(ko.get("ui_pleos_credit_title"), ko.get("ui_pleos_credit_notice"))
     if (s.eventLog.isNotEmpty()) {
         Text(ko.get("ui_2f65004bce0e"), fontWeight = FontWeight.Bold)
         Text(s.eventLog.takeLast(8).joinToString("\n"), fontSize = 12.sp, color = Muted)

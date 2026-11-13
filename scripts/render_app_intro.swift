@@ -22,6 +22,7 @@ private struct Plan: Decodable {
     let audio_start: Double
     let audio_volume: Float
     let hero_asset: String
+    let safety_asset: String
     let hero_title: String
     let hero_caption: String
     let segments: [Shot]
@@ -49,7 +50,7 @@ private func bitmap(_ draw: () -> Void) -> CGImage {
     NSGraphicsContext.restoreGraphicsState()
     return b.cgImage!
 }
-private func overlayImage(_ shot: Shot, credit: String, hero: String, visualCredit: String, heroTitle: String, heroCaption: String) -> CGImage {
+private func overlayImage(_ shot: Shot, credit: String, hero: String, safety: String, visualCredit: String, heroTitle: String, heroCaption: String) -> CGImage {
     bitmap {
         if shot.kind == "video" {
             pale.setFill(); NSRect(x: 0, y: 0, width: W, height: H).fill()
@@ -71,14 +72,15 @@ private func overlayImage(_ shot: Shot, credit: String, hero: String, visualCred
             text(credit, NSRect(x: 832, y: 28, width: 1030, height: 24), 15, muted)
         } else if shot.kind == "intro" {
             NSColor.white.setFill(); NSRect(x: 0, y: 0, width: W, height: H).fill()
-            rounded(NSRect(x: 1140, y: 166, width: 620, height: 740), pale, radius: 52)
-            let carPhoto = NSImage(contentsOfFile: hero)!
-            let photoHeight = 552 * carPhoto.size.height / carPhoto.size.width
-            let photoRect = NSRect(x: 1174, y: 342 + (430 - photoHeight) / 2, width: 552, height: photoHeight)
-            NSGraphicsContext.saveGraphicsState()
-            NSBezierPath(roundedRect: photoRect, xRadius: 24, yRadius: 24).addClip()
-            carPhoto.draw(in: photoRect)
-            NSGraphicsContext.restoreGraphicsState()
+            let panel = NSRect(x: 1140, y: 166, width: 620, height: 740)
+            rounded(panel, .white, radius: 52)
+            pale.setStroke(); let outline = NSBezierPath(roundedRect: panel, xRadius: 52, yRadius: 52)
+            outline.lineWidth = 3; outline.stroke()
+            let car = NSImage(contentsOfFile: hero)!
+            let carHeight = 552 * car.size.height / car.size.width
+            car.draw(in: NSRect(x: 1174, y: 342 + (430 - carHeight) / 2, width: 552, height: carHeight))
+            let belt = NSImage(contentsOfFile: safety)!
+            belt.draw(in: NSRect(x: 1330, y: 760, width: 240, height: 240 * belt.size.height / belt.size.width))
             text(heroTitle, NSRect(x: 1180, y: 278, width: 540, height: 44), 26, blue, .semibold, center: true)
             text(heroCaption, NSRect(x: 1180, y: 240, width: 540, height: 30), 17, muted, center: true)
             text("CarCue", NSRect(x: 112, y: 884, width: 800, height: 100), 70, blue, .bold)
@@ -173,7 +175,7 @@ private func blankMovie(_ url: URL, duration: Double) async throws {
         let parent = CALayer(); parent.frame = CGRect(x: 0, y: 0, width: W, height: H); parent.backgroundColor = pale.cgColor
         let renderedVideo = CALayer(); renderedVideo.frame = parent.bounds; parent.addSublayer(renderedVideo)
         for overlay in overlays {
-            let layer = CALayer(); layer.frame = parent.bounds; layer.contents = overlayImage(overlay.shot, credit: plan.music_credit, hero: plan.hero_asset, visualCredit: plan.visual_credit, heroTitle: plan.hero_title, heroCaption: plan.hero_caption); layer.opacity = 0
+            let layer = CALayer(); layer.frame = parent.bounds; layer.contents = overlayImage(overlay.shot, credit: plan.music_credit, hero: plan.hero_asset, safety: plan.safety_asset, visualCredit: plan.visual_credit, heroTitle: plan.hero_title, heroCaption: plan.hero_caption); layer.opacity = 0
             let s = overlay.start / cursor, end = (overlay.start + overlay.duration) / cursor, fade = 0.14 / cursor
             let animation = CAKeyframeAnimation(keyPath: "opacity")
             if overlay.shot.kind == "outro" {

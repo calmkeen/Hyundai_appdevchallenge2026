@@ -30,7 +30,15 @@ class NativeShowcaseTest {
     private fun show(name: String) {
         rule.waitForIdle()
         signal("events.jsonl").appendText(JSONObject().put("scene", name).put("device_ms", SystemClock.elapsedRealtime()).toString() + "\n")
-        Thread.sleep(2000)
+        // Compose's instrumentation clock does not run while the test thread
+        // sleeps. Pump native recompositions in real time so the recorded
+        // app shows the same wall-clock image animation as a normal launch.
+        val until = SystemClock.elapsedRealtime() + 2000
+        while (SystemClock.elapsedRealtime() < until) {
+            rule.mainClock.advanceTimeByFrame()
+            Thread.sleep(16)
+        }
+        rule.waitForIdle()
     }
     private fun click(text: String) {
         val node = rule.onNodeWithText(text)
@@ -49,23 +57,25 @@ class NativeShowcaseTest {
             click("IONIQ 5 · 2024")
             show("세 언어 선택")
             click("한국어")
-            rule.onNodeWithTag("vehicle_photo").assertExists()
-            show("홈 · IONIQ 5 실차 사진")
+            rule.onNodeWithTag("pleos_vehicle_visual").assertExists()
+            show("홈 · Pleos 원본 차량과 안전벨트")
             click("현재 차량 상태 보기 →")
-            rule.onNodeWithTag("vehicle_photo").assertExists()
+            rule.onNodeWithTag("pleos_vehicle_visual").assertExists()
             show("차량 상태 · 문 열림")
             click("MOCK · 닫힘 시연")
             rule.onNodeWithText("앞좌석 왼쪽 문이 닫혀 있어요").assertIsDisplayed()
             show("차량 상태 · 문 닫힘")
-            show("실차 사진 · 상태 정보 별도 표시")
             click("MOCK · 열림 시연")
+            show("Pleos 원본 차량 · 문 열림 전환")
+            rule.onNodeWithTag("seatbelt_visual").assertIsDisplayed()
+            show("Pleos 원본 안전벨트 안내")
             click("앞좌석 왼쪽 문이 열려 있어요")
-            show("문 상세 · 실차 사진")
+            show("문 상세 · Pleos 원본 차량")
             click("사용 가이드")
             rule.onNodeWithTag("guide_image_card").performScrollTo()
             show("가이드 목록 · 앱 내 사진")
             click("MOCK · 단계별 화면 시연")
-            show("가이드 1단계 · 실차 사진")
+            show("가이드 1단계 · Pleos 원본 차량")
             click("다음")
             rule.onNodeWithTag("guide_preview_image").assertExists()
             show("가이드 2단계 · 앱 내 사진")

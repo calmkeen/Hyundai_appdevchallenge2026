@@ -688,5 +688,40 @@
     "ko-KR": "OpenX Assets의 IONIQ 5 2022 모델을 개폐·앱 표시용으로 변환했습니다. 모델 원본·변환 소스·라이선스 전문을 APK의 models/source에 포함했습니다. 선택한 차량의 연식·트림 일치는 미검증입니다.",
     "en": "Adapted the OpenX Assets IONIQ 5 2022 model for door animation and app rendering. Original model, conversion source and full licenses are included in the APK at models/source. Selected vehicle year/trim match is unverified.",
     "ja-JP": "OpenX AssetsのIONIQ 5 2022モデルを開閉アニメーションとアプリ表示用に変換しました。原本・変換ソース・ライセンス全文をAPKのmodels/sourceに同梱しています。選択車両の年式・グレードとの一致は未検証です。"
+  },
+  "ui_pleos_visual_title": {
+    "ko-KR": "차량·안전벨트 시각화",
+    "en": "Vehicle & seat belt visuals",
+    "ja-JP": "車両・シートベルト表示"
+  },
+  "ui_pleos_belt_title": {
+    "ko-KR": "안전벨트 안내",
+    "en": "Seat belt guide",
+    "ja-JP": "シートベルト案内"
+  },
+  "ui_pleos_belt_notice": {
+    "ko-KR": "안내 이미지 예시 · 착용 상태 미연결",
+    "en": "Visual example · belt status not connected",
+    "ja-JP": "表示例 · 装着状態は未接続"
+  },
+  "ui_pleos_belt_image": {
+    "ko-KR": "Pleos 원본 안전벨트 안내 이미지",
+    "en": "Original Pleos seat belt reference image",
+    "ja-JP": "Pleos原本のシートベルト案内画像"
+  },
+  "ui_pleos_source": {
+    "ko-KR": "Pleos 원본 영상 · 참고 시각화",
+    "en": "Pleos original recording · reference visual",
+    "ja-JP": "Pleos原本映像 · 参考表示"
+  },
+  "ui_pleos_credit_title": {
+    "ko-KR": "시각화 출처",
+    "en": "Visual source",
+    "ja-JP": "表示素材の出典"
+  },
+  "ui_pleos_credit_notice": {
+    "ko-KR": "사용자가 지정한 carcue-pleos-sdk.mp4의 차량·안전벨트 장면을 잘라 앱에서 표시합니다. SDK 3D 위젯을 연결한 것이 아니며 안전벨트 착용 상태는 수신하지 않습니다. 개발용 참고 자료로 사용하며 별도 외부 배포권은 확인하지 않았습니다.",
+    "en": "Cropped vehicle and seat belt visuals from the user-specified carcue-pleos-sdk.mp4. These are reference frames, not a connected SDK 3D widget. Belt status is not received. Development reference use; separate redistribution rights are unverified.",
+    "ja-JP": "ユーザー指定のcarcue-pleos-sdk.mp4から車両とシートベルトの場面を切り出して表示します。SDKの3Dウィジェット接続ではなく、装着状態も受信しません。開発用参考素材であり、別途配布権は未確認です。"
   }
 }

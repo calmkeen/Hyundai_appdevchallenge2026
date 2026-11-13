@@ -14,8 +14,13 @@ assert sha(ROOT / plan["source"]) == recording["video_sha256"], "Source recordin
 assert sha(Path(recording["apk"])) == recording["apk_sha256"] == recording["installed_apk_sha256"], "Record the current APK before editing"
 assert plan["hero_asset"] == recording["hero_asset"]
 assert sha(ROOT / plan["hero_asset"]) == recording["hero_asset_sha256"], "Hero must match the recorded APK asset"
+assert plan["safety_asset"] == recording["safety_asset"]
+assert sha(ROOT / plan["safety_asset"]) == recording["safety_asset_sha256"]
+reference = recording["reference_visuals"]
+assert sha(ROOT / reference["source"]) == reference["source_sha256"]
 with zipfile.ZipFile(recording["apk"]) as package:
-    assert package.read("assets/" + plan["hero_asset"].removeprefix("content/")) == (ROOT / plan["hero_asset"]).read_bytes()
+    for asset in (plan["hero_asset"], plan["safety_asset"]):
+        assert package.read("assets/" + asset.removeprefix("content/")) == (ROOT / asset).read_bytes()
 # Each new run has slightly different real touch/transition times. Align cuts
 # with the device timestamps rather than reusing offsets from an older APK.
 events = {s["scene"]: s for s in recording["scenes"]}
@@ -50,18 +55,20 @@ meta = {
     "apk_sha256": json.loads((ROOT / "output/qa/carcue-native-run.json").read_text())["apk_sha256"],
     "music": music, "music_excerpt_start": plan["audio_start"], "music_volume": plan["audio_volume"],
     "vehicle_data": "MOCK",
-    "vehicle_photos": sources["vehicle_photos"], "model_shown_in_intro": False,
-    "hero_asset_sha256": sha(ROOT / plan["hero_asset"]), "external_ai_called": False,
+    "reference_visuals": reference, "model_shown_in_intro": False,
+    "hero_asset_sha256": sha(ROOT / plan["hero_asset"]),
+    "safety_asset_sha256": sha(ROOT / plan["safety_asset"]),
+    "seatbelt_status_connected": False, "external_ai_called": False,
     "functional_screens": "All functional screens are cuts from the same verified APK recording",
     "segments": plan["segments"],
 }
 out.with_suffix(".json").write_text(json.dumps(meta, ensure_ascii=False, indent=2) + "\n")
 credits = music["required_credit"] + "\n" + music["source_page"] + "\n" + music["license_url"] + "\n\n"
 credits += "Music excerpt trimmed, volume adjusted and faded for this video.\nFor YouTube, include the music credit in the video description.\n\n"
-credits += "Optional 3D model available in the APK, not used in this video:\n3D: andikapratamaw (2022), Dogan Ulus (2026), MPL-2.0 AND CC-BY-4.0, adapted.\n"
-credits += "https://github.com/vevalabs/openx-assets\nhttps://sketchfab.com/andikapratamaw\nhttps://www.mozilla.org/MPL/2.0/\nhttps://creativecommons.org/licenses/by/4.0/\n"
-credits += "Adapted: axes, original front-left hinge/door group, animation, native materials and contact shadow. Original model/source and license texts are included in the APK.\n"
-credits += "Vehicle photos used in the app/video: crash71100 / Calreyn88, CC0 1.0, Wikimedia Commons.\n"
-for image in sources["vehicle_photos"]: credits += image["source"] + "\n"
+credits += "Vehicle and seat belt reference visuals: exact rendered crops from the user-specified carcue-pleos-sdk.mp4.\n"
+credits += "Source SHA-256: " + reference["source_sha256"] + "\n"
+credits += "CarCue displays pre-rendered frames inside the native APK, not a live SDK 3D widget. Seat belt status is not connected.\n"
+credits += reference["rights"] + "\n\n"
+credits += "Charging-guide image: preserved existing app asset; vehicle photos and previous 3D source/license records remain in Docs/media-sources.json and the APK.\n"
 out.with_name("carcue-app-intro-credits.txt").write_text(credits)
 print(f"SAVED {out} (licensed external music)", flush=True)

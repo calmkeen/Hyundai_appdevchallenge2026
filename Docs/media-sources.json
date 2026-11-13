@@ -23,7 +23,8 @@
       "photographed_at": "2021-07-04",
       "specification_match_verified": false,
       "sha256": "034487386750db27a0d756981799d1da68e45647b4616d08f1612491ccaf2667",
-      "display": "crop_bottom"
+      "display": "crop_bottom",
+      "shown_as_primary_vehicle_visual": false
     },
     {
       "asset": "illustrations/ioniq5n-real.jpg",
@@ -34,7 +35,8 @@
       "photographed_at": "2025-06-28",
       "specification_match_verified": false,
       "sha256": "3a70efbc200c5fc372a7e8918e05cbd7983b65a3bc22f357ca72518321495eb1",
-      "display": "fit"
+      "display": "fit",
+      "shown_as_primary_vehicle_visual": false
     }
   ],
   "vehicle_3d": {
@@ -108,6 +110,109 @@
       "ioniq5-articulated.ccmesh": "89ec27c4404aa42b49faf5c5134f176251e5d85909795b6c7c871a964e787f4f",
       "ioniq5-articulated.glb": "173434d0f436a2f925486848c7a547e690ec2ed7c9d51ab594243e644ebb74cb"
     },
-    "checked_date": "2026-11-14"
+    "checked_date": "2026-11-14",
+    "shown_in_current_ui": false
+  },
+  "pleos_reference": {
+    "source": "output/qa/carcue-pleos-sdk.mp4",
+    "source_sha256": "3657b7a2a8105066980b1f27ee3b78bb1e4dac57caa3383a01770cf446fa8a6e",
+    "source_resolution": [
+      2560,
+      1440
+    ],
+    "provenance": "USER_SPECIFIED_SCREEN_RECORDING_RENDERED_VISUALS",
+    "kind": "PRE_RENDERED_REFERENCE_FRAMES_NOT_SDK_3D_WIDGET",
+    "car": {
+      "frames": [
+        "illustrations/pleos-reference/car/frame-000.png",
+        "illustrations/pleos-reference/car/frame-001.png",
+        "illustrations/pleos-reference/car/frame-002.png",
+        "illustrations/pleos-reference/car/frame-003.png",
+        "illustrations/pleos-reference/car/frame-004.png",
+        "illustrations/pleos-reference/car/frame-005.png",
+        "illustrations/pleos-reference/car/frame-006.png",
+        "illustrations/pleos-reference/car/frame-007.png",
+        "illustrations/pleos-reference/car/frame-008.png",
+        "illustrations/pleos-reference/car/frame-009.png",
+        "illustrations/pleos-reference/car/frame-010.png",
+        "illustrations/pleos-reference/car/frame-011.png",
+        "illustrations/pleos-reference/car/frame-012.png",
+        "illustrations/pleos-reference/car/frame-013.png",
+        "illustrations/pleos-reference/car/frame-014.png",
+        "illustrations/pleos-reference/car/frame-015.png",
+        "illustrations/pleos-reference/car/frame-016.png",
+        "illustrations/pleos-reference/car/frame-017.png",
+        "illustrations/pleos-reference/car/frame-018.png",
+        "illustrations/pleos-reference/car/frame-019.png",
+        "illustrations/pleos-reference/car/frame-020.png"
+      ],
+      "source_times_seconds": [
+        19.0,
+        19.05,
+        19.1,
+        19.15,
+        19.2,
+        19.25,
+        19.3,
+        19.35,
+        19.4,
+        19.45,
+        19.5,
+        19.55,
+        19.6,
+        19.65,
+        19.7,
+        19.75,
+        19.8,
+        19.85,
+        19.9,
+        19.95,
+        20.0
+      ],
+      "crop_xywh": [
+        130,
+        520,
+        635,
+        405
+      ],
+      "closed_frame": 0,
+      "open_frame": 20
+    },
+    "seatbelt": {
+      "asset": "illustrations/pleos-reference/seatbelt.png",
+      "source_time_seconds": 4,
+      "crop_xywh": [
+        250,
+        70,
+        370,
+        185
+      ],
+      "reading_connected": false
+    },
+    "rights": "User-requested local development reference from supplied recording. SDK binary/assets not extracted. No redistribution license for Pleos visuals asserted.",
+    "output_sha256": {
+      "illustrations/pleos-reference/car/frame-000.png": "1603c0572fce6bc2eecf663485b7a56051af9c2a14894e05d0e9c3d930ad0653",
+      "illustrations/pleos-reference/car/frame-001.png": "1603c0572fce6bc2eecf663485b7a56051af9c2a14894e05d0e9c3d930ad0653",
+      "illustrations/pleos-reference/car/frame-002.png": "5614d1776c650f6c9728e57813b6ebe090e7259ad81a5e9b04bc7ee0d650a544",
+      "illustrations/pleos-reference/car/frame-003.png": "5614d1776c650f6c9728e57813b6ebe090e7259ad81a5e9b04bc7ee0d650a544",
+      "illustrations/pleos-reference/car/frame-004.png": "5614d1776c650f6c9728e57813b6ebe090e7259ad81a5e9b04bc7ee0d650a544",
+      "illustrations/pleos-reference/car/frame-005.png": "158ff6404514d02360de02dcc49becbc0fede1642019b5ad851cd7a070beecbb",
+      "illustrations/pleos-reference/car/frame-006.png": "158ff6404514d02360de02dcc49becbc0fede1642019b5ad851cd7a070beecbb",
+      "illustrations/pleos-reference/car/frame-007.png": "2a36de0112304f1f3ee7bc7a479898f39370ef676dbb18333dbc279e40115b3c",
+      "illustrations/pleos-reference/car/frame-008.png": "6735d9544f044434c0868584dd77df8915d8cb98bb16c9b38e7f968a9b5f7dd0",
+      "illustrations/pleos-reference/car/frame-009.png": "6735d9544f044434c0868584dd77df8915d8cb98bb16c9b38e7f968a9b5f7dd0",
+      "illustrations/pleos-reference/car/frame-010.png": "6735d9544f044434c0868584dd77df8915d8cb98bb16c9b38e7f968a9b5f7dd0",
+      "illustrations/pleos-reference/car/frame-011.png": "49b02d2fa217c9205646637a134bbdc9e35a384590b1f0ec2a0a9f2164e9884f",
+      "illustrations/pleos-reference/car/frame-012.png": "49b02d2fa217c9205646637a134bbdc9e35a384590b1f0ec2a0a9f2164e9884f",
+      "illustrations/pleos-reference/car/frame-013.png": "49b02d2fa217c9205646637a134bbdc9e35a384590b1f0ec2a0a9f2164e9884f",
+      "illustrations/pleos-reference/car/frame-014.png": "51be419471b8eab5c37f8c9cd4fbc734b05e4d5fd8a75481e44f326952926248",
+      "illustrations/pleos-reference/car/frame-015.png": "8e755dfc2c182b9aa38e86464c45105528b006b0d4f4598de23fbc4f0657f574",
+      "illustrations/pleos-reference/car/frame-016.png": "8e755dfc2c182b9aa38e86464c45105528b006b0d4f4598de23fbc4f0657f574",
+      "illustrations/pleos-reference/car/frame-017.png": "c79a95bca701ff026a686059b7203bdd8965692e6f06d74484f303eb08d0df2c",
+      "illustrations/pleos-reference/car/frame-018.png": "db3ccb61f28b77455dcf81341897c0eb9b71c3943cf97fc4aec22d5f4c9185c0",
+      "illustrations/pleos-reference/car/frame-019.png": "375c317f6788302b6581b6faeb580df975d6d8015080db42e0c66a130b48e087",
+      "illustrations/pleos-reference/car/frame-020.png": "3cf9a53cef5947007fd0ab292a2964384b2041d35459027e4fa8de752291b359",
+      "illustrations/pleos-reference/seatbelt.png": "f6b81d4a66e440bb0dccdef971ab15ac63f49d345c916519285966bc5b458391"
+    }
   }
 }

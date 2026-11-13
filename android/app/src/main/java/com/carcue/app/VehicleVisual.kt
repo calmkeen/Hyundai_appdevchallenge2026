@@ -19,12 +19,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.json.JSONObject
+import android.content.Context
+import android.os.SystemClock
+import androidx.compose.ui.graphics.ImageBitmap
+import kotlinx.coroutines.delay
+import kotlin.math.roundToInt
 
 private val VisualBlue = Color(0xFF2859E8)
 private val VisualInk = Color(0xFF152132)
 private val VisualMuted = Color(0xFF526176)
 
-/** Fresh readings alone can determine the model's door pose; unknown is labelled explicitly. */
+/** Fresh readings alone can determine the door pose; unknown is labelled explicitly. */
 private fun Reading.visualState(): String = when {
     capability != Capability.SUPPORTED || status != ReadStatus.VALUE -> "unknown"
     value == "OPEN" -> "open"
@@ -32,30 +37,86 @@ private fun Reading.visualState(): String = when {
     else -> "unknown"
 }
 
+/** The user's exact Pleos recording, rendered inside CarCue as image frames.
+ * This is a native app visual, not an embedded/overlaid external system panel.
+ */
 @Composable
 fun VehicleSceneCard(reading: Reading, copy: UiCopy, modifier: Modifier = Modifier,
                      interactive: Boolean = true, onScenario: ((String) -> Unit)? = null,
                      profile: Profile? = null) {
-    var showModel by remember(profile?.id) { mutableStateOf(false) }
-    val photo = !showModel && profile != null
-    Surface(modifier, shape = RoundedCornerShape(20.dp), color = Color(0xFFF4F7FC),
+    Surface(modifier, shape = RoundedCornerShape(20.dp), color = Color.White,
         border = BorderStroke(1.dp, Color(0xFFDCE4F1))) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text(copy.get(if (photo) "ui_photo_title" else "ui_visual_title"), color = VisualInk, fontWeight = FontWeight.SemiBold, fontSize = 17.sp)
-            if (photo) VehicleRealPhoto(profile, copy, height = if (interactive) 180 else 210)
-            else VehicleModel3D(reading, copy, Modifier.fillMaxWidth().height(if (interactive) 230.dp else 210.dp), interactive)
-            Text(copy.get("ui_visual_" + reading.visualState()), color = if (reading.visualState() == "open") Color(0xFF9A5100) else VisualMuted, fontSize = 14.sp)
-            if (!photo) Text(copy.get(if (interactive) "ui_visual_drag" else "ui_visual_shape"), color = VisualMuted, fontSize = 12.sp)
-            if (interactive && profile != null) Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                TextButton(onClick = { showModel = false }, modifier = Modifier.weight(1f)) { Text(copy.get("ui_photo_tab")) }
-                TextButton(onClick = { showModel = true }, modifier = Modifier.weight(1f)) { Text(copy.get("ui_model_tab")) }
+        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(copy.get("ui_pleos_visual_title"), color = VisualInk, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
+            Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                PleosSeatbeltVisual(copy, Modifier.width(138.dp).height(75.dp))
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                    Text(copy.get("ui_pleos_belt_title"), color = VisualInk, fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                    Text(copy.get("ui_pleos_belt_notice"), color = VisualMuted, fontSize = 11.sp, lineHeight = 15.sp)
+                }
             }
-            if (onScenario != null && BuildConfig.IS_MOCK) Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            PleosVehicleVisual(reading, copy, Modifier.fillMaxWidth().height(210.dp))
+            Text(copy.get("ui_visual_" + reading.visualState()), color = if (reading.visualState() == "open") Color(0xFF9A5100) else VisualMuted, fontSize = 14.sp)
+            Text(copy.get("ui_pleos_source"), color = VisualMuted, fontSize = 11.sp)
+            if (onScenario != null && BuildConfig.IS_MOCK && interactive) Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(onClick = { onScenario("OPEN") }, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) { Text(copy.get("ui_visual_demo_open")) }
                 OutlinedButton(onClick = { onScenario("CLOSED") }, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) { Text(copy.get("ui_visual_demo_closed")) }
             }
         }
     }
+}
+
+private object PleosReferenceCache {
+    private val decoded = mutableMapOf<String, ImageBitmap>()
+    private var catalog: JSONObject? = null
+    private fun manifest(context: Context): JSONObject = catalog ?: JSONObject(
+        context.assets.open("illustrations/pleos-reference/manifest.json").bufferedReader().use { it.readText() }
+    ).also { catalog = it }
+    private fun image(context: Context, path: String): ImageBitmap {
+        val hash = manifest(context).getJSONObject("output_sha256").getString(path)
+        return decoded.getOrPut(hash) { context.assets.open(path).use { BitmapFactory.decodeStream(it)!! }.asImageBitmap() }
+    }
+    fun car(context: Context): List<ImageBitmap> {
+        val files = manifest(context).getJSONObject("car").getJSONArray("frames")
+        return (0 until files.length()).map { image(context, files.getString(it)) }
+    }
+    fun belt(context: Context): ImageBitmap = image(context, manifest(context).getJSONObject("seatbelt").getString("asset"))
+}
+
+@Composable
+fun PleosSeatbeltVisual(copy: UiCopy, modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    val bitmap = remember { PleosReferenceCache.belt(context) }
+    Image(bitmap, contentDescription = copy.get("ui_pleos_belt_image"), contentScale = ContentScale.Fit,
+        modifier = modifier.testTag("seatbelt_visual"))
+}
+
+@Composable
+fun PleosVehicleVisual(reading: Reading, copy: UiCopy, modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    val frames = remember { PleosReferenceCache.car(context) }
+    val state = reading.visualState()
+    val target = if (state == "open") frames.lastIndex else 0
+    var position by remember { mutableFloatStateOf(target.toFloat()) }
+    // Pose timing uses elapsed device time. The recorder also pumps Compose
+    // frames during each real-time hold so recompositions remain visible.
+    LaunchedEffect(target) {
+        val from = position
+        if (from != target.toFloat()) {
+            val start = SystemClock.uptimeMillis()
+            var t: Float
+            do {
+                t = ((SystemClock.uptimeMillis() - start) / 720f).coerceIn(0f, 1f)
+                position = from + (target - from) * t*t*(3f-2f*t)
+                if (t < 1f) delay(32)
+            } while (t < 1f)
+        }
+        position = target.toFloat()
+    }
+    Image(frames[position.roundToInt().coerceIn(frames.indices)],
+        contentDescription = copy.get("ui_visual_" + state), contentScale = ContentScale.Fit,
+        alpha = if (state == "unknown") 0.35f else 1f,
+        modifier = modifier.testTag("pleos_vehicle_visual"))
 }
 
 @Composable
