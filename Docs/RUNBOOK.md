@@ -55,7 +55,7 @@ LIVE에서 공개 가능한 VERIFIED 프로필과 PUBLISHED 가이드를 등록�
 - `content/profiles/catalog.json`: 언어와 분리된 차량 사양. 제공한 두 항목은 개발용 UNVERIFIED다.
 - `content/guides/`: Schema를 지키고 정확한 profile/manual/source version과 검수된 출처 절을 등록한다. DRAFT는 검색/답변에 사용하지 않는다.
 - `content/locales/catalog.json`: 48개 언어 후보의 RTL·UI/가이드 지원 상태. Mock 선택 목록은 `mock_visible=true`인 한국어·영어·일본어 3개이며, 다른 후보 데이터는 보존한다.
-- `content/locales/ui.json`: 119개 UI 문구의 한국어·영어·일본어 초안. 실제 AI 번역이나 검수된 차량 안내를 뜻하지 않는다. 다른 후보는 준비 중이며 pleos 빌드에서는 영어 대체 안내를 표시한다. 언어를 추가할 때 화면 코드를 바꿀 필요가 없다.
+- `content/locales/ui.json`: 129개 UI 문구의 한국어·영어·일본어 초안. 실제 AI 번역이나 검수된 차량 안내를 뜻하지 않는다. 다른 후보는 준비 중이며 pleos 빌드에서는 영어 대체 안내를 표시한다. 언어를 추가할 때 화면 코드를 바꿀 필요가 없다.
 - `content/locales/country-locales.json`: 50개 지역의 개발 후보 매핑이며 방문 순위나 지원 완료 목록이 아니다.
 - `scripts/prepare_content.py`: 개발용 초안을 다시 만드는 도구. 검수 콘텐츠를 등록한 이후에는 백업 없이 실행하지 않는다.
 
@@ -118,4 +118,14 @@ python3 scripts/record_mock_languages.py
 
 결과는 `output/qa/carcue-mock-languages.mp4`와 같은 이름의 JSON이다. JSON에 원본 APK와 설치된 APK의 SHA256 일치, AVD 정보, 화면 문구별 시각, 영상 해시를 기록한다. 앱 소스 커밋은 JSON의 `git_commit`을 따른다. `--serial`, `--adb`, `--apk`, `--output`으로 경로를 지정할 수 있다.
 
-기능당 2초의 이미지·3D 포함 편집본은 `python3 scripts/render_mock_short.py`로 만든다. 구성과 원본 구분은 `VIDEO_STORYBOARD.md`, 시간·소스·확대 영역은 `video-short.json`에서 관리한다. 최신 `carcue-mock-visuals-3d.mp4`는 32초 편집본, `carcue-mock-short.mp4`는 이전 28초 편집본, `carcue-mock-languages.mp4`는 무편집 녹화다. 3D 차량 구간은 기존 `carcue-pleos-sdk.mp4`가 필요하며 Pleos 에뮬레이터 시스템 UI로 출처를 표시한다.
+기능당 2초의 이미지·3D 포함 편집본은 `python3 scripts/render_mock_short.py`로 만든다. 구성과 원본 구분은 `VIDEO_STORYBOARD.md`, 시간·소스·확대 영역은 `video-short.json`에서 관리한다. 이전 `carcue-mock-visuals-3d.mp4`는 32초 편집본, `carcue-mock-short.mp4`는 이전 28초 편집본, `carcue-mock-languages.mp4`는 무편집 녹화다. 3D 차량 구간은 기존 `carcue-pleos-sdk.mp4`가 필요하며 Pleos 에뮬레이터 시스템 UI로 출처를 표시한다.
+
+## 최신 촬영 기준: 앱 안의 시각 요소와 연속 실행
+
+현재 기준은 실제 APK 내부의 3D·사진 기능을 사용한다. 위의 영상 합성 도구는 이전 결과 재현용이다. 구현은 `NATIVE_VISUALS.md`를 따른다. demo와 기기 테스트 APK를 빌드한 뒤 테스트 AVD가 부팅된 상태에서 실행한다.
+
+```bash
+python3 scripts/record_native_showcase.py
+```
+
+`NativeShowcaseTest`가 실제 버튼과 드래그로 기능을 진행하고 각 화면을 2초 유지한다. 호스트가 테스트 AVD의 demo 앱 데이터를 초기화하고 설치 APK 해시를 대조한 뒤, 하나의 `screenrecord` 원본을 `output/qa/carcue-native-run.mp4`에 저장한다. 같은 이름의 JSON과 `native-showcase-instrumentation.txt`에서 실행 증거를 확인한다. 별도 사진 장면이나 Pleos 시스템 UI 삽입은 하지 않는다.

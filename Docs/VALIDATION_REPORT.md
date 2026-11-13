@@ -9,6 +9,7 @@
 | 서버 회귀 | `.venv/bin/python -m pytest backend/tests -q` | 26개 통과 (세 언어의 자료 부족 응답 포함) |
 | Android 단위 | `:app:testDemoDebugUnitTest` | 6개 통과, 실패/건너뜀 0 |
 | Mock 기기 회귀 | API 35 / 1280×800 / `CarCueFlowTest` | 3개 통과 |
+| 실제 APK 연속 촬영 | API 35 / `NativeShowcaseTest` | 1개 통과, 실제 앱의 19개 화면·동작 |
 | 실제 SDK 기기 회귀 | Pleos 2.1 / API 34 / SDK 2.3.2 / Service 2.3.22 / `PleosSdkTest` | 1개 통과 |
 | SDK 전체 검증 도구 | `.venv/bin/python scripts/validate_pleos.py` | Capability·GET·변경 콜백·화면·unregister·release 조건 모두 통과 |
 | 앱 빌드 | `assembleDemoDebug`, `assemblePleosDebug` | APK 2종 성공 |
@@ -19,6 +20,8 @@
 최종 기준 JDK는 Temurin 17.0.21+9 ARM64, Gradle 8.10.2, AGP 8.8.2, Kotlin 2.0.0이다. compile/target SDK 35, min SDK 28이다.
 
 세 언어로 Mock 범위를 조정한 뒤 서버 26개·Mock 기기 3개·계약 검사를 다시 통과했고 두 APK를 재빌드했다. 일본어 홈과 세 언어 선택 캡처를 육안으로 확인했다. SDK·CarUx 수신과 Android 단위 시험은 같은 날 언어 변경 전에 확보한 결과이며, 이번 변경에서 재실행하지 않았다.
+
+앱 내 시각 요소를 추가한 뒤 demo·pleos·기기 테스트 APK를 빌드했다. Mock 회귀 3개에는 3D 열림·닫힘·미수신·오래된 값과 가이드 사진 검사도 추가해 통과했다. 3D 가림을 다듬은 최종 APK로 `NativeShowcaseTest`의 19개 실제 UI 동작을 통과하고 연속 녹화했다. SDK 수신과 서버 코드는 이번 UI 변경에서 수정하지 않았다. UI 문구 129개의 세 언어 누락·치환 변수를 검사했다.
 
 ## SDK 실제 수신 증거
 
@@ -50,7 +53,7 @@
 - 실제 HTTP로 로컬 FastAPI Mock 서버 왕복, NO_RELIABLE_SOURCE와 MOCK 모드 표시.
 - 미등록 QR 프로필 오류 및 세션 종료 후 프로필·언어·상태·대화 초기화.
 
-이는 48개 언어의 번역 완료나 모든 디스플레이·글자 확대 검증을 뜻하지 않는다. 한국어·영어·일본어 UI는 초안이며, 가이드 예시는 실제 조작 매뉴얼이 아니다. 세 언어 각각 119개 문구의 누락과 치환 변수 일치를 검사했다. 이전 빌드에서는 아랍어 영어 대체·RTL과 단계 숫자 방향을 확인했지만, 현재 Mock 선택 목록에서는 제외했다. RTL 확장 데이터와 배치 코드는 보존했다.
+이는 48개 언어의 번역 완료나 모든 디스플레이·글자 확대 검증을 뜻하지 않는다. 한국어·영어·일본어 UI는 초안이며, 가이드 예시는 실제 조작 매뉴얼이 아니다. 세 언어 각각 129개 문구의 누락과 치환 변수 일치를 검사했다. 이전 빌드에서는 아랍어 영어 대체·RTL과 단계 숫자 방향을 확인했지만, 현재 Mock 선택 목록에서는 제외했다. RTL 확장 데이터와 배치 코드는 보존했다.
 
 ## 서버 회귀 범위
 
@@ -71,7 +74,7 @@ LIVE provider 시험은 **메서드/HTTP transport 대역**이다. 실제 OpenAI
 
 ### 다국어 Mock 영상 추가 · 2026-11-13
 
-`carcue-mock-languages.mp4`는 최신 demo APK를 API 35 / CarCue_UI35 / 1280×800 AVD에 설치해 녹화한 약 79초의 Android screenrecord 원본이다. 한국어 → 영어 → 일본어 → 한국어 전환, 실제 언어 버튼 터치, 각 언어의 홈·문 상태 화면을 담았다. 차량 프로필은 계속 IONIQ 5 · 2024 · KR이다. 모든 차량 값은 MOCK이며 외부 AI를 호출하지 않았다.
+`carcue-mock-languages.mp4`는 당시 demo APK를 API 35 / CarCue_UI35 / 1280×800 AVD에 설치해 녹화한 약 79초의 Android screenrecord 원본이다. 한국어 → 영어 → 일본어 → 한국어 전환, 실제 언어 버튼 터치, 각 언어의 홈·문 상태 화면을 담았다. 차량 프로필은 계속 IONIQ 5 · 2024 · KR이다. 모든 차량 값은 MOCK이며 외부 AI를 호출하지 않았다.
 
 녹화 전 전달 APK와 기기에 설치된 base.apk의 SHA256이 `8d63511b8e8cd0cd16ce75bf1ae5037a5a6dff3e353ac028ac3a247453e3a59e`로 일치함을 검사했다. 앱 소스는 `ef8fe88`이다. JSON에는 APK·영상 해시, AVD, 언어, 관찰한 화면 문구별 시각이 있다. 시각은 호스트 기준의 근사값이다. 저장된 MP4를 macOS 영상 프레임워크로 열어 길이 78.7623초·1280×800을 확인하고, 10개 시점의 프레임을 디코딩했다. 세 언어의 홈·선택 목록·마지막 한국어 복귀 화면을 육안 확인했다. 결과는 `mock-languages-video-check.txt`와 `language-video-frames/`에 있다.
 
@@ -83,18 +86,26 @@ LIVE provider 시험은 **메서드/HTTP transport 대역**이다. 실제 OpenAI
 
 초기 편집본의 14개 장면 프레임을 모두 디코딩하고 이미지, 가이드, 질문, 언어 목록, 종료 화면을 육안 확인했다. 최종 자막과 전환 구간 조정 후 해당 장면들을 다시 확인했다. 무편집 원본은 `carcue-mock-languages.mp4`로 보존한다. 외부 AI 호출과 APK 수정은 이번 편집 범위에 없다.
 
-### 3D 차량 포함 최종 32초 버전
+### 3D 차량 포함 32초 편집본 · 이전 결과
 
 차량 그림·가이드 이미지·3D를 모두 포함해 달라는 사용자 요청으로 `carcue-mock-visuals-3d.mp4`를 추가했다. 총 16장면 × 2초 = 32초, 1280×800, 30fps다. 문이 닫힌 3D 차량은 첫 2초, 문이 열린 3D 차량은 10–12초에 배치했다. 원본 `carcue-pleos-sdk.mp4`의 차량 영역을 확대했으며, 두 구간에 Pleos 에뮬레이터 출처 자막을 넣었다. 3D는 플랫폼 시스템 UI이고 CarCue 자체 3D 렌더러 구현이 아니다. 나머지 앱 상태는 MOCK으로 구분한다.
 
 최종 MP4 길이 32초와 11개 시점의 프레임 디코딩을 확인했다. 3D 차량의 문 닫힘·열림, 출처 자막, 장면 경계에서 자막이 사라지는 것, 가이드 이미지와 영어·일본어 전환을 육안 확인했다. 검증 로그는 `mock-visuals-3d-video-check-final.txt`, 캡처는 `visuals-3d-frames-final/`다. 렌더러의 초기 텍스트 레이어 출력 누락은 비트맵 자막 합성으로 수정했고, 차량 확대 구간의 검은 여백도 화면 비율을 맞춰 제거했다.
 
-기본 `carcue-mock-flow.mp4`는 최신 32초 편집본과 같다. 이전 28초 편집본과 두 녹화 원본도 보존했다. 구성은 `VIDEO_STORYBOARD.md`, 구간·확대 영역은 `video-short.json`, 파일별 해시는 `carcue-mock-visuals-3d.json`에서 관리한다.
+이전 28초 편집본과 두 녹화 원본도 보존했다. 이전 구성은 `history/VIDEO_STORYBOARD_EDITED.md`, 구간·확대 영역은 `video-short.json`, 파일별 해시는 `carcue-mock-visuals-3d.json`에서 관리한다.
+
+### 최신: 실제 앱 안의 시각 요소와 연속 실행
+
+사용자의 의도에 맞춰 사진·3D를 실제 APK 안에 구현했다. 홈·상태·상세의 일반 차량 위치 모형은 Compose Canvas에서 원근 투영하며 드래그로 회전한다. 신선한 문 상태만 열림·닫힘으로 연결하고 미수신·미지원·오류·오래된 값은 미확인으로 표시한다. 가이드 사진도 APK의 자산을 읽어 실제 Image 컴포넌트로 표시한다. 모델은 차종의 정확한 외형이 아니다. 세부 구현과 출처는 `NATIVE_VISUALS.md`에 있다.
+
+`carcue-native-run.mp4`는 동일 APK에서 19개 기능 화면·동작을 실제로 실행한 연속 screenrecord 원본이다. 각 화면은 2초 유지하며 영상에 다른 이미지·Pleos 시스템 UI를 삽입하지 않는다. 설치 APK 해시를 전달 APK와 대조했다. 기본 `carcue-mock-flow.mp4`는 이 실제 앱 녹화와 같다. 촬영 중 고정 메뉴에 스크롤을 요청한 자동화 실패는 표시 중인 메뉴를 바로 누르도록 수정했다. 종료 직전 대화상자 잔상이 최종 프레임으로 남지 않도록 실제 앱의 마지막 터치까지 녹화한다.
 
 - APK: `output/apk/carcue-demo-debug.apk`, `output/apk/carcue-pleos-debug.apk`.
 - Mock 캡처: `output/qa/qa/01-profile.png` 등 기본 흐름. 최신 언어 선택·일본어 화면은 `09a-three-languages.png`, `09b-japanese-home.png`, `09c-japanese-status.png`.
 - 실제 SDK 캡처: `pleos-initial-get.png`, `pleos-changed-callback.png`, `pleos-session-ended.png`.
 - 로그: `output/qa/mock-instrumentation.txt`, `pleos-instrumentation.txt`, `pleos-sdk-events.txt`, `pleos-console-events.json`, `pleos-ux-events.txt`.
-- 영상: 최신 `output/qa/carcue-mock-visuals-3d.mp4` (`carcue-mock-flow.mp4`와 동일), 이전 28초 `carcue-mock-short.mp4`, 무편집 `carcue-mock-languages.mp4`, 최초 `carcue-mock-flow-initial.mp4`, 별도 실제 SDK 영상. SDK 화면과 Mock 화면의 출처를 혼동하지 않는다.
+- 영상: 최신 실제 앱 `output/qa/carcue-native-run.mp4` (`carcue-mock-flow.mp4`와 동일), 이전 편집본 `carcue-mock-visuals-3d.mp4`·`carcue-mock-short.mp4`, 이전 언어 녹화 `carcue-mock-languages.mp4`, 최초 `carcue-mock-flow-initial.mp4`, 별도 실제 SDK 영상. SDK 화면과 Mock 화면의 출처를 혼동하지 않는다.
 
 SDK·AVD·JDK 바이너리와 APK/영상은 Git에 포함하지 않았다. source, 계약, 테스트, 실행 안내는 feature 브랜치에서 관리한다. 원격 push·병합·배포·공모전 제출은 수행하지 않았다.
+
+최종 실제 앱 원본의 길이는 45.9814초, 해상도는 1280×800이다. `native-run-video-check-final.txt`와 `native-run-scene-check.txt`의 프레임 디코딩을 확인했고, 문 열림·닫힘·회전·가이드 사진·영어·일본어·깨끗한 종료 화면을 육안 확인했다. 새 demo APK의 SHA256은 `3a30d6912c214d89c1e12ad86a00b5f8b6860f812bec95f93be237b39d3fbdbb`이며, 설치된 APK와 일치했다.

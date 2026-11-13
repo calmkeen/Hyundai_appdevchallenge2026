@@ -593,5 +593,55 @@
     "ko-KR": "차종 확인 전 · 읽기 전용 상태",
     "en": "Vehicle profile unconfirmed · read-only readings",
     "ja-JP": "車種は未確認 · 状態の読み取り専用"
+  },
+  "ui_visual_title": {
+    "ko-KR": "3D 차량 위치 보기",
+    "en": "3D vehicle location",
+    "ja-JP": "3Dで車両の位置を確認"
+  },
+  "ui_visual_open": {
+    "ko-KR": "앞좌석 왼쪽 문 · 열림",
+    "en": "Front-left door · open",
+    "ja-JP": "前席左側のドア · 開"
+  },
+  "ui_visual_closed": {
+    "ko-KR": "앞좌석 왼쪽 문 · 닫힘",
+    "en": "Front-left door · closed",
+    "ja-JP": "前席左側のドア · 閉"
+  },
+  "ui_visual_unknown": {
+    "ko-KR": "문 상태 미확인 · 위치만 표시",
+    "en": "Door state unknown · location only",
+    "ja-JP": "ドア状態は未確認 · 位置のみ表示"
+  },
+  "ui_visual_drag": {
+    "ko-KR": "드래그해 돌려보기 · 차량 형상은 예시입니다",
+    "en": "Drag to rotate · illustrative vehicle shape",
+    "ja-JP": "ドラッグで回転 · 車両の形状は一例です"
+  },
+  "ui_visual_shape": {
+    "ko-KR": "차량 형상은 위치 설명을 위한 예시입니다",
+    "en": "Illustrative shape for identifying a location",
+    "ja-JP": "位置を示すための車両イメージです"
+  },
+  "ui_visual_demo_open": {
+    "ko-KR": "MOCK · 열림 시연",
+    "en": "MOCK · Open demo",
+    "ja-JP": "MOCK · 開いた状態"
+  },
+  "ui_visual_demo_closed": {
+    "ko-KR": "MOCK · 닫힘 시연",
+    "en": "MOCK · Closed demo",
+    "ja-JP": "MOCK · 閉じた状態"
+  },
+  "ui_guide_photo": {
+    "ko-KR": "충전 가이드 참고 이미지",
+    "en": "Charging guide reference image",
+    "ja-JP": "充電ガイドの参考画像"
+  },
+  "ui_guide_photo_notice": {
+    "ko-KR": "MOCK · 이미지 예시이며 실제 조작 절차가 아닙니다",
+    "en": "MOCK · reference image, not operating instructions",
+    "ja-JP": "MOCK · 参考画像であり、実際の操作手順ではありません"
   }
 }

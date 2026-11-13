@@ -176,15 +176,26 @@ fun CarCueApp(vm: CarCueViewModel) {
 }
 @Composable private fun HomeScreen(vm: CarCueViewModel, s: UiState, ko: UiCopy) {
     Heading(ko.get("ui_f5d47b042bda"), ko.get("ui_feca0d91b81e"))
-    Surface(color = Blue, shape = RoundedCornerShape(20.dp)) {
+    BoxWithConstraints {
+        if (maxWidth >= 760.dp) Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            HomeStatusCard(vm, ko, Modifier.weight(1f))
+            VehicleSceneCard(s.reading, ko, Modifier.weight(1f), interactive = false)
+        } else Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            HomeStatusCard(vm, ko)
+            VehicleSceneCard(s.reading, ko, interactive = false)
+        }
+    }
+    Panel(ko.get("ui_96918379aa24"), ko.get("ui_b5935d7ba17c"), onClick = { vm.go(Page.GUIDES) })
+    Panel(ko.get("ui_7a087ed8150b"), ko.get("ui_1a3926f02365"), onClick = vm::openAssistant)
+}
+@Composable private fun HomeStatusCard(vm: CarCueViewModel, ko: UiCopy, modifier: Modifier = Modifier) {
+    Surface(modifier, color = Blue, shape = RoundedCornerShape(20.dp)) {
         Column(Modifier.fillMaxWidth().padding(28.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Text(ko.get("ui_f02c2d11a01d"), color = Color.White, fontSize = 27.sp, fontWeight = FontWeight.Bold, lineHeight = 37.sp)
             Text(if (BuildConfig.IS_MOCK) ko.get("ui_f1eeaedd7e3c") else ko.get("ui_939f7daa4e4e"), color = Color.White)
             Button(onClick = { vm.go(Page.STATUS) }, colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Blue), shape = RoundedCornerShape(10.dp), modifier = Modifier.heightIn(min = 60.dp)) { Text(ko.get("ui_516e0278f12b"), fontSize = 18.sp) }
         }
     }
-    Panel(ko.get("ui_96918379aa24"), ko.get("ui_b5935d7ba17c"), onClick = { vm.go(Page.GUIDES) })
-    Panel(ko.get("ui_7a087ed8150b"), ko.get("ui_1a3926f02365"), onClick = vm::openAssistant)
 }
 private fun Reading.description(ko: UiCopy): String = when {
     capability == Capability.UNSUPPORTED -> ko.get("ui_320e56840e38")
@@ -198,13 +209,26 @@ private fun Reading.description(ko: UiCopy): String = when {
 @Composable private fun StatusScreen(vm: CarCueViewModel, s: UiState, ko: UiCopy) {
     Heading(ko.get("ui_fc73f9507b0a"), ko.get("ui_4915df98c8b8"))
     Action(ko.get("ui_3b6510d9d5ee"), s.reading.status != ReadStatus.LOADING) { vm.refresh() }
+    val interactive = s.ux.known && !s.ux.restricted
+    val demo: ((String) -> Unit)? = if (BuildConfig.IS_MOCK && interactive) vm::scenario else null
+    BoxWithConstraints {
+        if (maxWidth >= 760.dp) Row(horizontalArrangement = Arrangement.spacedBy(18.dp)) {
+            VehicleSceneCard(s.reading, ko, Modifier.weight(1f), interactive, demo)
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) { DoorReadingPanel(vm, s, ko) }
+        } else Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            DoorReadingPanel(vm, s, ko)
+            VehicleSceneCard(s.reading, ko, interactive = interactive, onScenario = demo)
+        }
+    }
+    Panel(ko.get("ui_c5c585276916"), ko.get("ui_d694ff301ced"))
+    Panel(ko.get("ui_1f1301d87291"), ko.get("ui_39e55b90c4c8"))
+    Notice(ko.get("ui_a5f57b36a3a7").replace("{internet}", s.internetAvailable?.toString() ?: "UNKNOWN").replace("{server}", s.serverConnection).replace("{vehicle}", s.vehicleConnection))
+}
+@Composable private fun DoorReadingPanel(vm: CarCueViewModel, s: UiState, ko: UiCopy) {
     Panel(ko.get("ui_5f00d4793151"), s.reading.description(ko), highlight = s.reading.status == ReadStatus.VALUE && s.reading.value == "OPEN", onClick = { vm.go(Page.DETAIL) })
     Text("${s.reading.source} · ${s.reading.capability} · ${s.reading.status}", color = Muted, fontSize = 14.sp)
     s.reading.receivedAt?.let { Text((ko.get("ui_cc088cb58015")) + DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault()).format(it), fontSize = 14.sp, color = Muted) }
     s.reading.previousValue?.let { Notice((ko.get("ui_467deb9ffd72")) + it + ko.get("ui_4a8f8d4b04bf")) }
-    Panel(ko.get("ui_c5c585276916"), ko.get("ui_d694ff301ced"))
-    Panel(ko.get("ui_1f1301d87291"), ko.get("ui_39e55b90c4c8"))
-    Notice(ko.get("ui_a5f57b36a3a7").replace("{internet}", s.internetAvailable?.toString() ?: "UNKNOWN").replace("{server}", s.serverConnection).replace("{vehicle}", s.vehicleConnection))
 }
 @Composable private fun DoorDiagram(open: Boolean) {
     Canvas(Modifier.fillMaxWidth().height(170.dp).semantics { contentDescription = "Physical front-left door location (ROW_1_LEFT), not necessarily the driver door" }) {
@@ -218,7 +242,7 @@ private fun Reading.description(ko: UiCopy): String = when {
 }
 @Composable private fun DetailScreen(vm: CarCueViewModel, s: UiState, ko: UiCopy) {
     Heading(s.reading.description(ko), ko.get("ui_27fb61365bb5"))
-    DoorDiagram(s.reading.status == ReadStatus.VALUE && s.reading.value == "OPEN")
+    VehicleSceneCard(s.reading, ko, interactive = s.ux.known && !s.ux.restricted)
     Notice(ko.get("ui_94ee6190b2e4"))
     Action(ko.get("ui_3b6510d9d5ee"), s.reading.status != ReadStatus.LOADING) { vm.refresh() }
     OutlinedButton(onClick = { vm.go(Page.GUIDES) }, modifier = Modifier.fillMaxWidth().heightIn(min = 60.dp)) { Text(ko.get("ui_1577a2d2afdc")) }
@@ -232,10 +256,16 @@ private fun Reading.description(ko: UiCopy): String = when {
     val guides = s.guides.filter { (it.title + it.body).contains(query, true) }
     if (guides.isEmpty()) Notice(ko.get("ui_7af6433d25e9"))
     guides.forEach { guide -> Panel(guide.title, guide.body, onClick = { vm.openGuide(guide) }) }
-    if (BuildConfig.IS_MOCK) OutlinedButton(onClick = { vm.openGuide(Guide("__layout_preview__", ko.get("ui_817e34c0f4e8"), ko.get("ui_275b15c57746"),
+    if (BuildConfig.IS_MOCK) Surface(onClick = { vm.openGuide(Guide("__layout_preview__", ko.get("ui_817e34c0f4e8"), ko.get("ui_275b15c57746"),
         listOf((ko.get("ui_3e7fa72af50a")) to (ko.get("ui_d1c1fb5dfe7f")),
             (ko.get("ui_6389dba531a5")) to (ko.get("ui_0f89f99fff78")),
-            (ko.get("ui_6a9bd682c497")) to (ko.get("ui_41867308eace"))), emptyList())) }, modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp)) { Text(ko.get("ui_5973dc193878")) }
+            (ko.get("ui_6a9bd682c497")) to (ko.get("ui_41867308eace"))), emptyList(), locale = s.locale)) }, modifier = Modifier.fillMaxWidth().testTag("guide_image_card"),
+        shape = RoundedCornerShape(16.dp), border = BorderStroke(1.dp, Line), color = Color.White) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            GuidePreviewPhoto(ko)
+            Text(ko.get("ui_5973dc193878"), color = Blue, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+        }
+    }
     Action(ko.get("ui_0812f118b535")) { vm.openAssistant() }
 }
 @Composable private fun GuideScreen(vm: CarCueViewModel, s: UiState, ko: UiCopy) {
@@ -246,7 +276,15 @@ private fun Reading.description(ko: UiCopy): String = when {
     Text("${s.guideStep+1} / ${guide.steps.size.coerceAtLeast(1)}", color = Blue, fontWeight = FontWeight.Bold, fontSize = 22.sp,
         style = LocalTextStyle.current.copy(textDirection = TextDirection.Ltr))
     if (guide.locale != s.locale) Notice(ko.get("ui_original_locale").replace("{locale}", guide.locale))
-    step?.let { Panel(it.first, it.second) }
+    if (guide.id == "__layout_preview__") BoxWithConstraints {
+        if (maxWidth >= 760.dp) Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            Box(Modifier.weight(1f)) { if (s.guideStep == 1) GuidePreviewPhoto(ko) else VehicleModel3D(s.reading, ko, Modifier.fillMaxWidth().height(200.dp), interactive = false) }
+            Column(Modifier.weight(1f)) { step?.let { Panel(it.first, it.second) } }
+        } else Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            if (s.guideStep == 1) GuidePreviewPhoto(ko) else VehicleModel3D(s.reading, ko, Modifier.fillMaxWidth().height(190.dp), interactive = false)
+            step?.let { Panel(it.first, it.second) }
+        }
+    } else step?.let { Panel(it.first, it.second) }
     guide.cautions.getOrNull(s.guideStep)?.forEach { Notice(it, error = true) }
     Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
         OutlinedButton(onClick = { vm.step(-1) }, enabled = s.guideStep > 0, modifier = Modifier.weight(1f).heightIn(min = 60.dp)) { Text(ko.get("ui_da7e61c67cc5")) }

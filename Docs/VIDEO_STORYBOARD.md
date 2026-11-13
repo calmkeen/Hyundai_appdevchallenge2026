@@ -1,38 +1,41 @@
-# Mock 짧은 영상 구성
+# 실제 앱 실행 영상 구성
 
-2026-11-13. 사용자 요청: 이전 이미지 요소 포함, 기능당 약 2초, 한국어·영어·일본어 전환 유지.
+2026-11-13. 최신 기준은 새 APK를 실행한 화면의 연속 녹화다. 차량 3D·그림·가이드 사진이 APK 내부에서 표시되고 실제 버튼·드래그·언어 변경으로 진행한다.
 
-최신 파일은 `output/qa/carcue-mock-visuals-3d.mp4`이며 1280×800, 30fps, 32초다. 실제 demo APK 녹화 구간·기기 테스트 캡처, 인계 가이드의 충전 사진, 기존 Pleos 전용 에뮬레이터 녹화의 3D 차량 장면을 합친 **편집본**이다. 모든 장면은 2초다.
+결과는 `output/qa/carcue-native-run.mp4`, 증거는 같은 이름의 JSON과 `native-showcase-instrumentation.txt`다. 기능별 화면은 2초씩 유지하며 실제 터치와 전환 시간이 포함된다. 앱 외부의 사진·3D·다른 화면을 후처리로 삽입하지 않는다. 차량 데이터는 demo의 MOCK이며 실제 AI를 호출하지 않는다.
 
-3D 차량은 **Pleos 에뮬레이터의 시스템 UI**다. 영상에서는 차량 부분을 확대하고 출처 자막을 넣었다. CarCue가 자체 3D 렌더러를 구현했다는 의미가 아니다. 충전 사진도 영상용 참고 장면으로 구분한다. Mock 앱의 상태값, 시스템 3D 화면, 참고 이미지를 각각의 출처로 관리한다.
+| 순서 | 실제 앱 화면·동작 |
+| --- | --- |
+| 1 | 차량 선택 |
+| 2 | 한국어·영어·일본어 선택 목록 |
+| 3 | 홈과 앱 내 3D 차량 |
+| 4 | 문 열림 상태와 3D 위치 |
+| 5 | Mock 닫힘 버튼과 3D 문 상태 변경 |
+| 6 | 드래그로 3D 모형 회전 |
+| 7 | 문 상세의 3D 위치 |
+| 8 | 가이드 목록 안의 참고 사진 |
+| 9 | 가이드 1단계의 차량 그림 |
+| 10 | 가이드 2단계 안의 참고 사진 |
+| 11 | 해당 단계의 AI 질문 화면 |
+| 12 | 영어 선택 |
+| 13 | 영어 홈과 3D 모형 |
+| 14 | 영어 차량 상태 |
+| 15 | 일본어 선택 |
+| 16 | 일본어 홈과 3D 모형 |
+| 17 | 일본어 차량 상태 |
+| 18 | 이용 종료 확인 |
+| 19 | 초기화된 차량 선택 화면 |
 
-| 시간 | 장면 | 원본 |
-| --- | --- | --- |
-| 0–2초 | 3D 차량 · 문 닫힘 | Pleos 에뮬레이터 시스템 UI, 확대·출처 자막 |
-| 2–4초 | 차량 선택 | 실제 APK 녹화 |
-| 4–6초 | 한국어·영어·일본어 목록 | 실제 APK 녹화 |
-| 6–8초 | 한국어 홈 | 실제 APK 녹화 |
-| 8–10초 | 한국어 차량 상태 | 실제 APK 녹화, MOCK 값 |
-| 10–12초 | 문 열림 3D 표시 | Pleos 에뮬레이터 시스템 UI, 확대·출처 자막 |
-| 12–14초 | 충전 가이드 이미지 예시 | 인계 SVG의 내장 사진, 별도 자막 |
-| 14–16초 | 단계별 가이드 | 실제 APK 기기 테스트 캡처 |
-| 16–18초 | AI 질문 / 자료 부족 응답 | 실제 APK 기기 테스트 캡처, MOCK 서버 |
-| 18–20초 | 영어 선택·전환 | 실제 APK 녹화 |
-| 20–22초 | 영어 홈 | 실제 APK 녹화 |
-| 22–24초 | 영어 차량 상태 | 실제 APK 녹화, MOCK 값 |
-| 24–26초 | 일본어 선택·전환 | 실제 APK 녹화 |
-| 26–28초 | 일본어 홈 | 실제 APK 녹화 |
-| 28–30초 | 일본어 차량 상태 | 실제 APK 녹화, MOCK 값 |
-| 30–32초 | 이용 종료 후 초기 화면 | 실제 APK 기기 테스트 캡처 |
-
-앱 코드와 APK를 바꾸는 작업은 수행하지 않았다. 무편집 녹화는 `carcue-mock-languages.mp4`, SDK 녹화는 `carcue-pleos-sdk.mp4`로 보존한다. 이전 28초 편집본은 `carcue-mock-short.mp4`에 남긴다. 최신 편집본의 입력 파일·종류·확대 영역·구간·SHA256은 `carcue-mock-visuals-3d.json`에 기록한다. 기본 `carcue-mock-flow.mp4`는 새 32초 편집본으로 갱신한다.
+3D 모형은 앱이 원근 투영해 그리는 일반적인 차량 위치 예시다. 선택 차종의 정확한 외형을 보증하지 않는다. 사진은 인계 패키지의 내장 PNG이며 Mock 화면 예시에 연결했다. 구현과 출처는 `NATIVE_VISUALS.md`를 따른다.
 
 ## 재현
 
-기존 녹화·기기 테스트 캡처가 `output/qa/`에 있는 macOS/Xcode 환경에서 실행한다.
+부팅된 테스트 AVD와 최신 demo·기기 테스트 APK를 준비한 뒤 실행한다.
 
 ```bash
-python3 scripts/render_mock_short.py
+python3 scripts/record_native_showcase.py
 ```
 
-`Docs/video-short.json`이 편집 구성을 관리한다. `scripts/edit_mock_showcase.swift`는 AVFoundation으로 영상 구간을 자르고, 사진·캡처를 2초 영상으로 만든 뒤 30fps MP4로 내보낸다. 3D 영상에는 구간별 출처 자막을 합성하며, 나머지 구간에는 표시하지 않는다. 음성·배경음악은 추가하지 않았다. 기술 참고: [Apple의 시간 구간 삽입 API](https://developer.apple.com/documentation/avfoundation/avmutablecomposition/inserttimerange(_:of:at:)), [프레임 쓰기 API](https://developer.apple.com/documentation/avfoundation/avassetwriterinputpixelbufferadaptor/append(_:withpresentationtime:)).
+설치된 APK의 해시를 전달 APK와 대조하며, 앱이 준비된 뒤 녹화를 시작하고 마지막 화면이 유지되는 동안 녹화를 마친다. 기본 `carcue-mock-flow.mp4`도 이 최신 연속 녹화로 갱신한다.
+
+이전 28초·32초 편집본과 무편집 언어 전환 영상은 원래 파일명으로 보존했다. 이전 편집 구성은 `history/VIDEO_STORYBOARD_EDITED.md`, `video-short.json`과 `render_mock_short.py`로 재현할 수 있다. 최신 실제 앱 실행 영상과 별도 결과다.

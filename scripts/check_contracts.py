@@ -15,7 +15,7 @@ for schema_name, fixture_name in [
     Draft202012Validator(schema).validate(json.loads((root / "contracts" / fixture_name).read_text()))
     print(f"PASS {fixture_name}")
 ui = json.loads((root / "content/locales/ui.json").read_text())
-source = (root / "android/app/src/main/java/com/carcue/app/CarCueApp.kt").read_text()
+source = "\n".join(p.read_text() for p in (root / "android/app/src/main/java/com/carcue/app").glob("*.kt"))
 keys = set(re.findall(r'get\("(ui_[A-Za-z0-9_]+)"\)', source))
 assert keys <= ui.keys(), keys - ui.keys()
 locales = json.loads((root / "content/locales/catalog.json").read_text())

@@ -32,11 +32,16 @@ class CarCueFlowTest {
         image("02-home")
         rule.onNodeWithText("현재 차량 상태 보기 →").performScrollTo().performClick()
         rule.onNodeWithText("앞좌석 왼쪽 문이 열려 있어요").assertIsDisplayed()
+        rule.onNodeWithTag("vehicle_3d").assertContentDescriptionEquals("앞좌석 왼쪽 문 · 열림")
+        rule.onNodeWithText("MOCK · 닫힘 시연").performScrollTo().performClick()
+        rule.onNodeWithTag("vehicle_3d").assertContentDescriptionEquals("앞좌석 왼쪽 문 · 닫힘")
+        rule.onNodeWithText("MOCK · 열림 시연").performScrollTo().performClick()
         image("03-mock-door-open")
         rule.onNodeWithText("앞좌석 왼쪽 문이 열려 있어요").performClick()
         image("04-door-detail")
         rule.runOnIdle { vm.scenario("UNAVAILABLE"); vm.go(Page.STATUS) }
         rule.onNodeWithText("아직 차량 정보를 읽지 못했어요").assertIsDisplayed()
+        rule.onNodeWithTag("vehicle_3d").assertContentDescriptionEquals("문 상태 미확인 · 위치만 표시")
         image("05-no-value")
         rule.runOnIdle { vm.scenario("CHECK_FAILED") }
         rule.onNodeWithText("지원 여부를 확인하지 못했어요").assertIsDisplayed()
@@ -44,6 +49,7 @@ class CarCueFlowTest {
         rule.onNodeWithText("이 차량에서 제공하지 않는 항목이에요").assertIsDisplayed()
         rule.runOnIdle { vm.scenario("STALE") }
         rule.onNodeWithText("이전에 받은 정보예요 · 현재값은 확인하지 못했어요").assertIsDisplayed()
+        rule.onNodeWithTag("vehicle_3d").assertContentDescriptionEquals("문 상태 미확인 · 위치만 표시")
         rule.runOnIdle { vm.openAssistant(); vm.scenario("RESTRICTED") }
         rule.onNodeWithTag("question_input").assertDoesNotExist()
         rule.onNodeWithText("주차한 뒤 이용해 주세요").assertIsDisplayed()
@@ -66,6 +72,7 @@ class CarCueFlowTest {
         rule.onNodeWithText("MOCK · 단계별 화면 시연").performScrollTo().performClick()
         rule.onNodeWithText("다음").performScrollTo().performClick()
         rule.onNodeWithText("2 / 3").assertIsDisplayed()
+        rule.onNodeWithTag("guide_preview_image").assertExists()
         rule.onNodeWithText("이 단계에 관해 질문").performScrollTo().performClick()
         rule.onNodeWithText("이전 안내로 돌아가기").performScrollTo().performClick()
         rule.onNodeWithText("2 / 3").assertIsDisplayed()
