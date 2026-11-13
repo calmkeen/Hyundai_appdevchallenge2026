@@ -15,7 +15,7 @@
 | 앱 빌드 | `assembleDemoDebug`, `assemblePleosDebug` | APK 2종 성공 |
 | 기기 테스트 빌드 | `assembleDemoDebugAndroidTest`, `assemblePleosDebugAndroidTest` | 성공 |
 | 계약 | `scripts/check_contracts.py` | Schema 3종과 제공 예제 3개, UI 문자열 키 검사 통과 |
-| 앱 소개 영상 | 실제 APK 녹화 기반 편집·AAC 디코딩 | 34초·1920×1080·30fps, 원본 차량·안전벨트·개폐·세 언어, 외부 음악 |
+| 앱 소개 영상 | 실제 APK 녹화 기반 편집·AAC 디코딩 | 34초·1920×1080·30fps, 실제 SDK 개폐+demo 기능·세 언어, 기존 음악 PCM 일치 |
 | 인계 패키지 | SHA256SUMS 전체 대조 | 일치 |
 
 최종 기준 JDK는 Temurin 17.0.21+9 ARM64, Gradle 8.10.2, AGP 8.8.2, Kotlin 2.0.0이다. compile/target SDK 35, min SDK 28이다.
@@ -24,7 +24,19 @@
 
 앱 내 시각 요소를 추가한 뒤 demo·pleos·기기 테스트 APK를 빌드했다. Mock 회귀 3개에는 3D 열림·닫힘·미수신·오래된 값과 가이드 사진 검사도 추가해 통과했다. 3D 가림을 다듬은 최종 APK로 `NativeShowcaseTest`의 19개 실제 UI 동작을 통과하고 연속 녹화했다. SDK 수신과 서버 코드는 이번 UI 변경에서 수정하지 않았다. UI 문구 129개의 세 언어 누락·치환 변수를 검사했다.
 
-## 최신: 실제 SDK 양방향 문 상태·앱 차량 시각화 · 2026-11-14
+## 최신: 실제 SDK 장면을 반영한 소개 영상 · 2026-11-14
+
+`carcue-sdk-app-intro.mp4`는 34초·1920×1080·30fps다. 7–13초의 닫힘 GET·열림 callback·닫힘 callback, 13–15초의 안전벨트 안내는 위에서 검증한 실제 pleos APK의 SDK AVD 녹화다. 다른 차량 선택·가이드·질문·세션 종료와 한국어/영어/일본어 전환은 기존 demo APK 실제 녹화를 유지했다. 기능 장면은 모두 2초다. 각 SDK 장면은 ‘Pleos SDK 수신 · 전용 AVD’, demo 장면은 ‘MOCK 데이터’를 표시한다.
+
+렌더 전 두 입력 MP4·설치/전달 APK·SDK 성공 증거 JSON과 모든 증거 파일·동봉 차량/안전벨트 PNG 해시를 검사했다. SDK 영상은 CarCue 앱 영역만 crop/확대하며 시스템 차량 패널을 넣지 않는다. 기존 단일 입력 편집기를 출처별 입력·좌표·표시를 받도록 보완했다. 근거를 결과 JSON의 `sources`, `sdk_validation`, `segments`에 저장한다.
+
+최종 영상 16개 시점에서 시작, SDK 닫힘·열림·닫힘 전환, 안전벨트, 가이드·질문 준비 중, 영어·일본어 선택/홈, 마무리를 디코딩하고 육안 확인했다(`sdk-intro-video-check.txt`). SDK 장면에서 검은 여백이 남은 첫 편집은 앱 영역 비율을 맞춰 수정한 뒤 재검수했다. 전체 기능당 약 2초와 양방향 차량 변화가 보존된다.
+
+음원은 기존 Scott Buckley 원본 SHA256·12초 시작·gain 0.32·페이드를 유지했다. 최종 AAC 디코딩은 34초·2채널·44,100Hz, peak 0.23239, RMS 0.019323, 클리핑 0이다. 디코딩한 PCM이 이전 34초 소개와 바이트 단위로 정확히 같음을 확인했다(`sdk-intro-audio-check.json`). 기존 소개·메타데이터·크레딧은 `archive-before-sdk-intro/`에 보존하고 원본 SDK/Mock 녹화는 변경하지 않았다.
+
+이번 변경은 영상·출처 메타데이터·편집 코드와 Docs 수정이다. 앱/서버 코드는 바꾸지 않았으며 SDK 16.747초 통과와 Mock 기기 회귀·촬영 결과는 기존 검증을 재사용했다. 안전벨트 센서·외부 AI·실차 센서 검증을 추가한 것은 아니다. 자세한 편집 표는 `APP_INTRO_VIDEO.md`를 따른다.
+
+## 실제 SDK 양방향 문 상태·앱 차량 시각화 · 2026-11-14
 
 전용 Pleos AVD의 실제 SDK 2.3.2 / Service 2.3.22에서 `PleosSdkTest` 1개가 16.747초에 통과했다. 최초 GET 0(CLOSED), 공식 Virtual Console 변경에 따른 실제 callback 1(OPEN), 복귀 callback 0(CLOSED)을 확인했다. 세 단계 모두 `IS_MOCK=false`, `source=PLEOS`, SUPPORTED/VALUE와 수신 시각을 검사했다. 앱은 읽기·구독만 수행하며 콘솔 입력은 호스트 시험 도구가 변경한다.
 

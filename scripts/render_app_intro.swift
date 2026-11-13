@@ -15,10 +15,17 @@ private struct Shot: Decodable {
     let start: Double?
     let chapter: String?
     let detail: String?
-    var key: String { [kind, title, subtitle, chapter ?? "", detail ?? ""].joined(separator: "|") }
+    let source: String?
+    var key: String { [kind, title, subtitle, chapter ?? "", detail ?? "", source ?? ""].joined(separator: "|") }
+}
+private struct SourceClip: Decodable {
+    let video: String, caption: String
+    let crop_xywh: [Double]
 }
 private struct Plan: Decodable {
-    let output: String, source: String, audio: String, music_credit: String, visual_credit: String
+    let output: String, audio: String, music_credit: String, visual_credit: String
+    let sources: [String: SourceClip]
+    let intro_notice: String, outro_notice: String
     let audio_start: Double
     let audio_volume: Float
     let hero_asset: String
@@ -50,7 +57,7 @@ private func bitmap(_ draw: () -> Void) -> CGImage {
     NSGraphicsContext.restoreGraphicsState()
     return b.cgImage!
 }
-private func overlayImage(_ shot: Shot, credit: String, hero: String, safety: String, visualCredit: String, heroTitle: String, heroCaption: String) -> CGImage {
+private func overlayImage(_ shot: Shot, credit: String, hero: String, safety: String, visualCredit: String, heroTitle: String, heroCaption: String, sourceCaption: String, introNotice: String, outroNotice: String) -> CGImage {
     bitmap {
         if shot.kind == "video" {
             pale.setFill(); NSRect(x: 0, y: 0, width: W, height: H).fill()
@@ -67,7 +74,7 @@ private func overlayImage(_ shot: Shot, credit: String, hero: String, safety: St
                 rounded(NSRect(x: 64, y: 286, width: 320, height: 44), NSColor(srgbRed: 1, green: 0.95, blue: 0.84, alpha: 1), radius: 10)
                 text(detail, NSRect(x: 80, y: 294, width: 295, height: 30), 19, NSColor(srgbRed: 0.54, green: 0.30, blue: 0.05, alpha: 1), .medium)
             }
-            text("실제 APK 실행 화면 · MOCK 데이터 · 개발 중", NSRect(x: 64, y: 24, width: 1600, height: 30), 18, muted)
+            text(sourceCaption, NSRect(x: 64, y: 24, width: 760, height: 30), 18, muted)
             text(visualCredit, NSRect(x: 832, y: 53, width: 1030, height: 20), 14, muted)
             text(credit, NSRect(x: 832, y: 28, width: 1030, height: 24), 15, muted)
         } else if shot.kind == "intro" {
@@ -88,7 +95,7 @@ private func overlayImage(_ shot: Shot, credit: String, hero: String, safety: St
             text(shot.subtitle, NSRect(x: 118, y: 343, width: 920, height: 70), 34, muted)
             rounded(NSRect(x: 116, y: 211, width: 420, height: 56), pale, radius: 14)
             text("한국어  ·  English  ·  日本語", NSRect(x: 134, y: 223, width: 396, height: 34), 24, blue, .medium)
-            text("개발 중인 Mock 앱 소개", NSRect(x: 116, y: 80, width: 800, height: 40), 22, muted)
+            text(introNotice, NSRect(x: 116, y: 80, width: 1000, height: 40), 22, muted)
             text(visualCredit, NSRect(x: 116, y: 58, width: 1680, height: 20), 14, muted)
             text(credit, NSRect(x: 116, y: 28, width: 1680, height: 30), 18, muted)
         } else {
@@ -96,7 +103,7 @@ private func overlayImage(_ shot: Shot, credit: String, hero: String, safety: St
             text("CarCue", NSRect(x: 180, y: 802, width: 1560, height: 120), 78, .white, .bold, center: true)
             text(shot.title, NSRect(x: 220, y: 428, width: 1480, height: 270), 83, .white, .bold, center: true, line: 114)
             text(shot.subtitle, NSRect(x: 220, y: 284, width: 1480, height: 60), 32, .white, .medium, center: true)
-            text("실제 APK 기반 Mock 시연", NSRect(x: 220, y: 103, width: 1480, height: 50), 22, NSColor.white.withAlphaComponent(0.8), center: true)
+            text(outroNotice, NSRect(x: 220, y: 103, width: 1480, height: 50), 22, NSColor.white.withAlphaComponent(0.8), center: true)
             text(visualCredit, NSRect(x: 150, y: 18, width: 1620, height: 22), 14, NSColor.white.withAlphaComponent(0.85), center: true)
             text(credit, NSRect(x: 150, y: 42, width: 1620, height: 35), 18, NSColor.white.withAlphaComponent(0.85), center: true)
         }
@@ -132,9 +139,17 @@ private func blankMovie(_ url: URL, duration: Double) async throws {
         let root = URL(fileURLWithPath: FileManager.default.currentDirectoryPath, isDirectory: true)
         let plan = try JSONDecoder().decode(Plan.self, from: Data(contentsOf: URL(fileURLWithPath: CommandLine.arguments[1])))
         let work = root.appendingPathComponent("output/qa/app-intro-work", isDirectory: true)
-        let source = AVURLAsset(url: root.appendingPathComponent(plan.source))
-        let sourceTrack = try await source.loadTracks(withMediaType: .video).first!
-        let sourceDuration = CMTimeGetSeconds(try await source.load(.duration))
+        var tracks = [String: AVAssetTrack](), durations = [String: Double]()
+        var assets = [String: AVURLAsset]()
+        for (name, clip) in plan.sources {
+            let asset = AVURLAsset(url: root.appendingPathComponent(clip.video))
+            let track = try await asset.loadTracks(withMediaType: .video).first!
+            let size = try await track.load(.naturalSize), crop = clip.crop_xywh
+            precondition(crop.count == 4 && crop[0] >= 0 && crop[1] >= 0 && crop[2] > 0 && crop[3] > 0)
+            precondition(crop[0]+crop[2] <= size.width && crop[1]+crop[3] <= size.height)
+            assets[name] = asset; tracks[name] = track
+            durations[name] = CMTimeGetSeconds(try await asset.load(.duration))
+        }
         let blank = work.appendingPathComponent("blank.mp4")
         try await blankMovie(blank, duration: 3)
         let blankAsset = AVURLAsset(url: blank)
@@ -146,17 +161,25 @@ private func blankMovie(_ url: URL, duration: Double) async throws {
         for shot in plan.segments {
             let at = CMTime(seconds: cursor, preferredTimescale: 600), duration = CMTime(seconds: shot.duration, preferredTimescale: 600)
             let native = shot.kind == "video"
-            if native { precondition((shot.start ?? 0) + shot.duration <= sourceDuration) }
-            try videoTrack.insertTimeRange(CMTimeRange(start: CMTime(seconds: native ? shot.start! : 0, preferredTimescale: 600), duration: duration), of: native ? sourceTrack : blankTrack, at: at)
+            if native { precondition(shot.start! >= 0 && shot.start! + shot.duration <= durations[shot.source!]!) }
+            try videoTrack.insertTimeRange(CMTimeRange(start: CMTime(seconds: native ? shot.start! : 0, preferredTimescale: 600), duration: duration), of: native ? tracks[shot.source!]! : blankTrack, at: at)
             let layer = AVMutableVideoCompositionLayerInstruction(assetTrack: videoTrack)
             if native {
-                layer.setTransform(CGAffineTransform(scaleX: 1.125, y: 1.125).concatenating(CGAffineTransform(translationX: appRect.minX, y: H - appRect.maxY)), at: at)
+                let c = plan.sources[shot.source!]!.crop_xywh
+                let crop = CGRect(x: c[0], y: c[1], width: c[2], height: c[3])
+                let scale = min(appRect.width/crop.width, appRect.height/crop.height)
+                let x = appRect.minX + (appRect.width-crop.width*scale)/2 - crop.minX*scale
+                let y = H-appRect.maxY + (appRect.height-crop.height*scale)/2 - crop.minY*scale
+                // The installed AVFoundation header specifies clean-aperture,
+                // top-left source coordinates for the crop, before transformation.
+                layer.setCropRectangle(crop, at: at)
+                layer.setTransform(CGAffineTransform(scaleX: scale, y: scale).concatenating(CGAffineTransform(translationX: x, y: y)), at: at)
                 layer.setOpacityRamp(fromStartOpacity: 0, toEndOpacity: 1, timeRange: CMTimeRange(start: at, duration: CMTime(seconds: 0.13, preferredTimescale: 600)))
                 layer.setOpacityRamp(fromStartOpacity: 1, toEndOpacity: 0, timeRange: CMTimeRange(start: at + duration - CMTime(seconds: 0.10, preferredTimescale: 600), duration: CMTime(seconds: 0.10, preferredTimescale: 600)))
             } else { layer.setTransform(.identity, at: at) }
             let instruction = AVMutableVideoCompositionInstruction()
             instruction.timeRange = CMTimeRange(start: at, duration: duration); instruction.layerInstructions = [layer]
-            instruction.backgroundColor = pale.cgColor; instructions.append(instruction)
+            instruction.backgroundColor = NSColor.white.cgColor; instructions.append(instruction)
             if let last = overlays.last, last.shot.key == shot.key {
                 overlays[overlays.count - 1].duration += shot.duration
             } else { overlays.append(Overlay(shot: shot, start: cursor, duration: shot.duration)) }
@@ -175,7 +198,7 @@ private func blankMovie(_ url: URL, duration: Double) async throws {
         let parent = CALayer(); parent.frame = CGRect(x: 0, y: 0, width: W, height: H); parent.backgroundColor = pale.cgColor
         let renderedVideo = CALayer(); renderedVideo.frame = parent.bounds; parent.addSublayer(renderedVideo)
         for overlay in overlays {
-            let layer = CALayer(); layer.frame = parent.bounds; layer.contents = overlayImage(overlay.shot, credit: plan.music_credit, hero: plan.hero_asset, safety: plan.safety_asset, visualCredit: plan.visual_credit, heroTitle: plan.hero_title, heroCaption: plan.hero_caption); layer.opacity = 0
+            let layer = CALayer(); layer.frame = parent.bounds; layer.contents = overlayImage(overlay.shot, credit: plan.music_credit, hero: plan.hero_asset, safety: plan.safety_asset, visualCredit: plan.visual_credit, heroTitle: plan.hero_title, heroCaption: plan.hero_caption, sourceCaption: plan.sources[overlay.shot.source ?? ""]?.caption ?? "", introNotice: plan.intro_notice, outroNotice: plan.outro_notice); layer.opacity = 0
             let s = overlay.start / cursor, end = (overlay.start + overlay.duration) / cursor, fade = 0.14 / cursor
             let animation = CAKeyframeAnimation(keyPath: "opacity")
             if overlay.shot.kind == "outro" {

@@ -43,3 +43,5 @@ APK의 `assets/models/source/`와 저장소 `content/models/source/`에 원본 B
 기존 자체 제작의 각진 모형과 사진 중심 영상은 Git 이력과 이전 산출물로 보존했다. 최신 소개 영상은 사용자 지정 Pleos 원본 시각화를 사용한다. 기능 장면은 실제 APK 녹화이며 시작 카드도 APK와 동일한 PNG다. 이전 사진과 OpenX 3D는 최신 소개 영상에 사용하지 않는다.
 
 충전 가이드 사진은 사용자가 제공한 인계 ZIP의 `assets/ui/guide.svg` 내장 PNG다. 외부 원작자·별도 사용권은 인계 자료에서 확인되지 않았다. 기존 개발 Mock 예시로 유지하며 실제 게시용 검수 완료로 표시하지 않는다.
+
+2026-11-14 SDK 장면을 반영한 소개도 같은 원곡·구간·gain·페이드를 유지한다. 두 최종 영상의 디코딩된 PCM이 정확히 일치했다. 최신 복사용 출처는 `output/qa/carcue-sdk-app-intro-credits.txt`이며, SDK 앱 녹화와 demo APK 녹화 출처를 함께 기재한다.

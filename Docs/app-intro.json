@@ -1,6 +1,5 @@
 {
-  "output": "output/qa/carcue-app-intro.mp4",
-  "source": "output/qa/carcue-native-run.mp4",
+  "output": "output/qa/carcue-sdk-app-intro.mp4",
   "audio": ".tooling/media/scott-buckley-a-kind-of-hope.mp3",
   "segments": [
     {
@@ -16,7 +15,8 @@
       "chapter": "01  시작하기",
       "title": "내 차량에 맞춰\n시작하세요",
       "subtitle": "차종과 연식을 확인하고\n편한 언어를 선택해요",
-      "source_scene": "차량 선택"
+      "source_scene": "차량 선택",
+      "source": "demo"
     },
     {
       "kind": "video",
@@ -25,46 +25,52 @@
       "chapter": "01  시작하기",
       "title": "내 차량에 맞춰\n시작하세요",
       "subtitle": "차종과 연식을 확인하고\n편한 언어를 선택해요",
-      "source_scene": "세 언어 선택"
+      "source_scene": "세 언어 선택",
+      "source": "demo"
     },
     {
       "kind": "video",
       "duration": 2,
-      "start": 8.01,
+      "start": 0.05,
       "chapter": "02  차량 상태",
-      "title": "지금 받은 상태를\n한눈에",
-      "subtitle": "문 위치와 수신 정보를\n함께 확인해요",
-      "source_scene": "차량 상태 · 문 열림"
+      "title": "차량 상태를\n앱 안에서",
+      "subtitle": "Pleos SDK로 받은\n문 상태를 보여줘요",
+      "source_scene": "SDK 최초 닫힘 수신",
+      "source": "sdk",
+      "detail": "SDK 수신 · 전용 AVD"
     },
     {
       "kind": "video",
       "duration": 2,
-      "start": 9.17,
+      "start": 1.8,
       "chapter": "02  차량 상태",
-      "title": "지금 받은 상태를\n한눈에",
-      "subtitle": "문 위치와 수신 정보를\n함께 확인해요",
-      "source_scene": "차량 상태 · 문 닫힘",
-      "lead_in_seconds": 0.95
+      "title": "문이 열리면\n그림도 함께",
+      "subtitle": "실제 SDK 변경 알림을 받아\n차량 시각화가 바뀌어요",
+      "source_scene": "SDK 열림 콜백",
+      "source": "sdk",
+      "detail": "닫힘 → 열림 · SDK 수신"
     },
     {
       "kind": "video",
       "duration": 2,
-      "start": 11.27,
+      "start": 5.8,
       "chapter": "02  차량 상태",
-      "title": "문 상태를\n눈으로 확인",
-      "subtitle": "Pleos 원본 차량 시각화가\n앱 안에서 바뀌어요",
-      "source_scene": "Pleos 원본 차량 · 문 열림 전환",
-      "lead_in_seconds": 0.95
+      "title": "다시 닫히면\n표시도 돌아와요",
+      "subtitle": "닫힘 알림까지 받아\n앱 안 차량이 함께 바뀌어요",
+      "source_scene": "SDK 닫힘 콜백",
+      "source": "sdk",
+      "detail": "열림 → 닫힘 · SDK 수신"
     },
     {
       "kind": "video",
       "duration": 2,
-      "start": 14.24,
+      "start": 7.9,
       "chapter": "03  안전벨트 안내",
       "title": "안전벨트 안내를\n익숙한 그림으로",
-      "subtitle": "Pleos 영상의 원본 이미지를\n앱 안에서 확인해요",
+      "subtitle": "Pleos 원본 이미지를\n앱 안에서 확인해요",
       "detail": "착용 상태 미연결 · 안내 예시",
-      "source_scene": "Pleos 원본 안전벨트 안내"
+      "source_scene": "SDK 앱의 안전벨트 안내",
+      "source": "sdk"
     },
     {
       "kind": "video",
@@ -73,7 +79,8 @@
       "chapter": "04  사용 가이드",
       "title": "사진과 함께\n단계별로",
       "subtitle": "필요한 안내를 열고\n한 단계씩 살펴봐요",
-      "source_scene": "가이드 목록 · 앱 내 사진"
+      "source_scene": "가이드 목록 · 앱 내 사진",
+      "source": "demo"
     },
     {
       "kind": "video",
@@ -82,7 +89,8 @@
       "chapter": "04  사용 가이드",
       "title": "사진과 함께\n단계별로",
       "subtitle": "필요한 안내를 열고\n한 단계씩 살펴봐요",
-      "source_scene": "가이드 2단계 · 앱 내 사진"
+      "source_scene": "가이드 2단계 · 앱 내 사진",
+      "source": "demo"
     },
     {
       "kind": "video",
@@ -92,7 +100,8 @@
       "title": "궁금한 순간,\n바로 질문",
       "subtitle": "살펴보던 가이드에서\n질문 화면으로 이어져요",
       "detail": "AI 답변 연결 준비 중",
-      "source_scene": "AI 질문 화면"
+      "source_scene": "AI 질문 화면",
+      "source": "demo"
     },
     {
       "kind": "video",
@@ -101,7 +110,8 @@
       "chapter": "06  언어 선택",
       "title": "익숙한 언어로\n이어지는 경험",
       "subtitle": "한국어\nEnglish\n日本語",
-      "source_scene": "언어 변경 · 영어 선택"
+      "source_scene": "언어 변경 · 영어 선택",
+      "source": "demo"
     },
     {
       "kind": "video",
@@ -110,7 +120,8 @@
       "chapter": "06  언어 선택",
       "title": "익숙한 언어로\n이어지는 경험",
       "subtitle": "한국어\nEnglish\n日本語",
-      "source_scene": "English · Home"
+      "source_scene": "English · Home",
+      "source": "demo"
     },
     {
       "kind": "video",
@@ -119,7 +130,8 @@
       "chapter": "06  언어 선택",
       "title": "익숙한 언어로\n이어지는 경험",
       "subtitle": "한국어\nEnglish\n日本語",
-      "source_scene": "언어 변경 · 일본어 선택"
+      "source_scene": "언어 변경 · 일본어 선택",
+      "source": "demo"
     },
     {
       "kind": "video",
@@ -128,7 +140,8 @@
       "chapter": "06  언어 선택",
       "title": "익숙한 언어로\n이어지는 경험",
       "subtitle": "한국어\nEnglish\n日本語",
-      "source_scene": "日本語 · ホーム"
+      "source_scene": "日本語 · ホーム",
+      "source": "demo"
     },
     {
       "kind": "video",
@@ -137,7 +150,8 @@
       "chapter": "07  이용 마치기",
       "title": "이용이 끝나면\n가볍게 마무리",
       "subtitle": "이번 이용의 선택과\n임시 기록을 정리해요",
-      "source_scene": "이용 종료 확인"
+      "source_scene": "이용 종료 확인",
+      "source": "demo"
     },
     {
       "kind": "outro",
@@ -153,5 +167,36 @@
   "hero_title": "차량·안전벨트 안내",
   "hero_caption": "Pleos 원본 영상의 시각화",
   "visual_credit": "Visual reference: user-specified Pleos SDK recording · local development preview",
-  "safety_asset": "content/illustrations/pleos-reference/seatbelt.png"
+  "safety_asset": "content/illustrations/pleos-reference/seatbelt.png",
+  "schema_version": 2,
+  "sources": {
+    "demo": {
+      "video": "output/qa/carcue-native-run.mp4",
+      "evidence": "output/qa/carcue-native-run.json",
+      "apk": "output/apk/carcue-demo-pleos-visual-debug.apk",
+      "vehicle_data": "MOCK",
+      "crop_xywh": [
+        0,
+        0,
+        1280,
+        800
+      ],
+      "caption": "실제 APK 실행 화면 · MOCK 데이터 · 개발 중"
+    },
+    "sdk": {
+      "video": "output/qa/pleos-sdk-retest/carcue-pleos-sdk-visual-check.mp4",
+      "evidence": "output/qa/pleos-sdk-retest/result.json",
+      "apk": "output/apk/carcue-pleos-sdk-verified-debug.apk",
+      "vehicle_data": "PLEOS",
+      "crop_xywh": [
+        854,
+        90,
+        1682,
+        1051.25
+      ],
+      "caption": "실제 APK 실행 화면 · Pleos SDK 수신 · 전용 AVD"
+    }
+  },
+  "intro_notice": "실제 SDK 문 상태 · 한국어·영어·일본어 시연",
+  "outro_notice": "문 상태: Pleos SDK · 그 외 기능: Mock 시연"
 }
