@@ -77,16 +77,24 @@ LIVE provider 시험은 **메서드/HTTP transport 대역**이다. 실제 OpenAI
 
 재현 도구는 `scripts/record_mock_languages.py`다. 이전 영상은 `carcue-mock-flow-initial.mp4`로 보존했다. APK 코드는 이번 녹화 작업에서 변경하지 않았다.
 
-### 기능당 2초 편집본 추가
+### 기능당 2초 편집본 추가 · 이전 28초 버전
 
 사용자 요청에 따라 인계 SVG의 충전 사진과 실제 APK 녹화·캡처를 합쳐 `carcue-mock-short.mp4`를 만들었다. 총 14장면 × 2초 = 28초, 1280×800, 30fps다. 한국어·영어·일본어 화면과 실제 언어 선택 터치를 유지한다. 이미지 예시는 별도 자막으로 구분한다. 원본 녹화와 편집본의 출처·시간표는 `VIDEO_STORYBOARD.md`, 재현 구성은 `video-short.json`을 따른다.
 
-초기 편집본의 14개 장면 프레임을 모두 디코딩하고 이미지, 가이드, 질문, 언어 목록, 종료 화면을 육안 확인했다. 최종 자막과 전환 구간 조정 후 해당 장면들을 다시 확인했다. 기본 `carcue-mock-flow.mp4`는 이 짧은 편집본과 같다. 무편집 원본은 `carcue-mock-languages.mp4`로 보존한다. 외부 AI 호출과 APK 수정은 이번 편집 범위에 없다.
+초기 편집본의 14개 장면 프레임을 모두 디코딩하고 이미지, 가이드, 질문, 언어 목록, 종료 화면을 육안 확인했다. 최종 자막과 전환 구간 조정 후 해당 장면들을 다시 확인했다. 무편집 원본은 `carcue-mock-languages.mp4`로 보존한다. 외부 AI 호출과 APK 수정은 이번 편집 범위에 없다.
+
+### 3D 차량 포함 최종 32초 버전
+
+차량 그림·가이드 이미지·3D를 모두 포함해 달라는 사용자 요청으로 `carcue-mock-visuals-3d.mp4`를 추가했다. 총 16장면 × 2초 = 32초, 1280×800, 30fps다. 문이 닫힌 3D 차량은 첫 2초, 문이 열린 3D 차량은 10–12초에 배치했다. 원본 `carcue-pleos-sdk.mp4`의 차량 영역을 확대했으며, 두 구간에 Pleos 에뮬레이터 출처 자막을 넣었다. 3D는 플랫폼 시스템 UI이고 CarCue 자체 3D 렌더러 구현이 아니다. 나머지 앱 상태는 MOCK으로 구분한다.
+
+최종 MP4 길이 32초와 11개 시점의 프레임 디코딩을 확인했다. 3D 차량의 문 닫힘·열림, 출처 자막, 장면 경계에서 자막이 사라지는 것, 가이드 이미지와 영어·일본어 전환을 육안 확인했다. 검증 로그는 `mock-visuals-3d-video-check-final.txt`, 캡처는 `visuals-3d-frames-final/`다. 렌더러의 초기 텍스트 레이어 출력 누락은 비트맵 자막 합성으로 수정했고, 차량 확대 구간의 검은 여백도 화면 비율을 맞춰 제거했다.
+
+기본 `carcue-mock-flow.mp4`는 최신 32초 편집본과 같다. 이전 28초 편집본과 두 녹화 원본도 보존했다. 구성은 `VIDEO_STORYBOARD.md`, 구간·확대 영역은 `video-short.json`, 파일별 해시는 `carcue-mock-visuals-3d.json`에서 관리한다.
 
 - APK: `output/apk/carcue-demo-debug.apk`, `output/apk/carcue-pleos-debug.apk`.
 - Mock 캡처: `output/qa/qa/01-profile.png` 등 기본 흐름. 최신 언어 선택·일본어 화면은 `09a-three-languages.png`, `09b-japanese-home.png`, `09c-japanese-status.png`.
 - 실제 SDK 캡처: `pleos-initial-get.png`, `pleos-changed-callback.png`, `pleos-session-ended.png`.
 - 로그: `output/qa/mock-instrumentation.txt`, `pleos-instrumentation.txt`, `pleos-sdk-events.txt`, `pleos-console-events.json`, `pleos-ux-events.txt`.
-- 영상: 최신 편집본 `output/qa/carcue-mock-short.mp4` (`carcue-mock-flow.mp4`와 동일), 무편집 `carcue-mock-languages.mp4`, 이전 `carcue-mock-flow-initial.mp4`, 별도 실제 SDK 영상. SDK 화면과 Mock 화면의 출처를 혼동하지 않는다.
+- 영상: 최신 `output/qa/carcue-mock-visuals-3d.mp4` (`carcue-mock-flow.mp4`와 동일), 이전 28초 `carcue-mock-short.mp4`, 무편집 `carcue-mock-languages.mp4`, 최초 `carcue-mock-flow-initial.mp4`, 별도 실제 SDK 영상. SDK 화면과 Mock 화면의 출처를 혼동하지 않는다.
 
 SDK·AVD·JDK 바이너리와 APK/영상은 Git에 포함하지 않았다. source, 계약, 테스트, 실행 안내는 feature 브랜치에서 관리한다. 원격 push·병합·배포·공모전 제출은 수행하지 않았다.

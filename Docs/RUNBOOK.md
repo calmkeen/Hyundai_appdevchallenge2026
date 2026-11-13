@@ -118,4 +118,4 @@ python3 scripts/record_mock_languages.py
 
 결과는 `output/qa/carcue-mock-languages.mp4`와 같은 이름의 JSON이다. JSON에 원본 APK와 설치된 APK의 SHA256 일치, AVD 정보, 화면 문구별 시각, 영상 해시를 기록한다. 앱 소스 커밋은 JSON의 `git_commit`을 따른다. `--serial`, `--adb`, `--apk`, `--output`으로 경로를 지정할 수 있다.
 
-기능당 2초의 이미지 포함 편집본은 `python3 scripts/render_mock_short.py`로 만든다. 구성과 원본 구분은 `VIDEO_STORYBOARD.md`, 시간·소스는 `video-short.json`에서 관리한다. `carcue-mock-short.mp4`는 편집본, `carcue-mock-languages.mp4`는 무편집 녹화다.
+기능당 2초의 이미지·3D 포함 편집본은 `python3 scripts/render_mock_short.py`로 만든다. 구성과 원본 구분은 `VIDEO_STORYBOARD.md`, 시간·소스·확대 영역은 `video-short.json`에서 관리한다. 최신 `carcue-mock-visuals-3d.mp4`는 32초 편집본, `carcue-mock-short.mp4`는 이전 28초 편집본, `carcue-mock-languages.mp4`는 무편집 녹화다. 3D 차량 구간은 기존 `carcue-pleos-sdk.mp4`가 필요하며 Pleos 에뮬레이터 시스템 UI로 출처를 표시한다.

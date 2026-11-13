@@ -34,7 +34,9 @@ evidence = {
     "duration_seconds": len(plan["segments"]) * plan["seconds_per_scene"],
     "sources": [{**s, "sha256": sha(ROOT / s["source"])} for s in plan["segments"]],
     "reference_image_origin": "Embedded PNG in the supplied assets/ui/guide.svg",
-    "vehicle_data": "MOCK", "external_ai_called": False,
+    "vehicle_data": "MOCK app readings; separately captioned Pleos emulator system 3D clips",
+    "three_dimensional_source": "Existing official Pleos emulator system UI recording; not a CarCue 3D renderer",
+    "external_ai_called": False,
     "video_sha256": sha(out),
     "plan_sha256": sha(plan_path),
 }
