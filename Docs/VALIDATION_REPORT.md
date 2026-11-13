@@ -10,8 +10,8 @@
 | Android 단위 | `:app:testDemoDebugUnitTest` | 이전 6개 통과, 실패/건너뜀 0 |
 | Mock 기기 회귀 | API 35 / 1280×800 / `CarCueFlowTest` | 5개 통과, 원본 개폐 프레임 픽셀 차이·안전벨트 미연결·세 언어·기존 흐름 |
 | 실제 APK 연속 촬영 | API 35 / `NativeShowcaseTest` | 1개 통과, 20개 실제 화면·개폐·세 언어 전환 |
-| 실제 SDK 기기 회귀 | Pleos 2.1 / API 34 / SDK 2.3.2 / Service 2.3.22 / `PleosSdkTest` | 이전 1개 통과. 이번 재시험은 실행 전 프로세스 종료 |
-| SDK 전체 검증 도구 | `.venv/bin/python scripts/validate_pleos.py` | 이전 Capability·GET·변경 콜백·화면·unregister·release 통과. 이번 재검증 미완료 |
+| 실제 SDK 기기 회귀 | Pleos 2.1 / API 34 / SDK 2.3.2 / Service 2.3.22 / `PleosSdkTest` | 최신 1개 통과, 16.747초. 실제 callback 0→1→0과 차량 이미지 픽셀 변경·복귀 |
+| SDK 전체 검증 도구 | `.venv/bin/python scripts/validate_pleos.py` | 최신 Capability·GET·양방향 콜백·차량 픽셀·영상·unregister·release 통과 |
 | 앱 빌드 | `assembleDemoDebug`, `assemblePleosDebug` | APK 2종 성공 |
 | 기기 테스트 빌드 | `assembleDemoDebugAndroidTest`, `assemblePleosDebugAndroidTest` | 성공 |
 | 계약 | `scripts/check_contracts.py` | Schema 3종과 제공 예제 3개, UI 문자열 키 검사 통과 |
@@ -24,7 +24,17 @@
 
 앱 내 시각 요소를 추가한 뒤 demo·pleos·기기 테스트 APK를 빌드했다. Mock 회귀 3개에는 3D 열림·닫힘·미수신·오래된 값과 가이드 사진 검사도 추가해 통과했다. 3D 가림을 다듬은 최종 APK로 `NativeShowcaseTest`의 19개 실제 UI 동작을 통과하고 연속 녹화했다. SDK 수신과 서버 코드는 이번 UI 변경에서 수정하지 않았다. UI 문구 129개의 세 언어 누락·치환 변수를 검사했다.
 
-## 최신: 사용자 지정 Pleos 원본 차량·안전벨트 · 2026-11-14
+## 최신: 실제 SDK 양방향 문 상태·앱 차량 시각화 · 2026-11-14
+
+전용 Pleos AVD의 실제 SDK 2.3.2 / Service 2.3.22에서 `PleosSdkTest` 1개가 16.747초에 통과했다. 최초 GET 0(CLOSED), 공식 Virtual Console 변경에 따른 실제 callback 1(OPEN), 복귀 callback 0(CLOSED)을 확인했다. 세 단계 모두 `IS_MOCK=false`, `source=PLEOS`, SUPPORTED/VALUE와 수신 시각을 검사했다. 앱은 읽기·구독만 수행하며 콘솔 입력은 호스트 시험 도구가 변경한다.
+
+앱 내부 차량 Image 노드를 캡처해 139,020픽셀 중 열림에서 8,083픽셀(약 5.81%)이 바뀌는 것을 확인했다. 다시 닫힌 캡처는 최초 닫힘 캡처와 픽셀·PNG SHA256이 정확히 일치했다. 단순 상태 문구 비교를 넘어 실제 렌더 결과를 검증했다. 종료 후 값/세션 삭제와 동일 Listener 해제·SDK release 반환도 확인했다. crash 버퍼는 비어 있다.
+
+증거는 `output/qa/pleos-sdk-retest/`의 instrumentation, SDK/콘솔 로그, 앱/차량 캡처, `result.json`에 있다. 설치 base.apk와 현재 빌드/전달 APK SHA256 일치를 확인했다. 10.002초·2560×1440의 실제 AVD 연속 녹화에서 CarCue 안의 차량 개폐/복귀를 디코딩하고 육안 확인했다. 기존 Mock 소개 영상과 원본 `carcue-pleos-sdk.mp4`는 변경하지 않았다. 상세 재현·APK 경로는 `SDK_VISUAL_RETEST.md`를 따른다.
+
+이전 실행 전 `Process crashed` 시도는 별도 보존한다. 이번에는 부팅 후 사용자 10에서 정상 앱 기동을 확인하고 설치·instrumentation·파일 수집 사용자를 일치시켜 완료했다. 이전 오류의 단일 원인을 확정한 것으로 보고하지 않는다. 서버·실차·안전벨트 센서·외부 AI·주행 UX 전환을 새로 검증한 결과는 아니다. UI는 기존 원본 프레임 전환이며 SDK 3D 위젯 이식이 아니다.
+
+## 이전: 사용자 지정 Pleos 원본 차량·안전벨트 · 2026-11-14
 
 사용자가 정확히 지정한 `carcue-pleos-sdk.mp4`의 안전벨트와 은색 차량 렌더 장면을 앱 내부 이미지로 넣었다. 입력 MP4의 SHA256은 `3657b7a2a8105066980b1f27ee3b78bb1e4dac57caa3383a01770cf446fa8a6e`로 유지한다. 차량은 19~20초의 21개 프레임, 안전벨트는 4초의 원본 부분이다. SDK 바이너리·원본 그래픽 리소스를 추출하지 않았다. 별도 공개 SDK 3D 위젯 연결이 아니라 원본 프레임 애니메이션이며, 안전벨트 착용 상태는 미연결이다.
 
@@ -36,7 +46,7 @@ Mock 기기 시험 5개가 14.345초에 통과했다(`pleos-reference-flow-test.
 
 최종 소개 영상은 34초·1920×1080·30fps다. AAC를 PCM으로 디코딩해 34초·stereo 44,100Hz, peak 0.23239, RMS 0.019323, 클리핑 0을 확인했다(`pleos-reference-audio-check.json`). Scott Buckley의 기존 외부 음원 파일/해시를 유지하며 음악을 새로 합성하지 않았다. 결과별 MP4·APK 별칭과 체크섬을 갱신했다. 원본 기준 영상과 이전 앱·사진 중심 영상은 그대로 보존했다. 출처·사용 범위는 `PLEOS_VISUAL_SOURCE.md`에 기록한다.
 
-기존 실제 SDK 문 수신 어댑터는 변경하지 않았다. 이번 Pleos AVD 재시험은 설치 서비스 지연으로 전용 AVD를 재시작하고 새 APK 설치까지 성공했지만, instrumentation이 `shortMsg=Process crashed`로 종료해 최초 GET/콜백 검증을 새로 완료하지 못했다. 이를 새 SDK 통과로 보고하지 않는다. 실패 시도는 `pleos-reference-sdk-attempt/`, 이전 성공 로그는 `archive-before-pleos-reference/sdk/` 및 기존 기본 SDK 로그에 보존한다. 서버 26개·Android 단위 6개·실제 SDK/CarUx 성공 결과는 이전 검증이며, 실차·실제 OpenAI 호출을 새로 검증하지 않았다.
+기존 실제 SDK 문 수신 어댑터는 변경하지 않았다. 원본 시각화 추가 직후의 첫 Pleos AVD 재시험은 설치 서비스 지연과 `shortMsg=Process crashed`로 미완료였다. 이후 위 최신 양방향 SDK 재시험에서 완료했으며, 첫 시도 자체를 성공으로 바꿔 기록하지 않는다. 실패 시도는 `pleos-reference-sdk-attempt/`, 이전 성공 로그는 `archive-before-pleos-reference/sdk/` 및 기존 기본 SDK 로그에 보존한다. 서버 26개·Android 단위 6개·실제 SDK/CarUx 성공 결과는 이전 검증이며, 실차·실제 OpenAI 호출을 새로 검증하지 않았다.
 
 ## 이전: 실차 사진 중심으로 복원 · 2026-11-14
 

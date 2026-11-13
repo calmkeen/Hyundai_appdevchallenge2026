@@ -1,6 +1,6 @@
 # SDK 지원 조사와 실제 수신 기록
 
-기준일: 2026-11-13. 실차 시험이 아닌 **공식 Pleos 전용 AVD의 실제 SDK 호출**과 Mock을 구분한다.
+기준일: 2026-11-14. 실차 시험이 아닌 **공식 Pleos 전용 AVD의 실제 SDK 호출**과 Mock을 구분한다.
 
 ## 환경과 보존
 
@@ -27,7 +27,7 @@
 
 | 항목 | API / 권한 | 실제 결과 |
 | --- | --- | --- |
-| 앞좌석 왼쪽 문 | checkDoorPositionCapabilities / getCurrentDoorPosition / registerDoorPosition / unregisterDoorPosition, `pleos.car.permission.CAR_DOORS` | Capability 수신: ROW_1_LEFT, min 0 / max 1, READ_WRITE. GET 0 수신, 실제 콜백 0→1과 UI 갱신 확인 |
+| 앞좌석 왼쪽 문 | checkDoorPositionCapabilities / getCurrentDoorPosition / registerDoorPosition / unregisterDoorPosition, `pleos.car.permission.CAR_DOORS` | Capability 수신: ROW_1_LEFT, min 0 / max 1, READ_WRITE. GET 0 수신, 실제 콜백 1→0과 앱 내부 차량 이미지 개폐·복귀 픽셀 비교 확인 |
 | SOC | check/get/register/unregisterEvBatteryStateOfCharge, CAR_ENERGY | 구조만 준비, 앱 호출 미연결 |
 | 연료 | check/get/register/unregisterFuelPercent, CAR_ENERGY | BEV에서 임의 수치 생성 안 함, 앱 호출 미연결 |
 | 타이어 저압 | checkLowTirePressureCapabilities / checkWheelAreaCapabilities / getLowTirePressure | 앱 호출 미연결. PSI 등 숫자 제공으로 해석하지 않음 |
@@ -43,11 +43,12 @@
 3. SDK initialize → Capability → 최초 GET → Listener 등록.
 4. 공식 Virtual Console의 browser heartbeat를 유지한 상태에서 `door_fl=0`을 읽고, `door_fl=1`로 시뮬레이션 변경.
 5. 실제 SDK `onPositionUpdated` 콜백, 변경된 화면, 수신 시각 확인.
-6. 세션 종료 시 같은 Listener·영역의 unregister와 release 호출·반환 확인. 최종 결과는 검증 보고서를 따른다.
+6. `door_fl=0`으로 복귀해 실제 닫힘 콜백과 최초 차량 이미지로의 정확한 복귀를 확인.
+7. 세션 종료 시 같은 Listener·영역의 unregister와 release 호출·반환 확인. 최종 결과는 검증 보고서를 따른다.
 
 실행 도구는 `scripts/validate_pleos.py`다. emulator serial과 `ro.kernel.qemu=1`을 확인해 실기기에서는 실행을 거부한다. **시뮬레이션 변경은 테스트 도구가 공식 Virtual Console에 요청하며 앱은 GET/구독만 수행한다.** 앱에 SET이나 문 제어 기능을 넣지 않았다.
 
-증거 경로: `output/qa/pleos-instrumentation.txt`, `pleos-sdk-events.txt`, `pleos-console-events.json`, 전용 AVD 화면 캡처. Logcat 시간대와 콘솔 이벤트의 UTC ISO 8601을 구분한다. 차량 측 측정 시각을 알 수 없어 앱 수신 시각으로 표시한다.
+최신 증거 경로는 `output/qa/pleos-sdk-retest/`의 `pleos-instrumentation.txt`, `pleos-sdk-events.txt`, `pleos-console-events.json`, 앱/차량 캡처, 실제 실행 영상과 `result.json`이다. 세부 픽셀 비교·재현은 `SDK_VISUAL_RETEST.md`를 따른다. 이전 기본 경로 SDK 로그는 초기 성공 이력으로 보존한다. Logcat 시간대와 콘솔 이벤트의 UTC ISO 8601을 구분한다. 차량 측 측정 시각을 알 수 없어 앱 수신 시각으로 표시한다.
 
 ## UX 라이브러리 차이와 한계
 

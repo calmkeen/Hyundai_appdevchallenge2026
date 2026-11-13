@@ -6,7 +6,7 @@
 | --- | --- | --- |
 | 1 환경 | 기존 작업 보존, 인계 문서·자산·계약 보관, 분리한 빌드 SDK, Git feature 브랜치 | JDK 17·SDK 2.3.2·전용 AVD 준비 및 앱 설치·실행 확인 |
 | 2 제품 뼈대 | Compose S01~S11, 반응형 차량 메뉴, 실제 버튼·입력·검색·단계 이동, 프로필/언어 분리, 앱 내 Pleos 원본 차량·안전벨트 이미지와 문 프레임 전환·가이드 이미지 | Mock APK/UI 검증 결과는 검증 보고서 참조 |
-| 3 한 상태 연동 | 문 위치의 권한·Capability·GET·Listener·해제 어댑터 | 전용 AVD에서 실제 Capability·GET·0→1 변경 콜백·UI 반영 확인. 동일 Listener 해제와 release도 통과 |
+| 3 한 상태 연동 | 문 위치의 권한·Capability·GET·Listener·해제 어댑터 | 전용 AVD에서 실제 Capability·GET·0→1→0 콜백·차량 이미지 개폐/복귀 픽셀 비교 통과. 동일 Listener 해제와 release 확인 |
 | 4 상태 안내 | 물리 영역, 미수신/미지원/확인 실패/오류/오래된 값 분리 | 검수된 프로필/매뉴얼 없음. 실제 조작 안내 게시 안 함 |
 | 5 AI·번역 | FastAPI·SQLite 세션, 검색, Responses API 어댑터, Schema·출처 검증, 숫자/단위 검사, 클라이언트 HTTP 연결 | 실제 OpenAI 호출 안 함. 키·모델·검수 자료 필요 |
 | 6 언어·UX·종료 | 48개 BCP47 후보, 50개 지역 후보, UI 문자열 JSON, RTL, 제한 시 입력/긴 안내 차단, 로컬 삭제/서버 삭제 재시도 | 실제 UX GET/변경/복귀 확인. Mock 언어 선택은 한국어·영어·일본어 3개. 145개 UI 문구의 번역 초안이며 가이드·AI 번역 검수 완료를 뜻하지 않음 |
@@ -17,7 +17,7 @@
 - **실제 앱 기능:** 네이티브 화면 이동, 언어 카탈로그 검색·선택, 차량 프로필 변경 시 문맥 삭제, 가이드 단계 복귀, 오류 표시, 로컬 세션 종료, API 클라이언트.
 - **실제 서버 기능:** HTTP API, 세션 토큰 소유 검사, 만료·삭제, 요청 중복 방지, 프로필/버전/검수 상태에 따른 검색, 출처 ID 대조, 원문 추출 검증, 요청 제한.
 - **실제 UX 제한 API:** 초기 GET false/0, 주행 조건 callback true/80, 주차 복귀 callback false/0을 전용 AVD에서 확인했다.
-- **실제 SDK 데이터:** `pleos` flavor에서 전용 AVD의 문 상태 Capability·GET·변경 콜백을 수신했다. 실차 값이 아니라 전용 AVD가 제공한 값이다. 이번 시각화 변경 후 재시험은 instrumentation 프로세스 종료로 미완료이며 이전 성공 결과와 구분한다.
+- **실제 SDK 데이터:** `pleos` flavor에서 전용 AVD의 문 상태 Capability·GET·변경 콜백을 수신했다. 실차 값이 아니라 전용 AVD가 제공한 값이다. 2026-11-14 재시험에서 실제 callback 1·0에 따라 앱 내부 차량 이미지의 8,083픽셀 변경과 최초 닫힘 이미지로의 정확한 복귀를 확인했다. 세션 종료·unregister·release까지 통과했다. `SDK_VISUAL_RETEST.md` 참조.
 - **MOCK 차량 데이터:** `demo` flavor의 모든 문 상태. 주차/제한 시나리오도 Mock이며 실제 CarUxRestrictions 수신이 아니다. APK·화면에 MOCK을 표시한다.
 - **MOCK AI:** 기본 서버는 답을 생성하지 않고 `NO_RELIABLE_SOURCE` 또는 번역 불가를 반환한다. `mode=MOCK`가 표시된다.
 - **OpenAI LIVE 어댑터:** 구현 및 HTTP transport 대역 테스트만 수행했다. 실제 API 키·모델 설정과 호출 증거는 없다. 초기 답변은 검수 원문의 직접 추출로 제한하며 자유 생성 조작 설명은 제공하지 않는다.

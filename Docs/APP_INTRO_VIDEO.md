@@ -29,3 +29,7 @@ python3 scripts/render_app_intro.py
 부팅된 CarCue_UI35와 최신 demo·기기 테스트 APK를 준비한다. 촬영은 20개 실제 화면을 약 2초씩 유지하며 파일 신호로 시작·끝을 동기화한다. `source_scene`과 실제 기기 시각으로 편집 구간을 정렬하고 개폐 전환 시작을 포함한다.
 
 결과는 `output/qa/carcue-app-intro.mp4`, 최신 별칭은 `carcue-pleos-visual-intro.mp4`와 `carcue-mock-flow.mp4`다. 최신 APK 별칭은 `output/apk/carcue-demo-pleos-visual-debug.apk`다. 사진 중심 영상·APK는 `output/qa/archive-before-pleos-reference/`, `output/apk/*-before-pleos-reference.apk`에 보존한다. 원본 기준 영상 `carcue-pleos-sdk.mp4`는 덮어쓰지 않는다.
+
+## 별도 실제 SDK 검증 영상
+
+2026-11-14 실제 문 GET·양방향 콜백과 앱 내부 차량 이미지 개폐/복귀를 확인한 10.002초 전용 AVD 녹화는 `output/qa/pleos-sdk-retest/carcue-pleos-sdk-visual-check.mp4`다. `SDK_VISUAL_RETEST.md`에서 관리한다. 위 34초 소개 영상은 Mock APK 녹화 그대로 보존하며 이 새 SDK 실증과 구분한다.

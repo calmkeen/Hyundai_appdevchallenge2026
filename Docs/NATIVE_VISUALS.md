@@ -25,3 +25,5 @@ python3 scripts/render_app_intro.py
 ```
 
 소개 영상의 기능 화면은 새 demo APK를 실제 실행해 촬영한다. 차량값은 MOCK, 안전벨트 센서 미연결, 실제 외부 AI 호출 없음이다. 실제 SDK 수신 시험 및 최종 결과는 `VALIDATION_REPORT.md`를 따른다.
+
+2026-11-14 실제 SDK 재시험도 완료했다. 전용 AVD의 GET 0 → callback 1 → callback 0으로 같은 차량 이미지의 개폐·복귀를 확인했고, 열림 8,083픽셀 변경과 닫힘의 정확한 복귀를 비교했다. SDK 해제까지 통과했으며 `SDK_VISUAL_RETEST.md`에 별도 실제 SDK 영상과 증거를 기록한다. 34초 소개 영상의 값은 계속 MOCK이다.
