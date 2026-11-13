@@ -69,10 +69,18 @@ LIVE provider 시험은 **메서드/HTTP transport 대역**이다. 실제 OpenAI
 
 ## 결과 파일
 
+### 다국어 Mock 영상 추가 · 2026-11-13
+
+`carcue-mock-languages.mp4`는 최신 demo APK를 API 35 / CarCue_UI35 / 1280×800 AVD에 설치해 녹화한 약 79초의 Android screenrecord 원본이다. 한국어 → 영어 → 일본어 → 한국어 전환, 실제 언어 버튼 터치, 각 언어의 홈·문 상태 화면을 담았다. 차량 프로필은 계속 IONIQ 5 · 2024 · KR이다. 모든 차량 값은 MOCK이며 외부 AI를 호출하지 않았다.
+
+녹화 전 전달 APK와 기기에 설치된 base.apk의 SHA256이 `8d63511b8e8cd0cd16ce75bf1ae5037a5a6dff3e353ac028ac3a247453e3a59e`로 일치함을 검사했다. 앱 소스는 `ef8fe88`이다. JSON에는 APK·영상 해시, AVD, 언어, 관찰한 화면 문구별 시각이 있다. 시각은 호스트 기준의 근사값이다. 저장된 MP4를 macOS 영상 프레임워크로 열어 길이 78.7623초·1280×800을 확인하고, 10개 시점의 프레임을 디코딩했다. 세 언어의 홈·선택 목록·마지막 한국어 복귀 화면을 육안 확인했다. 결과는 `mock-languages-video-check.txt`와 `language-video-frames/`에 있다.
+
+재현 도구는 `scripts/record_mock_languages.py`다. 기본 Mock 영상 경로 `carcue-mock-flow.mp4`도 이 새 영상으로 갱신했고, 이전 영상은 `carcue-mock-flow-initial.mp4`로 보존했다. APK 코드는 이번 녹화 작업에서 변경하지 않았다.
+
 - APK: `output/apk/carcue-demo-debug.apk`, `output/apk/carcue-pleos-debug.apk`.
 - Mock 캡처: `output/qa/qa/01-profile.png` 등 기본 흐름. 최신 언어 선택·일본어 화면은 `09a-three-languages.png`, `09b-japanese-home.png`, `09c-japanese-status.png`.
 - 실제 SDK 캡처: `pleos-initial-get.png`, `pleos-changed-callback.png`, `pleos-session-ended.png`.
 - 로그: `output/qa/mock-instrumentation.txt`, `pleos-instrumentation.txt`, `pleos-sdk-events.txt`, `pleos-console-events.json`, `pleos-ux-events.txt`.
-- 영상: `output/qa/carcue-mock-flow.mp4`와 별도 실제 SDK 영상. 영상은 세 언어로 목록을 줄이기 전의 시연이며, 최신 언어 목록과 일본어는 APK·캡처를 기준으로 한다. SDK 화면과 Mock 화면의 출처를 혼동하지 않는다.
+- 영상: 최신 `output/qa/carcue-mock-languages.mp4` (`carcue-mock-flow.mp4`와 동일), 이전 `carcue-mock-flow-initial.mp4`, 별도 실제 SDK 영상. SDK 화면과 Mock 화면의 출처를 혼동하지 않는다.
 
 SDK·AVD·JDK 바이너리와 APK/영상은 Git에 포함하지 않았다. source, 계약, 테스트, 실행 안내는 feature 브랜치에서 관리한다. 원격 push·병합·배포·공모전 제출은 수행하지 않았다.

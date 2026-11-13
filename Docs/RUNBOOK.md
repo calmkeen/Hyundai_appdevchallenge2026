@@ -105,3 +105,15 @@ SDK와 테스트 APK를 전용 AVD에 설치한 뒤 저장소 루트에서 실�
 결과: `output/qa/`의 Mock 캡처·영상, 실제 SDK 로그·캡처. APK는 `output/apk/`에 복사하며 Git에서는 제외한다.
 
 실제 UX 제한 시뮬레이션 재현 도구는 `scripts/validate_pleos_ux.py`다. 기본 serial은 emulator-5584이며 테스트 전용이다. 주차 상태로 복구한 뒤 종료한다.
+
+## 실제 APK의 다국어 Mock 영상 녹화
+
+부팅된 테스트 AVD `CarCue_UI35`에서 다음을 실행한다. 지정한 demo APK를 설치하고 **해당 테스트 앱의 데이터만 초기화**한다. 연결된 대상이 emulator인지 확인하며 실기기는 거부한다.
+
+```bash
+python3 scripts/record_mock_languages.py
+```
+
+한국어 → 영어 → 일본어 → 한국어 순서로 실제 언어 버튼을 누른다. 각 언어에서 홈과 문 상태 화면을 보여 주며 언어 목록과 터치 위치도 녹화한다. 영상은 Android `screenrecord`의 원본 MP4이며 화면 합성·속도 변경·AI 프레임 생성을 사용하지 않는다. 차량 상태는 demo의 MOCK 값이고 외부 AI는 호출하지 않는다.
+
+결과는 `output/qa/carcue-mock-languages.mp4`와 같은 이름의 JSON이다. JSON에 원본 APK와 설치된 APK의 SHA256 일치, AVD 정보, 화면 문구별 시각, 영상 해시를 기록한다. 앱 소스 커밋은 JSON의 `git_commit`을 따른다. `--serial`, `--adb`, `--apk`, `--output`으로 경로를 지정할 수 있다.
