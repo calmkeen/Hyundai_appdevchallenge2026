@@ -1,0 +1,20 @@
+{
+  "seconds_per_scene": 2,
+  "output": "output/qa/carcue-mock-short.mp4",
+  "segments": [
+    {"label": "차량 선택", "kind": "video", "source": "output/qa/carcue-mock-languages.mp4", "start": 1.5},
+    {"label": "세 언어 선택", "kind": "video", "source": "output/qa/carcue-mock-languages.mp4", "start": 8},
+    {"label": "한국어 홈", "kind": "video", "source": "output/qa/carcue-mock-languages.mp4", "start": 14},
+    {"label": "한국어 차량 상태", "kind": "video", "source": "output/qa/carcue-mock-languages.mp4", "start": 21},
+    {"label": "충전 가이드 이미지 예시", "kind": "image", "source": "output/qa/reference-images/guide-0.png", "caption": "가이드 이미지 예시 · 실제 차량 조작 안내 아님"},
+    {"label": "단계별 가이드", "kind": "image", "source": "output/qa/qa/08-guide-step.png"},
+    {"label": "AI 질문 · Mock 응답", "kind": "image", "source": "output/qa/qa/10-server-mock-response.png"},
+    {"label": "영어로 변경", "kind": "video", "source": "output/qa/carcue-mock-languages.mp4", "start": 33},
+    {"label": "영어 홈", "kind": "video", "source": "output/qa/carcue-mock-languages.mp4", "start": 36},
+    {"label": "영어 차량 상태", "kind": "video", "source": "output/qa/carcue-mock-languages.mp4", "start": 43},
+    {"label": "일본어로 변경", "kind": "video", "source": "output/qa/carcue-mock-languages.mp4", "start": 55},
+    {"label": "일본어 홈", "kind": "video", "source": "output/qa/carcue-mock-languages.mp4", "start": 58},
+    {"label": "일본어 차량 상태", "kind": "video", "source": "output/qa/carcue-mock-languages.mp4", "start": 65},
+    {"label": "이용 종료 · 초기화", "kind": "image", "source": "output/qa/qa/07-session-ended.png"}
+  ]
+}

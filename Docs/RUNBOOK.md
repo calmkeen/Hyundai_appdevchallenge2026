@@ -117,3 +117,5 @@ python3 scripts/record_mock_languages.py
 한국어 → 영어 → 일본어 → 한국어 순서로 실제 언어 버튼을 누른다. 각 언어에서 홈과 문 상태 화면을 보여 주며 언어 목록과 터치 위치도 녹화한다. 영상은 Android `screenrecord`의 원본 MP4이며 화면 합성·속도 변경·AI 프레임 생성을 사용하지 않는다. 차량 상태는 demo의 MOCK 값이고 외부 AI는 호출하지 않는다.
 
 결과는 `output/qa/carcue-mock-languages.mp4`와 같은 이름의 JSON이다. JSON에 원본 APK와 설치된 APK의 SHA256 일치, AVD 정보, 화면 문구별 시각, 영상 해시를 기록한다. 앱 소스 커밋은 JSON의 `git_commit`을 따른다. `--serial`, `--adb`, `--apk`, `--output`으로 경로를 지정할 수 있다.
+
+기능당 2초의 이미지 포함 편집본은 `python3 scripts/render_mock_short.py`로 만든다. 구성과 원본 구분은 `VIDEO_STORYBOARD.md`, 시간·소스는 `video-short.json`에서 관리한다. `carcue-mock-short.mp4`는 편집본, `carcue-mock-languages.mp4`는 무편집 녹화다.

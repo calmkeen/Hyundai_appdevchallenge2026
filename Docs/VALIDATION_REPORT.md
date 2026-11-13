@@ -75,12 +75,18 @@ LIVE provider 시험은 **메서드/HTTP transport 대역**이다. 실제 OpenAI
 
 녹화 전 전달 APK와 기기에 설치된 base.apk의 SHA256이 `8d63511b8e8cd0cd16ce75bf1ae5037a5a6dff3e353ac028ac3a247453e3a59e`로 일치함을 검사했다. 앱 소스는 `ef8fe88`이다. JSON에는 APK·영상 해시, AVD, 언어, 관찰한 화면 문구별 시각이 있다. 시각은 호스트 기준의 근사값이다. 저장된 MP4를 macOS 영상 프레임워크로 열어 길이 78.7623초·1280×800을 확인하고, 10개 시점의 프레임을 디코딩했다. 세 언어의 홈·선택 목록·마지막 한국어 복귀 화면을 육안 확인했다. 결과는 `mock-languages-video-check.txt`와 `language-video-frames/`에 있다.
 
-재현 도구는 `scripts/record_mock_languages.py`다. 기본 Mock 영상 경로 `carcue-mock-flow.mp4`도 이 새 영상으로 갱신했고, 이전 영상은 `carcue-mock-flow-initial.mp4`로 보존했다. APK 코드는 이번 녹화 작업에서 변경하지 않았다.
+재현 도구는 `scripts/record_mock_languages.py`다. 이전 영상은 `carcue-mock-flow-initial.mp4`로 보존했다. APK 코드는 이번 녹화 작업에서 변경하지 않았다.
+
+### 기능당 2초 편집본 추가
+
+사용자 요청에 따라 인계 SVG의 충전 사진과 실제 APK 녹화·캡처를 합쳐 `carcue-mock-short.mp4`를 만들었다. 총 14장면 × 2초 = 28초, 1280×800, 30fps다. 한국어·영어·일본어 화면과 실제 언어 선택 터치를 유지한다. 이미지 예시는 별도 자막으로 구분한다. 원본 녹화와 편집본의 출처·시간표는 `VIDEO_STORYBOARD.md`, 재현 구성은 `video-short.json`을 따른다.
+
+초기 편집본의 14개 장면 프레임을 모두 디코딩하고 이미지, 가이드, 질문, 언어 목록, 종료 화면을 육안 확인했다. 최종 자막과 전환 구간 조정 후 해당 장면들을 다시 확인했다. 기본 `carcue-mock-flow.mp4`는 이 짧은 편집본과 같다. 무편집 원본은 `carcue-mock-languages.mp4`로 보존한다. 외부 AI 호출과 APK 수정은 이번 편집 범위에 없다.
 
 - APK: `output/apk/carcue-demo-debug.apk`, `output/apk/carcue-pleos-debug.apk`.
 - Mock 캡처: `output/qa/qa/01-profile.png` 등 기본 흐름. 최신 언어 선택·일본어 화면은 `09a-three-languages.png`, `09b-japanese-home.png`, `09c-japanese-status.png`.
 - 실제 SDK 캡처: `pleos-initial-get.png`, `pleos-changed-callback.png`, `pleos-session-ended.png`.
 - 로그: `output/qa/mock-instrumentation.txt`, `pleos-instrumentation.txt`, `pleos-sdk-events.txt`, `pleos-console-events.json`, `pleos-ux-events.txt`.
-- 영상: 최신 `output/qa/carcue-mock-languages.mp4` (`carcue-mock-flow.mp4`와 동일), 이전 `carcue-mock-flow-initial.mp4`, 별도 실제 SDK 영상. SDK 화면과 Mock 화면의 출처를 혼동하지 않는다.
+- 영상: 최신 편집본 `output/qa/carcue-mock-short.mp4` (`carcue-mock-flow.mp4`와 동일), 무편집 `carcue-mock-languages.mp4`, 이전 `carcue-mock-flow-initial.mp4`, 별도 실제 SDK 영상. SDK 화면과 Mock 화면의 출처를 혼동하지 않는다.
 
 SDK·AVD·JDK 바이너리와 APK/영상은 Git에 포함하지 않았다. source, 계약, 테스트, 실행 안내는 feature 브랜치에서 관리한다. 원격 push·병합·배포·공모전 제출은 수행하지 않았다.
