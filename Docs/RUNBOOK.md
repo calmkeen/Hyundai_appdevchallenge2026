@@ -54,8 +54,8 @@ LIVE에서 공개 가능한 VERIFIED 프로필과 PUBLISHED 가이드를 등록�
 
 - `content/profiles/catalog.json`: 언어와 분리된 차량 사양. 제공한 두 항목은 개발용 UNVERIFIED다.
 - `content/guides/`: Schema를 지키고 정확한 profile/manual/source version과 검수된 출처 절을 등록한다. DRAFT는 검색/답변에 사용하지 않는다.
-- `content/locales/catalog.json`: 48개 언어 후보의 RTL·UI/가이드 지원 상태.
-- `content/locales/ui.json`: 언어 태그별 UI 문구. 한국어/영어 초안만 있고 다른 언어는 영어 대체와 준비 중 표시가 나타난다. 언어를 추가할 때 화면 코드를 바꿀 필요가 없다.
+- `content/locales/catalog.json`: 48개 언어 후보의 RTL·UI/가이드 지원 상태. Mock 선택 목록은 `mock_visible=true`인 한국어·영어·일본어 3개이며, 다른 후보 데이터는 보존한다.
+- `content/locales/ui.json`: 119개 UI 문구의 한국어·영어·일본어 초안. 실제 AI 번역이나 검수된 차량 안내를 뜻하지 않는다. 다른 후보는 준비 중이며 pleos 빌드에서는 영어 대체 안내를 표시한다. 언어를 추가할 때 화면 코드를 바꿀 필요가 없다.
 - `content/locales/country-locales.json`: 50개 지역의 개발 후보 매핑이며 방문 순위나 지원 완료 목록이 아니다.
 - `scripts/prepare_content.py`: 개발용 초안을 다시 만드는 도구. 검수 콘텐츠를 등록한 이후에는 백업 없이 실행하지 않는다.
 

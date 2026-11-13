@@ -37,7 +37,8 @@ locales = [
  ("sw-KE","Kiswahili","스와힐리어",False), ("lo-LA","ລາວ","라오어",False),
 ]
 write("locales/catalog.json", [{"locale":tag,"native_name":native,"display_name":ko,"rtl":rtl,
-    "ui_status":"DRAFT" if tag in ("ko-KR","en") else "PLANNED", "guide_status":"PLANNED"} for tag,native,ko,rtl in locales])
+    "ui_status":"DRAFT" if tag in ("ko-KR","en","ja-JP") else "PLANNED", "guide_status":"PLANNED",
+    "mock_visible":tag in ("ko-KR","en","ja-JP")} for tag,native,ko,rtl in locales])
 countries = {
  "KR":["ko-KR"],"US":["en","es"],"GB":["en"],"CA":["en","fr-FR"],"AU":["en"],"NZ":["en"],
  "JP":["ja-JP"],"CN":["zh-Hans"],"TW":["zh-Hant"],"HK":["zh-Hant","en"],"SG":["en","zh-Hans","ms-MY","ta-IN"],

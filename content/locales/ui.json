@@ -1,478 +1,597 @@
 {
   "ui_ca3a352a7386": {
     "ko-KR": "시연 프로필 · 차량 일치 미확인",
-    "en": "Demo profile · vehicle match unverified"
+    "en": "Demo profile · vehicle match unverified",
+    "ja-JP": "デモ用プロフィール · 車両との一致は未確認"
   },
   "ui_034999faab05": {
     "ko-KR": "홈",
-    "en": "Home"
+    "en": "Home",
+    "ja-JP": "ホーム"
   },
   "ui_fc73f9507b0a": {
     "ko-KR": "내 차 상태",
-    "en": "Vehicle status"
+    "en": "Vehicle status",
+    "ja-JP": "車両の状態"
   },
   "ui_96918379aa24": {
     "ko-KR": "사용 가이드",
-    "en": "Vehicle guides"
+    "en": "Vehicle guides",
+    "ja-JP": "使い方ガイド"
   },
   "ui_7a087ed8150b": {
     "ko-KR": "AI 질문·번역",
-    "en": "AI questions & translation"
+    "en": "AI questions & translation",
+    "ja-JP": "AIへの質問・翻訳"
   },
   "ui_8b1858a51ec7": {
     "ko-KR": "이용 설정 · 이용 마치기",
-    "en": "Settings · End session"
+    "en": "Settings · End session",
+    "ja-JP": "利用設定・利用終了"
   },
   "ui_8d18a8f56cc2": {
     "ko-KR": "어떤 차량을 이용하시나요?",
-    "en": "Which vehicle are you using?"
+    "en": "Which vehicle are you using?",
+    "ja-JP": "どの車両をご利用ですか？"
   },
   "ui_b491620e8764": {
     "ko-KR": "차종·연식·판매지역을 확인해 주세요. 선택 언어와 차량 사양은 별도로 관리해요.",
-    "en": "Confirm model, year and sales market. Your language does not change the specification."
+    "en": "Confirm model, year and sales market. Your language does not change the specification.",
+    "ja-JP": "車種・年式・販売地域をご確認ください。表示言語を変更しても車両の仕様は変わりません。"
   },
   "ui_6fc3f26a9b34": {
     "ko-KR": "현재 목록은 개발용 미검수 프로필입니다. 실제 차량 일치와 매뉴얼 검수를 마치기 전에는 조작 절차를 제공하지 않아요.",
-    "en": "These development profiles are unverified. Vehicle procedures are withheld until profile and manuals are reviewed."
+    "en": "These development profiles are unverified. Vehicle procedures are withheld until profile and manuals are reviewed.",
+    "ja-JP": "この一覧は開発用の未確認プロフィールです。車両との一致とマニュアルの確認が完了するまで、操作手順は提供しません。"
   },
   "ui_cc624e1afe01": {
     "ko-KR": "시연 프로필로 선택 →",
-    "en": "Select demo profile →"
+    "en": "Select demo profile →",
+    "ja-JP": "デモ用プロフィールを選択 →"
   },
   "ui_74c30739d02d": {
     "ko-KR": "이전 이용 기록은 기기에서 지웠어요. 서버 삭제를 다시 요청하고 있어요.",
-    "en": "Local history is cleared. Remote deletion is pending."
+    "en": "Local history is cleared. Remote deletion is pending.",
+    "ja-JP": "前回の利用履歴を端末から削除しました。サーバーへの削除依頼を再試行しています。"
   },
   "ui_ce0d787f948e": {
     "ko-KR": "QR은 등록된 안내 프로필만 엽니다. 차량 접근권이나 인증 연결을 제공하지 않아요.",
-    "en": "QR opens a guide profile. It does not grant vehicle access or pair a phone."
+    "en": "QR opens a guide profile. It does not grant vehicle access or pair a phone.",
+    "ja-JP": "QRコードは登録済みのガイド用プロフィールを開きます。車両へのアクセス権の付与やスマートフォンとの接続は行いません。"
   },
   "ui_c8c8ce7e9632": {
     "ko-KR": "편한 언어를 선택해 주세요",
-    "en": "Choose your language"
+    "en": "Choose your language",
+    "ja-JP": "ご利用の言語を選んでください"
   },
   "ui_d585be7b3815": {
     "ko-KR": "언어 검색",
-    "en": "Search languages"
+    "en": "Search languages",
+    "ja-JP": "言語を検索"
   },
   "ui_47626091d586": {
     "ko-KR": "준비 중 · 영어 대체",
-    "en": "Planned · English fallback"
+    "en": "Planned · English fallback",
+    "ja-JP": "準備中 · 英語で表示"
   },
   "ui_88234c294ba7": {
     "ko-KR": "화면 번역 초안",
-    "en": "UI translation draft"
+    "en": "UI translation draft",
+    "ja-JP": "画面翻訳の草案"
   },
   "ui_f5d47b042bda": {
     "ko-KR": "무엇을 확인할까요?",
-    "en": "What would you like to check?"
+    "en": "What would you like to check?",
+    "ja-JP": "何を確認しますか？"
   },
   "ui_feca0d91b81e": {
     "ko-KR": "차량에서 받은 상태와 이 차량에 맞는 안내를 함께 살펴보세요.",
-    "en": "Read available vehicle information and find guidance for this specification."
+    "en": "Read available vehicle information and find guidance for this specification.",
+    "ja-JP": "車両から受信した情報と、この車両に合ったガイドを確認できます。"
   },
   "ui_f02c2d11a01d": {
     "ko-KR": "지금 받은 정보부터\n차근차근 확인해 보세요",
-    "en": "Start with the information\nreceived from your vehicle"
+    "en": "Start with the information\nreceived from your vehicle",
+    "ja-JP": "車両から届いた情報を\n一つずつ確認しましょう"
   },
   "ui_f1eeaedd7e3c": {
     "ko-KR": "MOCK · 차량 연결 없이 화면을 시연합니다",
-    "en": "MOCK · demonstrating without a vehicle connection"
+    "en": "MOCK · demonstrating without a vehicle connection",
+    "ja-JP": "MOCK · 車両に接続せず画面を実演しています"
   },
   "ui_939f7daa4e4e": {
     "ko-KR": "상태별 수신 시각과 출처를 확인하세요",
-    "en": "Check the source and receive time for each reading"
+    "en": "Check the source and receive time for each reading",
+    "ja-JP": "各情報の出典と受信時刻をご確認ください"
   },
   "ui_516e0278f12b": {
     "ko-KR": "현재 차량 상태 보기 →",
-    "en": "View vehicle status →"
+    "en": "View vehicle status →",
+    "ja-JP": "現在の車両状態を見る →"
   },
   "ui_b5935d7ba17c": {
     "ko-KR": "차량·연식·판매지역에 맞는 검수 자료만 제공해요.",
-    "en": "Only reviewed material matching this vehicle and market."
+    "en": "Only reviewed material matching this vehicle and market.",
+    "ja-JP": "車種・年式・販売地域が一致する確認済み資料のみを提供します。"
   },
   "ui_1a3926f02365": {
     "ko-KR": "궁금한 내용은 질문하고, 원문과 번역을 함께 확인해요.",
-    "en": "Ask a question and compare the original with its translation."
+    "en": "Ask a question and compare the original with its translation.",
+    "ja-JP": "質問したり、原文と翻訳を並べて確認したりできます。"
   },
   "ui_320e56840e38": {
     "ko-KR": "이 차량에서 제공하지 않는 항목이에요",
-    "en": "Not supported by this vehicle"
+    "en": "Not supported by this vehicle",
+    "ja-JP": "この車両では提供されていない項目です"
   },
   "ui_21feab3eaf5d": {
     "ko-KR": "지원 여부를 확인하지 못했어요",
-    "en": "Capability check failed"
+    "en": "Capability check failed",
+    "ja-JP": "対応状況を確認できませんでした"
   },
   "ui_777eced9ebf5": {
     "ko-KR": "차량 정보를 확인하고 있어요",
-    "en": "Reading vehicle information"
+    "en": "Reading vehicle information",
+    "ja-JP": "車両情報を読み取っています"
   },
   "ui_e2e286b9fa93": {
     "ko-KR": "정보를 가져오지 못했어요 · 차량 고장 판정이 아닙니다",
-    "en": "Could not read information · not a fault diagnosis"
+    "en": "Could not read information · not a fault diagnosis",
+    "ja-JP": "情報を取得できませんでした · 車両の故障を示すものではありません"
   },
   "ui_a02318b2fa61": {
     "ko-KR": "이전에 받은 정보예요 · 현재값은 확인하지 못했어요",
-    "en": "Previous information · current value unknown"
+    "en": "Previous information · current value unknown",
+    "ja-JP": "以前に受信した情報です · 現在の値は確認できていません"
   },
   "ui_86b92bfd7c71": {
     "ko-KR": "앞좌석 왼쪽 문이 열려 있어요",
-    "en": "Front-left door is open"
+    "en": "Front-left door is open",
+    "ja-JP": "前席左側のドアが開いています"
   },
   "ui_f70cce500477": {
     "ko-KR": "앞좌석 왼쪽 문이 닫혀 있어요",
-    "en": "Front-left door is closed"
+    "en": "Front-left door is closed",
+    "ja-JP": "前席左側のドアが閉まっています"
   },
   "ui_fee8ea990bf9": {
     "ko-KR": "아직 차량 정보를 읽지 못했어요",
-    "en": "No vehicle reading received yet"
+    "en": "No vehicle reading received yet",
+    "ja-JP": "車両情報をまだ受信していません"
   },
   "ui_4915df98c8b8": {
     "ko-KR": "차량이 전달한 항목만 표시해요. 수신 오류와 차량 경고는 다릅니다.",
-    "en": "Only received readings are shown. Connection errors are separate from vehicle warnings."
+    "en": "Only received readings are shown. Connection errors are separate from vehicle warnings.",
+    "ja-JP": "車両から受信した項目のみを表示します。受信エラーと車両の警告は別のものです。"
   },
   "ui_3b6510d9d5ee": {
     "ko-KR": "현재 상태 다시 확인",
-    "en": "Read current status again"
+    "en": "Read current status again",
+    "ja-JP": "現在の状態を再確認"
   },
   "ui_5f00d4793151": {
     "ko-KR": "문 상태 · 앞좌석 왼쪽",
-    "en": "Door · front left"
+    "en": "Door · front left",
+    "ja-JP": "ドアの状態 · 前席左側"
   },
   "ui_cc088cb58015": {
     "ko-KR": "앱 수신 시각 ",
-    "en": "App received at "
+    "en": "App received at ",
+    "ja-JP": "アプリの受信時刻 "
   },
   "ui_467deb9ffd72": {
     "ko-KR": "이전 정보: ",
-    "en": "Previous value: "
+    "en": "Previous value: ",
+    "ja-JP": "以前の値："
   },
   "ui_4a8f8d4b04bf": {
     "ko-KR": " · 현재 상태가 아닙니다",
-    "en": " · not the current reading"
+    "en": " · not the current reading",
+    "ja-JP": " · 現在の状態ではありません"
   },
   "ui_c5c585276916": {
     "ko-KR": "배터리 잔량",
-    "en": "Battery charge"
+    "en": "Battery charge",
+    "ja-JP": "バッテリー残量"
   },
   "ui_d694ff301ced": {
     "ko-KR": "아직 연결하지 않은 항목이에요. — %",
-    "en": "This property is not integrated yet. — %"
+    "en": "This property is not integrated yet. — %",
+    "ja-JP": "この項目はまだ接続されていません。— %"
   },
   "ui_1f1301d87291": {
     "ko-KR": "경고등 · 타이어 저압",
-    "en": "Warnings · low tire pressure"
+    "en": "Warnings · low tire pressure",
+    "ja-JP": "警告灯・タイヤ空気圧低下"
   },
   "ui_39e55b90c4c8": {
     "ko-KR": "아직 읽지 않은 항목이에요. 정상으로 판단하지 않아요.",
-    "en": "These properties have not been read. No normal/safe status is inferred."
+    "en": "These properties have not been read. No normal/safe status is inferred.",
+    "ja-JP": "まだ読み取っていない項目です。正常とは判断しません。"
   },
   "ui_27fb61365bb5": {
     "ko-KR": "ROW_1_LEFT · 앞좌석 왼쪽 영역입니다. 운전석이라는 뜻으로 바꾸지 않아요.",
-    "en": "ROW_1_LEFT is a physical front-left area, not necessarily the driver seat."
+    "en": "ROW_1_LEFT is a physical front-left area, not necessarily the driver seat.",
+    "ja-JP": "ROW_1_LEFTは物理的な前席左側の位置を示します。運転席とは限りません。"
   },
   "ui_94ee6190b2e4": {
     "ko-KR": "이 차량의 검수된 문 안내는 아직 등록되지 않았어요. 조작 절차나 고장 원인을 추측하지 않아요.",
-    "en": "No reviewed door guide is registered for this profile. Procedures and fault causes are not inferred."
+    "en": "No reviewed door guide is registered for this profile. Procedures and fault causes are not inferred.",
+    "ja-JP": "この車両の確認済みドアガイドはまだ登録されていません。操作手順や故障原因は推測しません。"
   },
   "ui_1577a2d2afdc": {
     "ko-KR": "관련 가이드 확인",
-    "en": "Related guides"
+    "en": "Related guides",
+    "ja-JP": "関連ガイドを確認"
   },
   "ui_d6b8c2700dd3": {
     "ko-KR": "이 상태에 관해 질문",
-    "en": "Ask about this reading"
+    "en": "Ask about this reading",
+    "ja-JP": "この状態について質問"
   },
   "ui_fc613175a649": {
     "ko-KR": "공식 지원 연락처는 차량 프로필 검수 후 제공됩니다.",
-    "en": "Official support contacts are withheld until this profile is verified."
+    "en": "Official support contacts are withheld until this profile is verified.",
+    "ja-JP": "公式サポートの連絡先は、車両プロフィールの確認後に提供します。"
   },
   "ui_5f3488318abb": {
     "ko-KR": "가이드 검색",
-    "en": "Search guides"
+    "en": "Search guides",
+    "ja-JP": "ガイドを検索"
   },
   "ui_7af6433d25e9": {
     "ko-KR": "이 차량과 언어에 맞는 검수 가이드가 아직 없어요. 충전, 좌석·거울, 화면·표시등 주제는 공식 자료 검수 후 제공해요.",
-    "en": "No reviewed guides match this vehicle and language yet. Charging, seats/mirrors and displays require the correct official manuals."
+    "en": "No reviewed guides match this vehicle and language yet. Charging, seats/mirrors and displays require the correct official manuals.",
+    "ja-JP": "この車両と言語に対応する確認済みガイドはまだありません。充電、シート・ミラー、画面・表示灯の案内は、該当する公式資料の確認後に提供します。"
   },
   "ui_817e34c0f4e8": {
     "ko-KR": "가이드 화면 예시",
-    "en": "Guide layout preview"
+    "en": "Guide layout preview",
+    "ja-JP": "ガイド画面の例"
   },
   "ui_275b15c57746": {
     "ko-KR": "MOCK · 실제 차량 조작 안내가 아닌 화면 탐색 예시입니다.",
-    "en": "MOCK · interface preview, not vehicle instructions."
+    "en": "MOCK · interface preview, not vehicle instructions.",
+    "ja-JP": "MOCK · 画面の操作例です。実際の車両操作の案内ではありません。"
   },
   "ui_3e7fa72af50a": {
     "ko-KR": "현재 차량 확인",
-    "en": "Confirm profile"
+    "en": "Confirm profile",
+    "ja-JP": "選択中の車両を確認"
   },
   "ui_d1c1fb5dfe7f": {
     "ko-KR": "상단 차량 이름과 판매지역을 확인하는 화면입니다.",
-    "en": "This screen shows the selected profile and sales market."
+    "en": "This screen shows the selected profile and sales market.",
+    "ja-JP": "画面上部で、選択した車両名と販売地域を確認します。"
   },
   "ui_6389dba531a5": {
     "ko-KR": "원문과 출처 확인",
-    "en": "Review sources"
+    "en": "Review sources",
+    "ja-JP": "原文と出典を確認"
   },
   "ui_0f89f99fff78": {
     "ko-KR": "실제 검수 자료가 등록되면 이 자리에 출처가 표시됩니다.",
-    "en": "Reviewed source material will appear here when registered."
+    "en": "Reviewed source material will appear here when registered.",
+    "ja-JP": "確認済み資料が登録されると、ここに出典が表示されます。"
   },
   "ui_6a9bd682c497": {
     "ko-KR": "질문 후 돌아오기",
-    "en": "Ask and return"
+    "en": "Ask and return",
+    "ja-JP": "質問して戻る"
   },
   "ui_41867308eace": {
     "ko-KR": "질문 화면에서 돌아와도 이 단계를 유지합니다.",
-    "en": "The current step is retained when returning from questions."
+    "en": "The current step is retained when returning from questions.",
+    "ja-JP": "質問画面から戻っても、現在のステップを保持します。"
   },
   "ui_5973dc193878": {
     "ko-KR": "MOCK · 단계별 화면 시연",
-    "en": "MOCK · preview guide steps"
+    "en": "MOCK · preview guide steps",
+    "ja-JP": "MOCK · ステップ画面の実演"
   },
   "ui_0812f118b535": {
     "ko-KR": "AI에 질문하기",
-    "en": "Ask AI"
+    "en": "Ask AI",
+    "ja-JP": "AIに質問"
   },
   "ui_a94f7c5cbf98": {
     "ko-KR": "개발용 화면 예시 · 차량 매뉴얼이 아닙니다",
-    "en": "Development layout fixture · not a vehicle manual"
+    "en": "Development layout fixture · not a vehicle manual",
+    "ja-JP": "開発用の画面例 · 車両マニュアルではありません"
   },
   "ui_da7e61c67cc5": {
     "ko-KR": "이전",
-    "en": "Previous"
+    "en": "Previous",
+    "ja-JP": "前へ"
   },
   "ui_aef613c6612d": {
     "ko-KR": "다음",
-    "en": "Next"
+    "en": "Next",
+    "ja-JP": "次へ"
   },
   "ui_af7d9b9636de": {
     "ko-KR": "이 단계에 관해 질문",
-    "en": "Ask about this step"
+    "en": "Ask about this step",
+    "ja-JP": "このステップについて質問"
   },
   "ui_f483cda99083": {
     "ko-KR": "참고한 안내",
-    "en": "Sources"
+    "en": "Sources",
+    "ja-JP": "参照した資料"
   },
   "ui_21d615f3f8da": {
     "ko-KR": "원문과 번역을 함께",
-    "en": "Original & translation"
+    "en": "Original & translation",
+    "ja-JP": "原文と翻訳を一緒に確認"
   },
   "ui_029f6d65e9db": {
     "ko-KR": "무엇이 궁금하신가요?",
-    "en": "What would you like to know?"
+    "en": "What would you like to know?",
+    "ja-JP": "何を知りたいですか？"
   },
   "ui_c59c7d532980": {
     "ko-KR": "차량 프로필은 유지됩니다. 검수 자료가 없으면 답을 만들지 않아요.",
-    "en": "Your vehicle profile stays the same. Answers require reviewed vehicle sources."
+    "en": "Your vehicle profile stays the same. Answers require reviewed vehicle sources.",
+    "ja-JP": "車両プロフィールはそのまま保持します。確認済み資料がなければ回答を作成しません。"
   },
   "ui_81e47212bc91": {
     "ko-KR": "AI 질문",
-    "en": "Ask AI"
+    "en": "Ask AI",
+    "ja-JP": "AIへの質問"
   },
   "ui_03270bdd0c07": {
     "ko-KR": "번역",
-    "en": "Translate"
+    "en": "Translate",
+    "ja-JP": "翻訳"
   },
   "ui_7ff647e2d1c8": {
     "ko-KR": "번역할 원문",
-    "en": "Original text"
+    "en": "Original text",
+    "ja-JP": "翻訳する原文"
   },
   "ui_252ee2182be5": {
     "ko-KR": "질문을 입력해 주세요",
-    "en": "Enter a question"
+    "en": "Enter a question",
+    "ja-JP": "質問を入力してください"
   },
   "ui_e2c47f0a9a27": {
     "ko-KR": "질문·선택 언어·차량 프로필·필요한 상태를 CarCue 서버로 보내며, LIVE 모드에서는 OpenAI가 처리할 수 있음을 확인했어요.",
-    "en": "I understand that text, language, profile and selected readings are sent to CarCue and may be processed by OpenAI in LIVE mode."
+    "en": "I understand that text, language, profile and selected readings are sent to CarCue and may be processed by OpenAI in LIVE mode.",
+    "ja-JP": "入力文・選択言語・車両プロフィール・必要な状態情報がCarCueサーバーに送信され、LIVEモードではOpenAIで処理される場合があることを確認しました。"
   },
   "ui_62d6724cd18d": {
     "ko-KR": "확인하고 있어요…",
-    "en": "Checking…"
+    "en": "Checking…",
+    "ja-JP": "確認しています…"
   },
   "ui_e592e2e100ab": {
     "ko-KR": "번역하기",
-    "en": "Translate"
+    "en": "Translate",
+    "ja-JP": "翻訳する"
   },
   "ui_12d7bd98bbd6": {
     "ko-KR": "질문 보내기",
-    "en": "Send question"
+    "en": "Send question",
+    "ja-JP": "質問を送信"
   },
   "ui_25fa53c0d70d": {
     "ko-KR": "요청 취소",
-    "en": "Cancel request"
+    "en": "Cancel request",
+    "ja-JP": "リクエストをキャンセル"
   },
   "ui_16c72fd12cf2": {
     "ko-KR": "같은 요청 다시 시도",
-    "en": "Retry this request"
+    "en": "Retry this request",
+    "ja-JP": "同じリクエストを再試行"
   },
   "ui_0201f36241b8": {
     "ko-KR": "원문",
-    "en": "Original"
+    "en": "Original",
+    "ja-JP": "原文"
   },
   "ui_372ae2e0ffb4": {
     "ko-KR": "번역 · 검수 전",
-    "en": "Translation · unreviewed"
+    "en": "Translation · unreviewed",
+    "ja-JP": "翻訳 · 未確認"
   },
   "ui_2b2ab898a3e7": {
     "ko-KR": "답변",
-    "en": "Answer"
+    "en": "Answer",
+    "ja-JP": "回答"
   },
   "ui_e17400f68f7b": {
     "ko-KR": "서버 처리 모드: ",
-    "en": "Server mode: "
+    "en": "Server mode: ",
+    "ja-JP": "サーバーの処理モード："
   },
   "ui_203cc8718a2b": {
     "ko-KR": " · 차량 데이터 출처와 별개입니다",
-    "en": " · independent of vehicle source"
+    "en": " · independent of vehicle source",
+    "ja-JP": " · 車両データの出所とは別です"
   },
   "ui_7812fd4be3f4": {
     "ko-KR": "이전 안내로 돌아가기",
-    "en": "Return to guidance"
+    "en": "Return to guidance",
+    "ja-JP": "前のガイドに戻る"
   },
   "ui_6b75cf511717": {
     "ko-KR": "이용 설정",
-    "en": "Settings"
+    "en": "Settings",
+    "ja-JP": "利用設定"
   },
   "ui_7755a2a560f6": {
     "ko-KR": "선택 언어와 질문은 이 이용 세션에만 적용해요.",
-    "en": "Language and questions belong to this temporary session."
+    "en": "Language and questions belong to this temporary session.",
+    "ja-JP": "選択言語と質問は、この利用セッションにのみ適用されます。"
   },
   "ui_587de113f790": {
     "ko-KR": "차량과 언어",
-    "en": "Vehicle & language"
+    "en": "Vehicle & language",
+    "ja-JP": "車両と言語"
   },
   "ui_0a651ab9b144": {
     "ko-KR": "차량 다시 선택",
-    "en": "Change vehicle"
+    "en": "Change vehicle",
+    "ja-JP": "車両を選び直す"
   },
   "ui_d85f3e3f0a01": {
     "ko-KR": "개발 시나리오 · 실제 차량값이 아닙니다",
-    "en": "Development scenarios · not live vehicle data"
+    "en": "Development scenarios · not live vehicle data",
+    "ja-JP": "開発用シナリオ · 実際の車両データではありません"
   },
   "ui_b791275db7bd": {
     "ko-KR": "이용을 마치면 질문과 대화, 선택 언어, 임시 차량 정보를 지워요. 차량의 기본 안내와 시스템 언어는 유지됩니다. 서버 삭제를 확인하지 못하면 삭제를 다시 요청해요.",
-    "en": "Ending clears questions, translations, language and temporary readings. Shared guides and vehicle system language remain. Remote deletion is retried if offline."
+    "en": "Ending clears questions, translations, language and temporary readings. Shared guides and vehicle system language remain. Remote deletion is retried if offline.",
+    "ja-JP": "利用を終了すると、質問・会話・選択言語・一時的な車両情報を削除します。共有ガイドと車両システムの言語は維持されます。サーバーでの削除を確認できない場合は、削除を再試行します。"
   },
   "ui_48af33bc151c": {
     "ko-KR": "이용 마치기",
-    "en": "End session"
+    "en": "End session",
+    "ja-JP": "利用を終了"
   },
   "ui_cc3578c46b23": {
     "ko-KR": "서버 삭제 대기 중",
-    "en": "Remote deletion pending"
+    "en": "Remote deletion pending",
+    "ja-JP": "サーバーでの削除待ち"
   },
   "ui_2f65004bce0e": {
     "ko-KR": "개발 검증 이벤트",
-    "en": "Development verification events"
+    "en": "Development verification events",
+    "ja-JP": "開発検証イベント"
   },
   "ui_a934c90be0af": {
     "ko-KR": "이용을 마칠까요?",
-    "en": "End this session?"
+    "en": "End this session?",
+    "ja-JP": "利用を終了しますか？"
   },
   "ui_4e1c5ad41153": {
     "ko-KR": "질문과 대화를 지웁니다. 차량의 기본 안내는 남겨 둡니다.",
-    "en": "Questions and conversation will be cleared. Shared guides remain."
+    "en": "Questions and conversation will be cleared. Shared guides remain.",
+    "ja-JP": "質問と会話を削除します。共有ガイドは残ります。"
   },
   "ui_a827222cef89": {
     "ko-KR": "지우고 마치기",
-    "en": "Clear and end"
+    "en": "Clear and end",
+    "ja-JP": "削除して終了"
   },
   "ui_040aff729eb9": {
     "ko-KR": "계속 이용하기",
-    "en": "Keep using"
+    "en": "Keep using",
+    "ja-JP": "利用を続ける"
   },
   "ui_141e2592b7e9": {
     "ko-KR": "개발 시연",
-    "en": "Development demo"
+    "en": "Development demo",
+    "ja-JP": "開発デモ"
   },
   "ui_daf3c51bca8c": {
     "ko-KR": "수신 결과 별도 확인",
-    "en": "Readings verified separately"
+    "en": "Readings verified separately",
+    "ja-JP": "受信結果を個別に確認"
   },
   "ui_c92b33651170": {
     "ko-KR": "이 언어의 번역은 준비 중이에요. 화면은 영어 원문으로 표시합니다.",
-    "en": "This language is planned. UI is shown in English; vehicle specification is unchanged."
+    "en": "This language is planned. UI is shown in English; vehicle specification is unchanged.",
+    "ja-JP": "この言語の翻訳は準備中です。画面は英語で表示します。車両の仕様は変わりません。"
   },
   "ui_8c21f2cd26d0": {
     "ko-KR": "주차한 뒤 이용해 주세요 · 플랫폼 제한 확인 중이거나 제한이 적용됐어요.",
-    "en": "Please use after parking. Platform restrictions are active or unknown."
+    "en": "Please use after parking. Platform restrictions are active or unknown.",
+    "ja-JP": "駐車後にご利用ください · プラットフォームの制限を確認中、または制限が適用されています。"
   },
   "ui_e10195a1239f": {
     "ko-KR": "상태",
-    "en": "Status"
+    "en": "Status",
+    "ja-JP": "状態"
   },
   "ui_e2e1efb2ea75": {
     "ko-KR": "가이드",
-    "en": "Guides"
+    "en": "Guides",
+    "ja-JP": "ガイド"
   },
   "ui_70e6bde5c047": {
     "ko-KR": "질문·번역",
-    "en": "Ask"
+    "en": "Ask",
+    "ja-JP": "質問・翻訳"
   },
   "ui_e750450bf461": {
     "ko-KR": "이 차량의 안내 정보를 찾지 못했어요. 차량을 다시 선택해 주세요.",
-    "en": "This profile was not found. Please select a registered vehicle."
+    "en": "This profile was not found. Please select a registered vehicle.",
+    "ja-JP": "この車両のガイド情報が見つかりません。車両を選び直してください。"
   },
   "ui_5bf44155337d": {
     "ko-KR": "주차한 뒤 이용해 주세요.",
-    "en": "Please use after parking."
+    "en": "Please use after parking.",
+    "ja-JP": "駐車後にご利用ください。"
   },
   "ui_f21529f8757a": {
     "ko-KR": "질문을 보내기 전에 외부 처리 안내를 확인해 주세요.",
-    "en": "Review the processing notice before sending."
+    "en": "Review the processing notice before sending.",
+    "ja-JP": "質問を送信する前に、外部処理に関する説明をご確認ください。"
   },
   "ui_241983579b6f": {
     "ko-KR": "지금 번역할 수 없어요. 원문은 그대로 보관했어요.",
-    "en": "Translation is unavailable. Your original text is preserved."
+    "en": "Translation is unavailable. Your original text is preserved.",
+    "ja-JP": "現在、翻訳できません。原文はそのまま保持しています。"
   },
   "ui_91a49aa8ca0f": {
     "ko-KR": "서버에서 처리하지 못했어요. 연결과 세션을 확인한 뒤 다시 시도해 주세요.",
-    "en": "The server could not process this request. Check the connection and session, then retry."
+    "en": "The server could not process this request. Check the connection and session, then retry.",
+    "ja-JP": "サーバーで処理できませんでした。接続とセッションを確認してから再試行してください。"
   },
   "ui_a8af1bdc6df6": {
     "ko-KR": "주차한 뒤 이용해 주세요",
-    "en": "Please use after parking"
+    "en": "Please use after parking",
+    "ja-JP": "駐車後にご利用ください"
   },
   "ui_50afa257b1c5": {
     "ko-KR": "입력과 긴 안내는 제한 중이에요. 현재 상태는 확인할 수 있어요.",
-    "en": "Text entry and long guides are restricted. Current readings remain available."
+    "en": "Text entry and long guides are restricted. Current readings remain available.",
+    "ja-JP": "文字入力と長いガイドは制限されています。現在の状態は確認できます。"
   },
   "ui_6b02921768d6": {
     "ko-KR": "내 차 상태 보기",
-    "en": "View readings"
+    "en": "View readings",
+    "ja-JP": "車両の状態を見る"
   },
   "ui_5c5529c4ea48": {
     "ko-KR": "수신값: {value} · 의미 확인 전",
-    "en": "Received: {value} · interpretation unverified"
+    "en": "Received: {value} · interpretation unverified",
+    "ja-JP": "受信値：{value} · 意味は未確認"
   },
   "ui_a5f57b36a3a7": {
     "ko-KR": "인터넷: {internet}\nCarCue 서버: {server}\n차량 API: {vehicle}",
-    "en": "Internet: {internet}\nCarCue server: {server}\nVehicle API: {vehicle}"
+    "en": "Internet: {internet}\nCarCue server: {server}\nVehicle API: {vehicle}",
+    "ja-JP": "インターネット：{internet}\nCarCueサーバー：{server}\n車両API：{vehicle}"
   },
   "ui_translate_answer": {
     "ko-KR": "이 답변 번역하기",
-    "en": "Translate this answer"
+    "en": "Translate this answer",
+    "ja-JP": "この回答を翻訳する"
   },
   "ui_translate_guide": {
     "ko-KR": "이 안내의 저장된 번역 확인",
-    "en": "Find a saved translation of this guide"
+    "en": "Find a saved translation of this guide",
+    "ja-JP": "このガイドの保存済み翻訳を確認"
   },
   "ui_open_guide": {
     "ko-KR": "관련 가이드 열기",
-    "en": "Open related guide"
+    "en": "Open related guide",
+    "ja-JP": "関連ガイドを開く"
   },
   "ui_confirm_profile": {
     "ko-KR": "차량 다시 확인",
-    "en": "Confirm vehicle profile"
+    "en": "Confirm vehicle profile",
+    "ja-JP": "車両プロフィールを再確認"
   },
   "ui_original_locale": {
     "ko-KR": "이 안내는 원문 언어({locale})로 표시하고 있어요.",
-    "en": "This guide is shown in its original language ({locale})."
+    "en": "This guide is shown in its original language ({locale}).",
+    "ja-JP": "このガイドは原文の言語（{locale}）で表示しています。"
   },
   "ui_profile_unknown": {
     "ko-KR": "차종 확인 전 · 읽기 전용 상태",
-    "en": "Vehicle profile unconfirmed · read-only readings"
+    "en": "Vehicle profile unconfirmed · read-only readings",
+    "ja-JP": "車種は未確認 · 状態の読み取り専用"
   }
 }

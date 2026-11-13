@@ -60,7 +60,7 @@ class CarCueFlowTest {
         }
         image("07-session-ended")
     }
-    @Test fun guideStepReturnAndPlannedRtlKeepMarket() {
+    @Test fun guideStepReturnAndJapaneseKeepMarket() {
         begin()
         rule.runOnIdle { vm.go(Page.GUIDES) }
         rule.onNodeWithText("MOCK · 단계별 화면 시연").performScrollTo().performClick()
@@ -70,10 +70,26 @@ class CarCueFlowTest {
         rule.onNodeWithText("이전 안내로 돌아가기").performScrollTo().performClick()
         rule.onNodeWithText("2 / 3").assertIsDisplayed()
         image("08-guide-step")
-        rule.runOnIdle { vm.language(); vm.chooseLanguage("ar") }
-        rule.runOnIdle { assertEquals("KR", vm.state.value.profile?.market) }
-        rule.onNodeWithText("This language is planned. UI is shown in English; vehicle specification is unchanged.").assertIsDisplayed()
-        image("09-rtl-fallback")
+        rule.runOnIdle { vm.language() }
+        rule.onNodeWithText("العربية").assertDoesNotExist()
+        rule.onNodeWithText("English").performScrollTo().performClick()
+        rule.onNodeWithText("This guide is shown in its original language (ko-KR).").assertIsDisplayed()
+        rule.runOnIdle { vm.language() }
+        image("09a-three-languages")
+        rule.onNodeWithText("日本語").performScrollTo().performClick()
+        rule.runOnIdle {
+            assertEquals(setOf("ko-KR", "en", "ja-JP"), vm.content.languages.map { it.tag }.toSet())
+            assertEquals("KR", vm.state.value.profile?.market)
+            assertEquals("ja-JP", vm.state.value.locale)
+        }
+        rule.onNodeWithText("このガイドは原文の言語（ko-KR）で表示しています。").assertIsDisplayed()
+        rule.onNodeWithText("2 / 3").assertIsDisplayed()
+        rule.runOnIdle { vm.go(Page.HOME) }
+        rule.onNodeWithText("何を確認しますか？").assertIsDisplayed()
+        image("09b-japanese-home")
+        rule.onNodeWithText("現在の車両状態を見る →").performScrollTo().performClick()
+        rule.onNodeWithText("前席左側のドアが開いています").assertIsDisplayed()
+        image("09c-japanese-status")
     }
     @Test fun serverMockRoundTripAndUnknownQr() {
         begin()

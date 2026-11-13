@@ -18,5 +18,11 @@ ui = json.loads((root / "content/locales/ui.json").read_text())
 source = (root / "android/app/src/main/java/com/carcue/app/CarCueApp.kt").read_text()
 keys = set(re.findall(r'get\("(ui_[A-Za-z0-9_]+)"\)', source))
 assert keys <= ui.keys(), keys - ui.keys()
-assert all("ko-KR" in ui[k] and "en" in ui[k] for k in keys)
-print(f"PASS {len(keys)} UI resource keys")
+locales = json.loads((root / "content/locales/catalog.json").read_text())
+mock_locales = {l["locale"] for l in locales if l.get("mock_visible")}
+assert mock_locales == {"ko-KR", "en", "ja-JP"}
+for key, translations in ui.items():
+    for locale in mock_locales:
+        assert translations.get(locale), (key, locale)
+        assert set(re.findall(r"\{\w+\}", translations[locale])) == set(re.findall(r"\{\w+\}", translations["en"])), (key, locale)
+print(f"PASS {len(keys)} referenced UI keys; {len(ui)} resources in all 3 mock languages, placeholders preserved")

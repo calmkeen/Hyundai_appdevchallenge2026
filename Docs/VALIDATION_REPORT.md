@@ -6,7 +6,7 @@
 
 | 구분 | 명령/환경 | 결과 |
 | --- | --- | --- |
-| 서버 회귀 | `.venv/bin/python -m pytest backend/tests -q` | 24개 통과 |
+| 서버 회귀 | `.venv/bin/python -m pytest backend/tests -q` | 26개 통과 (세 언어의 자료 부족 응답 포함) |
 | Android 단위 | `:app:testDemoDebugUnitTest` | 6개 통과, 실패/건너뜀 0 |
 | Mock 기기 회귀 | API 35 / 1280×800 / `CarCueFlowTest` | 3개 통과 |
 | 실제 SDK 기기 회귀 | Pleos 2.1 / API 34 / SDK 2.3.2 / Service 2.3.22 / `PleosSdkTest` | 1개 통과 |
@@ -17,6 +17,8 @@
 | 인계 패키지 | SHA256SUMS 전체 대조 | 일치 |
 
 최종 기준 JDK는 Temurin 17.0.21+9 ARM64, Gradle 8.10.2, AGP 8.8.2, Kotlin 2.0.0이다. compile/target SDK 35, min SDK 28이다.
+
+세 언어로 Mock 범위를 조정한 뒤 서버 26개·Mock 기기 3개·계약 검사를 다시 통과했고 두 APK를 재빌드했다. 일본어 홈과 세 언어 선택 캡처를 육안으로 확인했다. SDK·CarUx 수신과 Android 단위 시험은 같은 날 언어 변경 전에 확보한 결과이며, 이번 변경에서 재실행하지 않았다.
 
 ## SDK 실제 수신 증거
 
@@ -43,12 +45,12 @@
 - null/미수신, 지원 확인 실패, 실제 미지원, 오래된 값의 서로 다른 표시.
 - Mock 주행 제한 변경 시 열린 질문 입력 제거와 제한 화면 표시.
 - 가이드 단계 2에서 질문 후 돌아와도 단계 유지.
-- 계획 언어인 아랍어 선택 시 영어 대체 안내와 RTL 배치. 단계 숫자 방향이 뒤집힌 문제를 수정 후 재검증.
+- 현재 Mock 언어 목록은 한국어·영어·일본어 3개. 실제 버튼으로 영어→일본어 변경, 일본어 홈·문 상태 표시, 단계 2 유지와 기존 가이드의 원문 언어 안내를 확인.
 - 언어 변경 후 대한민국 사양 유지.
 - 실제 HTTP로 로컬 FastAPI Mock 서버 왕복, NO_RELIABLE_SOURCE와 MOCK 모드 표시.
 - 미등록 QR 프로필 오류 및 세션 종료 후 프로필·언어·상태·대화 초기화.
 
-이는 48개 언어의 번역 완료나 모든 디스플레이·글자 확대 검증을 뜻하지 않는다. 한국어/영어 UI도 초안이며, 가이드 예시는 실제 조작 매뉴얼이 아니다.
+이는 48개 언어의 번역 완료나 모든 디스플레이·글자 확대 검증을 뜻하지 않는다. 한국어·영어·일본어 UI는 초안이며, 가이드 예시는 실제 조작 매뉴얼이 아니다. 세 언어 각각 119개 문구의 누락과 치환 변수 일치를 검사했다. 이전 빌드에서는 아랍어 영어 대체·RTL과 단계 숫자 방향을 확인했지만, 현재 Mock 선택 목록에서는 제외했다. RTL 확장 데이터와 배치 코드는 보존했다.
 
 ## 서버 회귀 범위
 
@@ -68,9 +70,9 @@ LIVE provider 시험은 **메서드/HTTP transport 대역**이다. 실제 OpenAI
 ## 결과 파일
 
 - APK: `output/apk/carcue-demo-debug.apk`, `output/apk/carcue-pleos-debug.apk`.
-- Mock 캡처: `output/qa/qa/01-profile.png` 등 11개.
+- Mock 캡처: `output/qa/qa/01-profile.png` 등 기본 흐름. 최신 언어 선택·일본어 화면은 `09a-three-languages.png`, `09b-japanese-home.png`, `09c-japanese-status.png`.
 - 실제 SDK 캡처: `pleos-initial-get.png`, `pleos-changed-callback.png`, `pleos-session-ended.png`.
 - 로그: `output/qa/mock-instrumentation.txt`, `pleos-instrumentation.txt`, `pleos-sdk-events.txt`, `pleos-console-events.json`, `pleos-ux-events.txt`.
-- 영상: `output/qa/carcue-mock-flow.mp4`와 별도 실제 SDK 영상. SDK 화면과 Mock 화면의 출처를 혼동하지 않는다.
+- 영상: `output/qa/carcue-mock-flow.mp4`와 별도 실제 SDK 영상. 영상은 세 언어로 목록을 줄이기 전의 시연이며, 최신 언어 목록과 일본어는 APK·캡처를 기준으로 한다. SDK 화면과 Mock 화면의 출처를 혼동하지 않는다.
 
 SDK·AVD·JDK 바이너리와 APK/영상은 Git에 포함하지 않았다. source, 계약, 테스트, 실행 안내는 feature 브랜치에서 관리한다. 원격 push·병합·배포·공모전 제출은 수행하지 않았다.

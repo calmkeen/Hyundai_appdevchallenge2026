@@ -23,9 +23,10 @@ class ContentRepository(private val context: Context) {
                 p.optString("manual_set_id").takeUnless { s -> s == "null" || s.isBlank() }, p.optString("manual_version").takeUnless { s -> s == "null" || s.isBlank() }) } }
     }
     val languages: List<Language> = array("locales/catalog.json").let { data ->
-        (0 until data.length()).map { data.getJSONObject(it).let { l ->
+        (0 until data.length()).map { data.getJSONObject(it) }
+            .filter { !BuildConfig.IS_MOCK || it.optBoolean("mock_visible", false) }
+            .map { l ->
             Language(l.getString("locale"), l.getString("native_name"), l.getString("display_name"), l.getBoolean("rtl"), l.getString("ui_status")) } }
-    }
     // DRAFT handoff templates are intentionally not exposed. Reviewed guides arrive via the API.
     fun parseGuides(data: JSONArray, profile: Profile, locale: String): List<Guide> {
         if (!profile.verified || profile.manualVersion == null || profile.manualSetId == null) return emptyList()

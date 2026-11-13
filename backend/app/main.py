@@ -14,6 +14,17 @@ from .models import AskRequest, SessionRequest, TranslateRequest
 from .provider import Provider
 from .storage import Store
 
+NO_SOURCE_MESSAGES = {
+    "ko-KR": "이 차량의 검수된 자료에서 확인하지 못했어요. 차량 정보를 다시 확인해 주세요.",
+    "en": "No reviewed source is available for this vehicle. Please confirm the vehicle profile.",
+    "ja-JP": "この車両の確認済み資料では確認できませんでした。車両情報をもう一度ご確認ください。",
+}
+UNAVAILABLE_MESSAGES = {
+    "ko-KR": "지금 답변을 확인할 수 없어요. 저장된 안내를 이용해 주세요.",
+    "en": "The answer could not be verified. Please use the saved guides.",
+    "ja-JP": "現在、回答を確認できません。保存済みのガイドをご利用ください。",
+}
+
 
 def timestamp(value):
     return datetime.fromtimestamp(value, timezone.utc).isoformat().replace("+00:00", "Z")
@@ -161,7 +172,7 @@ def create_app(db_path=None, catalog=None, provider=None, mode=None):
             reserve(request.session_id)
             sources = catalog.retrieve(request)
             result = {"request_id": request.request_id, "status": "NO_RELIABLE_SOURCE", "locale": request.locale,
-                "answer": "이 차량의 검수된 자료에서 확인하지 못했어요. 차량 정보를 다시 확인해 주세요." if request.locale.startswith("ko") else "No reviewed source is available for this vehicle. Please confirm the vehicle profile.",
+                "answer": NO_SOURCE_MESSAGES.get(request.locale, NO_SOURCE_MESSAGES["en"]),
                 "citations": [], "follow_up_question": None,
                 "actions": [{"kind": "SELECT_PROFILE", "target_id": None}], "mode": mode}
             # MOCK never calls OpenAI and never synthesizes a supposedly sourced answer.
@@ -195,7 +206,7 @@ def create_app(db_path=None, catalog=None, provider=None, mode=None):
                                              {"kind": "REFRESH_STATUS", "target_id": "door.position"}]
                 except Exception:
                     # Never expose provider details, credentials or a partial unvalidated answer.
-                    result.update(status="TEMPORARILY_UNAVAILABLE", answer="지금 답변을 확인할 수 없어요. 저장된 안내를 이용해 주세요." if request.locale.startswith("ko") else "The answer could not be verified. Please use the saved guides.", citations=[], actions=[], follow_up_question=None)
+                    result.update(status="TEMPORARILY_UNAVAILABLE", answer=UNAVAILABLE_MESSAGES.get(request.locale, UNAVAILABLE_MESSAGES["en"]), citations=[], actions=[], follow_up_question=None)
             save(request.session_id, request.request_id, fingerprint, result, request.question)
             return result
 

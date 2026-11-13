@@ -77,12 +77,16 @@ def test_language_is_independent_of_vehicle_market():
     assert len(client.get("/v1/locales").json()) == 48
 
 
-def test_mock_no_source_matches_handoff_schema():
+@pytest.mark.parametrize("locale,notice", [("ko-KR", "검수된 자료"), ("en", "No reviewed source"), ("ja-JP", "確認済み資料")])
+def test_mock_no_source_matches_handoff_schema(locale, notice):
     _, client, s, h = setup()
-    response = client.post("/v1/ask", json=question(s), headers=h)
+    q = question(s)
+    q["locale"] = locale
+    response = client.post("/v1/ask", json=q, headers=h)
     assert response.status_code == 200
     value = response.json()
     assert value["mode"] == "MOCK" and value["status"] == "NO_RELIABLE_SOURCE"
+    assert value["locale"] == locale and notice in value["answer"]
     jsonschema.validate(value, json.loads((ROOT / "contracts/ask-response.schema.json").read_text()))
 
 
