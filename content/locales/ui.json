@@ -723,5 +723,20 @@
     "ko-KR": "사용자가 지정한 carcue-pleos-sdk.mp4의 차량·안전벨트 장면을 잘라 앱에서 표시합니다. SDK 3D 위젯을 연결한 것이 아니며 안전벨트 착용 상태는 수신하지 않습니다. 개발용 참고 자료로 사용하며 별도 외부 배포권은 확인하지 않았습니다.",
     "en": "Cropped vehicle and seat belt visuals from the user-specified carcue-pleos-sdk.mp4. These are reference frames, not a connected SDK 3D widget. Belt status is not received. Development reference use; separate redistribution rights are unverified.",
     "ja-JP": "ユーザー指定のcarcue-pleos-sdk.mp4から車両とシートベルトの場面を切り出して表示します。SDKの3Dウィジェット接続ではなく、装着状態も受信しません。開発用参考素材であり、別途配布権は未確認です。"
+  },
+  "ui_sdk_guide_preview_body": {
+    "ko-KR": "화면 탐색 예시입니다. 검수된 차량 안내는 준비 중입니다.",
+    "en": "Interface preview. Reviewed vehicle guidance is being prepared.",
+    "ja-JP": "画面の操作例です。確認済みの車両ガイドは準備中です。"
+  },
+  "ui_sdk_guide_preview_button": {
+    "ko-KR": "예시 · 단계별 안내 보기",
+    "en": "Preview · view guide steps",
+    "ja-JP": "表示例 · ステップガイドを開く"
+  },
+  "ui_sdk_guide_preview_image_notice": {
+    "ko-KR": "안내 이미지 예시 · 실제 조작 절차는 준비 중입니다",
+    "en": "Guide image preview · vehicle procedures are being prepared",
+    "ja-JP": "案内画像の表示例 · 実際の操作手順は準備中です"
   }
 }

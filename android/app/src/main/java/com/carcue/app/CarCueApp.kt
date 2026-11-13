@@ -256,14 +256,16 @@ private fun Reading.description(ko: UiCopy): String = when {
     val guides = s.guides.filter { (it.title + it.body).contains(query, true) }
     if (guides.isEmpty()) Notice(ko.get("ui_7af6433d25e9"))
     guides.forEach { guide -> Panel(guide.title, guide.body, onClick = { vm.openGuide(guide) }) }
-    if (BuildConfig.IS_MOCK) Surface(onClick = { vm.openGuide(Guide("__layout_preview__", ko.get("ui_817e34c0f4e8"), ko.get("ui_275b15c57746"),
+    // Debug SDK builds can demonstrate the same guide UI without inventing
+    // reviewed manual content or replacing the real vehicle repository.
+    if (BuildConfig.DEBUG) Surface(onClick = { vm.openGuide(Guide("__layout_preview__", ko.get("ui_817e34c0f4e8"), ko.get(if (BuildConfig.IS_MOCK) "ui_275b15c57746" else "ui_sdk_guide_preview_body"),
         listOf((ko.get("ui_3e7fa72af50a")) to (ko.get("ui_d1c1fb5dfe7f")),
             (ko.get("ui_6389dba531a5")) to (ko.get("ui_0f89f99fff78")),
             (ko.get("ui_6a9bd682c497")) to (ko.get("ui_41867308eace"))), emptyList(), locale = s.locale)) }, modifier = Modifier.fillMaxWidth().testTag("guide_image_card"),
         shape = RoundedCornerShape(16.dp), border = BorderStroke(1.dp, Line), color = Color.White) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             GuidePreviewPhoto(ko)
-            Text(ko.get("ui_5973dc193878"), color = Blue, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+            Text(ko.get(if (BuildConfig.IS_MOCK) "ui_5973dc193878" else "ui_sdk_guide_preview_button"), color = Blue, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
         }
     }
     Action(ko.get("ui_0812f118b535")) { vm.openAssistant() }

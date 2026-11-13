@@ -30,7 +30,7 @@
 - `carcue-pleos-sdk-visual-check.mp4`: 약 10.002초·2560×1440, 실제 전용 AVD 화면의 연속 녹화. 왼쪽은 Pleos 기본 패널, 오른쪽 CarCue 안에 추가한 차량 이미지도 함께 바뀐다. 후처리로 다른 차량 프레임을 영상 위에 삽입하지 않았다.
 - `video-check.txt`, `video-frames/`: 닫힘·열림·복귀 영상 프레임 디코딩 및 육안 확인.
 
-검증한 APK는 `output/apk/carcue-pleos-sdk-verified-debug.apk`이며 SHA256은 `556847802b8a4046a3fa445491bc2ba08069bdcd7da6d62e30da2874c4ce6151`다. 설치 base.apk와 동일함을 확인했다. 기존 Mock APK와 전체 Mock 소개는 보존한다. 최신 34초 소개에는 이 검증 영상의 SDK 개폐·안전벨트 장면을 반영하고 나머지 Mock 장면과 구분한다(`APP_INTRO_VIDEO.md`). 원본 시각화 기준 영상 `carcue-pleos-sdk.mp4`도 변경하지 않았다.
+검증한 APK는 `output/apk/carcue-pleos-sdk-verified-debug.apk`이며 SHA256은 `556847802b8a4046a3fa445491bc2ba08069bdcd7da6d62e30da2874c4ce6151`다. 설치 base.apk와 동일함을 확인했다. 기존 Mock APK와 전체 Mock 소개는 보존한다. 이 16.747초 시험 이후 전체 기능·세 언어를 한 SDK 앱에서 다시 검증·촬영했다. 최신 34초 소개는 새 단일 원본을 사용한다(`SDK_FULL_APP_SHOWCASE.md`, `APP_INTRO_VIDEO.md`). 원본 시각화 기준 영상 `carcue-pleos-sdk.mp4`도 변경하지 않았다.
 
 ## 재현과 범위
 

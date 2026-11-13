@@ -1,10 +1,10 @@
 # CarCue 영상 구성
 
-최신 소개는 `output/qa/carcue-sdk-app-intro.mp4`다. 34초·1920×1080·30fps, 기능별 약 2초와 한·영·일 전환을 유지한다. 자세한 시간표와 출처는 `APP_INTRO_VIDEO.md`, 편집 구간은 `app-intro.json`에서 관리한다.
+최신 소개는 `output/qa/carcue-full-sdk-intro.mp4`다. 34초·1920×1080·30fps, 기능별 2초·기존 무료 음악을 유지하며 첫 문구를 “언제, 어디서든, 평소와 같은 경험을.”로 바꿨다. 모든 기능·한/영/일 장면을 같은 Pleos SDK APK/프로세스에서 새로 촬영했다. 시간표와 출처는 `APP_INTRO_VIDEO.md`, 편집 구간은 `app-intro.json`, 촬영 증거는 `SDK_FULL_APP_SHOWCASE.md`다.
 
-7–15초는 실제 Pleos AVD SDK 수신 검증 녹화를 사용한다. SDK GET 닫힘 → 열림 callback → 닫힘 callback과 앱 내부 차량 변화가 각 2초이며, 이어 2초는 원본 안전벨트 안내다. SDK 기본 패널을 제외하고 CarCue 앱 영역만 자른다. 해당 장면은 ‘Pleos SDK 수신 · 전용 AVD’, 다른 demo APK 기능·언어 장면은 ‘MOCK’으로 표시한다. 두 APK와 두 녹화의 해시·출처는 결과 JSON에 기록한다. 배경음악은 이전과 동일한 외부 무료 음원을 유지한다.
+원본 `pleos-full-showcase/carcue-pleos-native-run.mp4`는 차량·언어 선택 → 한국어 홈/상태/개폐 → 안전벨트/문 상세 → 가이드 목록/단계/질문 → 영어 선택/홈/실제 문 열림 → 일본어 선택/홈/실제 문 닫힘 → 종료/초기화의 20개 장면을 담는다. 소개 편집에는 이 한 원본만 쓰고, 모든 장면의 SDK 앱 영역과 표기를 통일한다. 가이드 예시·안전벨트 센서 미연결·AI 준비 중은 유지한다.
 
-SDK 개폐 증거는 `SDK_VISUAL_RETEST.md`와 `output/qa/pleos-sdk-retest/`다. 기존 Mock 소개·원본 녹화도 아래와 같이 보존한다.
+이전 SDK/demo 혼합 구성은 `history/APP_INTRO_VIDEO_MIXED_SDK_DEMO.md`와 `archive-before-full-sdk-intro/`에 보존한다. 기존 demo 원본은 아래의 이전 이력으로 남기며 최신 소개에는 사용하지 않는다.
 
 ## 보존한 demo APK 실행 원본
 

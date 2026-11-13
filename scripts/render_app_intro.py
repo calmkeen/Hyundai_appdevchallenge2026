@@ -10,6 +10,8 @@ plan_path = ROOT / "Docs/app-intro.json"
 plan = json.loads(plan_path.read_text())
 sha = lambda p: hashlib.sha256(p.read_bytes()).hexdigest()
 assert plan["schema_version"] == 2
+assert set(plan["sources"]) == {"sdk"}, "All feature shots must use the same SDK app recording"
+assert all(s["source"] == "sdk" for s in plan["segments"] if s["kind"] == "video")
 recordings, provenance = {}, {}
 for name, source in plan["sources"].items():
     evidence = ROOT / source["evidence"]
@@ -21,21 +23,27 @@ for name, source in plan["sources"].items():
         expected = record["video_sha256"]
     else:
         assert source["vehicle_data"] == "PLEOS" and "SDK" in source["caption"] and "AVD" in source["caption"]
-        assert record["type"] == "REAL_PLEOS_SDK_EMULATOR_VISUAL_VALIDATION"
+        assert record["type"] in ["REAL_PLEOS_SDK_EMULATOR_VISUAL_VALIDATION", "UNEDITED_REAL_PLEOS_APK_SCREENRECORD"]
         visual = record["visual_result"]
-        assert visual["source"] == "PLEOS" and visual["changed_pixels"] > 0
+        assert visual["source"] == "PLEOS"
+        if "changed_pixels" in visual:
+            assert visual["changed_pixels"] > 0
+        if record["type"] == "UNEDITED_REAL_PLEOS_APK_SCREENRECORD":
+            assert record["single_apk"] and record["package"] == "com.carcue.app"
+            assert all(s["source"] == "PLEOS" for s in record["scenes"])
         assert visual["initial_closed_sha256"] == visual["restored_closed_sha256"] != visual["open_sha256"]
         for filename, expected_hash in record["files_sha256"].items():
             assert sha(evidence.parent / filename) == expected_hash, filename
-        assert "OK (1 test)" in (evidence.parent / "pleos-instrumentation.txt").read_text()
-        expected = record["files_sha256"][Path(source["video"]).name]
+        test_log = "instrumentation.txt" if "scenes" in record else "pleos-instrumentation.txt"
+        assert "OK (1 test)" in (evidence.parent / test_log).read_text()
+        expected = record["video_sha256"] if "scenes" in record else record["files_sha256"][Path(source["video"]).name]
     assert sha(ROOT / source["video"]) == expected, "Source recording hash mismatch"
     with zipfile.ZipFile(ROOT / source["apk"]) as package:
         for asset in (plan["hero_asset"], plan["safety_asset"]):
             assert package.read("assets/" + asset.removeprefix("content/")) == (ROOT / asset).read_bytes()
     provenance[name] = {**source, "video_sha256": expected, "evidence_sha256": sha(evidence),
                         "apk_sha256": record["apk_sha256"], "installed_apk_sha256": record["installed_apk_sha256"]}
-recording = recordings["demo"]
+recording = next(record for record in recordings.values() if "reference_visuals" in record)
 assert plan["hero_asset"] == recording["hero_asset"]
 assert sha(ROOT / plan["hero_asset"]) == recording["hero_asset_sha256"], "Hero must match the recorded APK asset"
 assert plan["safety_asset"] == recording["safety_asset"]
@@ -44,13 +52,14 @@ reference = recording["reference_visuals"]
 assert sha(ROOT / reference["source"]) == reference["source_sha256"]
 # Each new run has slightly different real touch/transition times. Align cuts
 # with the device timestamps rather than reusing offsets from an older APK.
-events = {s["scene"]: s for s in recording["scenes"]}
 for shot in plan["segments"]:
-    if shot["kind"] == "video" and shot["source"] == "demo":
+    if shot["kind"] == "video" and "scenes" in recordings[shot["source"]]:
+        recording_for_shot = recordings[shot["source"]]
+        events = {s["scene"]: s for s in recording_for_shot["scenes"]}
         event = events[shot["source_scene"]]
         # Test markers follow the native click/swipe and idle handshake. Include
         # their lead-in so the edit retains the moving door and the actual drag.
-        shot["start"] = round((event["device_ms"] - recording["recording_started_device_ms_approx"]) / 1000 + .10 - shot.get("lead_in_seconds", 0), 2)
+        shot["start"] = round((event["device_ms"] - recording_for_shot["recording_started_device_ms_approx"]) / 1000 + .10 - shot.get("lead_in_seconds", 0), 2)
 assert all(s["duration"] == 2 for s in plan["segments"] if s["kind"] == "video")
 plan_path.write_text(json.dumps(plan, ensure_ascii=False, indent=2) + "\n")
 media = json.loads((ROOT / "Docs/media-sources.json").read_text())
@@ -75,20 +84,20 @@ meta = {
     "sources": provenance,
     "plan_sha256": sha(plan_path), "video_sha256": sha(out),
     "music": music, "music_excerpt_start": plan["audio_start"], "music_volume": plan["audio_volume"],
-    "vehicle_data": "MIXED_PLEOS_SDK_AVD_AND_MOCK",
+    "vehicle_data": "PLEOS_SDK_AVD" if all(s["vehicle_data"] == "PLEOS" for s in plan["sources"].values()) else "MIXED_PLEOS_SDK_AVD_AND_MOCK",
     "sdk_validation": {key: recordings["sdk"][key] for key in ["type", "sdk_version", "vehicle_service", "visual_result", "physical_vehicle_tested"]},
     "reference_visuals": reference, "model_shown_in_intro": False,
     "hero_asset_sha256": sha(ROOT / plan["hero_asset"]),
     "safety_asset_sha256": sha(ROOT / plan["safety_asset"]),
     "seatbelt_status_connected": False, "external_ai_called": False,
-    "functional_screens": "Cuts from verified demo APK and real Pleos SDK AVD recordings; each source labelled separately",
+    "functional_screens": "All functional and language scenes are cuts from one verified Pleos SDK APK/process recording" if len(provenance) == 1 else "Cuts from verified APK recordings; each source labelled separately",
     "segments": plan["segments"],
 }
 out.with_suffix(".json").write_text(json.dumps(meta, ensure_ascii=False, indent=2) + "\n")
 credits = music["required_credit"] + "\n" + music["source_page"] + "\n" + music["license_url"] + "\n\n"
 credits += "Music excerpt trimmed, volume adjusted and faded for this video.\nFor YouTube, include the music credit in the video description.\n\n"
 credits += "Door state shots: real Pleos SDK 2.3.2 / Vehicle Service 2.3.22 on the official isolated AVD, not physical vehicle testing.\n"
-credits += "Other feature/language shots: actual demo APK recording with MOCK vehicle data. Safety belt status is not connected. External AI is not called.\n\n"
+credits += "All feature/language shots: one real Pleos SDK APK/process recording. Guide content is a debug layout preview; belt status is not connected; external AI is not called.\n\n"
 credits += "Vehicle and seat belt reference visuals: exact rendered crops from the user-specified carcue-pleos-sdk.mp4.\n"
 credits += "Source SHA-256: " + reference["source_sha256"] + "\n"
 credits += "CarCue displays pre-rendered frames inside the native APK, not a live SDK 3D widget. Seat belt status is not connected.\n"

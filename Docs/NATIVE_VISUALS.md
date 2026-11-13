@@ -24,6 +24,6 @@ python3 scripts/record_native_showcase.py
 python3 scripts/render_app_intro.py
 ```
 
-최신 소개 영상의 문 상태·안전벨트 장면은 검증한 pleos APK 실제 녹화, 언어·가이드·기타 기능은 기존 demo APK 녹화를 사용한다. SDK 수신과 Mock 출처를 장면별로 표시하며 안전벨트 센서 미연결·실제 외부 AI 호출 없음은 유지한다. 실제 SDK 수신 시험 및 최종 결과는 `VALIDATION_REPORT.md`를 따른다.
+최신 소개 영상의 모든 문 상태·안전벨트·언어·가이드·질문·종료 장면은 같은 pleos APK/프로세스의 실제 연속 녹화를 사용한다. SDK debug 앱에서 가이드 UI 예시도 표시하되 안전벨트 센서 미연결·실제 외부 AI 호출 없음은 유지한다. 실제 SDK 수신 시험 및 최종 결과는 `VALIDATION_REPORT.md`를 따른다.
 
-2026-11-14 실제 SDK 재시험도 완료했다. 전용 AVD의 GET 0 → callback 1 → callback 0으로 같은 차량 이미지의 개폐·복귀를 확인했고, 열림 8,083픽셀 변경과 닫힘의 정확한 복귀를 비교했다. SDK 해제까지 통과했으며 `SDK_VISUAL_RETEST.md`에 별도 실제 SDK 영상과 증거를 기록한다. 최신 34초 소개 영상의 문 상태 장면은 이 실제 SDK 녹화로 교체했고, 나머지 demo 장면의 차량값은 MOCK으로 구분한다.
+2026-11-14 실제 SDK 재시험도 완료했다. 전용 AVD의 GET 0 → callback 1 → callback 0으로 같은 차량 이미지의 개폐·복귀를 확인했고, 열림 8,083픽셀 변경과 닫힘의 정확한 복귀를 비교했다. SDK 해제까지 통과했으며 `SDK_VISUAL_RETEST.md`에 별도 실제 SDK 영상과 증거를 기록한다. 이후 전체 촬영을 `PleosShowcaseTest`로 확장해 언어·기타 기능까지 같은 SDK 앱으로 통일했다. `SDK_FULL_APP_SHOWCASE.md`를 따른다.

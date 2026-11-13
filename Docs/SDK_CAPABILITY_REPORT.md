@@ -50,6 +50,10 @@
 
 최신 증거 경로는 `output/qa/pleos-sdk-retest/`의 `pleos-instrumentation.txt`, `pleos-sdk-events.txt`, `pleos-console-events.json`, 앱/차량 캡처, 실제 실행 영상과 `result.json`이다. 세부 픽셀 비교·재현은 `SDK_VISUAL_RETEST.md`를 따른다. 이전 기본 경로 SDK 로그는 초기 성공 이력으로 보존한다. Logcat 시간대와 콘솔 이벤트의 UTC ISO 8601을 구분한다. 차량 측 측정 시각을 알 수 없어 앱 수신 시각으로 표시한다.
 
+## 같은 SDK 앱의 전체 기능·언어 촬영
+
+2026-11-14 `PleosShowcaseTest`는 프로필/언어 선택, 실제 문 상태, 가이드 예시/질문, 영어·일본어 전환, 종료를 같은 APK/프로세스에서 완료했다. 79.742초 통과, 모든 20개 장면의 PLEOS 출처, 한국어 1→0·영어 1·일본어 0 콜백과 종료 해제를 확인했다. 최신 소개는 이 단일 SDK 원본만 사용한다. `SDK_FULL_APP_SHOWCASE.md`와 `APP_INTRO_VIDEO.md`를 따른다.
+
 ## UX 라이브러리 차이와 한계
 
 공식 이미지에는 `ai.pleos.playground.car`와 `car-frameworks-service`가 있지만 표준 `android.car` 공유 라이브러리는 등록되어 있지 않다. 필수 선언 시 APK 설치가 거부되는 것을 실제 확인했다. 표준 라이브러리를 선택적으로 선언하고, 클래스가 없으면 `UxState(known=false, restricted=true)`로 처리한다. 속도나 기어로 제한 상태를 대체하지 않는다.

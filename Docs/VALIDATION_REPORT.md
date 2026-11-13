@@ -10,12 +10,13 @@
 | Android 단위 | `:app:testDemoDebugUnitTest` | 이전 6개 통과, 실패/건너뜀 0 |
 | Mock 기기 회귀 | API 35 / 1280×800 / `CarCueFlowTest` | 5개 통과, 원본 개폐 프레임 픽셀 차이·안전벨트 미연결·세 언어·기존 흐름 |
 | 실제 APK 연속 촬영 | API 35 / `NativeShowcaseTest` | 1개 통과, 20개 실제 화면·개폐·세 언어 전환 |
+| SDK 앱 전체 촬영 | `PleosShowcaseTest`, 전용 AVD/사용자 10 | 1개 통과, 79.742초, 같은 APK/프로세스 20개 장면·4회 실제 변경 콜백 |
 | 실제 SDK 기기 회귀 | Pleos 2.1 / API 34 / SDK 2.3.2 / Service 2.3.22 / `PleosSdkTest` | 최신 1개 통과, 16.747초. 실제 callback 0→1→0과 차량 이미지 픽셀 변경·복귀 |
 | SDK 전체 검증 도구 | `.venv/bin/python scripts/validate_pleos.py` | 최신 Capability·GET·양방향 콜백·차량 픽셀·영상·unregister·release 통과 |
-| 앱 빌드 | `assembleDemoDebug`, `assemblePleosDebug` | APK 2종 성공 |
+| 앱 빌드 | `assembleDemoDebug`, `assemblePleosDebug` | 이전 APK 2종 성공. 이번 SDK 전체 촬영용 pleos APK 재빌드 성공 |
 | 기기 테스트 빌드 | `assembleDemoDebugAndroidTest`, `assemblePleosDebugAndroidTest` | 성공 |
 | 계약 | `scripts/check_contracts.py` | Schema 3종과 제공 예제 3개, UI 문자열 키 검사 통과 |
-| 앱 소개 영상 | 실제 APK 녹화 기반 편집·AAC 디코딩 | 34초·1920×1080·30fps, 실제 SDK 개폐+demo 기능·세 언어, 기존 음악 PCM 일치 |
+| 앱 소개 영상 | 실제 APK 녹화 기반 편집·AAC 디코딩 | 34초·1920×1080·30fps, 전체 기능/세 언어를 한 SDK 앱으로 통일, 기존 음악 PCM 일치 |
 | 인계 패키지 | SHA256SUMS 전체 대조 | 일치 |
 
 최종 기준 JDK는 Temurin 17.0.21+9 ARM64, Gradle 8.10.2, AGP 8.8.2, Kotlin 2.0.0이다. compile/target SDK 35, min SDK 28이다.
@@ -24,7 +25,19 @@
 
 앱 내 시각 요소를 추가한 뒤 demo·pleos·기기 테스트 APK를 빌드했다. Mock 회귀 3개에는 3D 열림·닫힘·미수신·오래된 값과 가이드 사진 검사도 추가해 통과했다. 3D 가림을 다듬은 최종 APK로 `NativeShowcaseTest`의 19개 실제 UI 동작을 통과하고 연속 녹화했다. SDK 수신과 서버 코드는 이번 UI 변경에서 수정하지 않았다. UI 문구 129개의 세 언어 누락·치환 변수를 검사했다.
 
-## 최신: 실제 SDK 장면을 반영한 소개 영상 · 2026-11-14
+## 최신: 전체 기능을 같은 SDK 앱에서 촬영 · 2026-11-14
+
+SDK `pleos` 앱에서 차량·언어 선택부터 문 상태, 가이드 목록/단계, 질문, 영어·일본어 전환, 이용 종료까지 20개 장면을 연속 촬영했다. `PleosShowcaseTest` 1개가 79.742초에 통과했다. 설치 APK SHA256과 전달 APK의 일치, 녹화 시작/종료 직전 PID 27585의 일치, 모든 장면의 `source=PLEOS`를 확인했다. 실제 GET 0 → 한국어 callback 1→0 → 영어 callback 1 → 일본어 callback 0 → unregister → release의 순서를 검사했다. 차량의 닫힘 복귀 PNG는 최초와 정확히 일치한다. KR 프로필·가이드 단계 복귀·종료 후 프로필/값 삭제도 확인했다.
+
+SDK 개발 빌드에서 기존 가이드 화면 예시를 열 수 있게 하고 예시·검수 자료 준비 중임을 세 언어로 표시했다. SDK 차량 저장소/GET/Listener와 제어 권한은 바꾸지 않았다. 새 APK/테스트 빌드는 `pleos-full-showcase/build.txt`, 148개 UI 자원의 세 언어/치환 변수 검사는 `contracts.txt`에 저장했다. 차량·안전벨트 원본 22개 PNG의 APK 바이트 일치 검사도 통과했다. crash 버퍼는 비어 있다. 이 변경의 새 전체 흐름 시험과 과거 Mock/SDK 시험은 구분한다.
+
+최종 `carcue-full-sdk-intro.mp4`는 34초·1920×1080·30fps다. 기능 장면 14개는 모두 같은 SDK 앱 원본에서 2초씩 잘랐고, 입력을 한 개로 제한해 demo APK 장면이 섞이지 않게 검사한다. 첫 문구는 ‘언제, 어디서든, 평소와 같은 경험을.’로 바꾸고 마무리도 같은 메시지로 맞췄다. 원본/설치 APK/검증 JSON/편집 계획/이미지 자산의 해시를 대조했다. 시작·SDK 개폐·안전벨트·가이드·질문·영어/일본어 선택과 홈·마무리 17개 시점을 디코딩해 육안 확인했다(`pleos-full-showcase/intro-video-check.txt`).
+
+음악은 기존 외부 원곡·12초 시작·gain 0.32·페이드를 유지했다. AAC 디코딩은 34초·2채널·44,100Hz, peak 0.23239, RMS 0.019323, 클리핑 0이며 5,997,600바이트의 PCM이 이전 영상과 정확히 같다(`intro-audio-check.json`). 이전 혼합 소개·SDK/Mock 원본과 이전 APK는 보존한다. 자세한 원본·시험·재현은 `SDK_FULL_APP_SHOWCASE.md`, 편집 표는 `APP_INTRO_VIDEO.md`다.
+
+모든 기능이 SDK 연결 앱에서 실행되는 것과 가이드 콘텐츠/AI 연결 상태는 구분한다. 가이드는 debug UI 예시, 안전벨트 센서 미연결, 실제 AI 호출 없음이다. 물리 차량 센서·검수된 매뉴얼·AI 답변 품질을 새로 검증한 것은 아니다. 서버/Android 단위/기존 Mock 기기 결과는 이전 시험이며 이번에는 같은 SDK 앱의 전체 흐름을 직접 시험했다.
+
+## 이전: 실제 SDK 장면을 반영한 소개 영상 · 2026-11-14
 
 `carcue-sdk-app-intro.mp4`는 34초·1920×1080·30fps다. 7–13초의 닫힘 GET·열림 callback·닫힘 callback, 13–15초의 안전벨트 안내는 위에서 검증한 실제 pleos APK의 SDK AVD 녹화다. 다른 차량 선택·가이드·질문·세션 종료와 한국어/영어/일본어 전환은 기존 demo APK 실제 녹화를 유지했다. 기능 장면은 모두 2초다. 각 SDK 장면은 ‘Pleos SDK 수신 · 전용 AVD’, demo 장면은 ‘MOCK 데이터’를 표시한다.
 

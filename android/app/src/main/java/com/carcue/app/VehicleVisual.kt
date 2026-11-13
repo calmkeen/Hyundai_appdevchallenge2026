@@ -161,6 +161,6 @@ fun GuidePreviewPhoto(copy: UiCopy, modifier: Modifier = Modifier) {
     Column(modifier, verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Image(image, contentDescription = copy.get("ui_guide_photo"), contentScale = ContentScale.Fit,
             modifier = Modifier.fillMaxWidth().height(190.dp).testTag("guide_preview_image"))
-        Text(copy.get("ui_guide_photo_notice"), color = VisualMuted, fontSize = 12.sp)
+        Text(copy.get(if (BuildConfig.IS_MOCK) "ui_guide_photo_notice" else "ui_sdk_guide_preview_image_notice"), color = VisualMuted, fontSize = 12.sp)
     }
 }

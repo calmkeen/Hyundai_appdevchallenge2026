@@ -45,3 +45,5 @@ APK의 `assets/models/source/`와 저장소 `content/models/source/`에 원본 B
 충전 가이드 사진은 사용자가 제공한 인계 ZIP의 `assets/ui/guide.svg` 내장 PNG다. 외부 원작자·별도 사용권은 인계 자료에서 확인되지 않았다. 기존 개발 Mock 예시로 유지하며 실제 게시용 검수 완료로 표시하지 않는다.
 
 2026-11-14 SDK 장면을 반영한 소개도 같은 원곡·구간·gain·페이드를 유지한다. 두 최종 영상의 디코딩된 PCM이 정확히 일치했다. 최신 복사용 출처는 `output/qa/carcue-sdk-app-intro-credits.txt`이며, SDK 앱 녹화와 demo APK 녹화 출처를 함께 기재한다.
+
+현재 최신 `carcue-full-sdk-intro.mp4`는 모든 기능을 한 SDK 앱에서 촬영했다. BGM 구간·음량·페이드는 그대로이며 디코딩 PCM도 앞선 34초 영상과 일치한다. 최신 출처 TXT는 `output/qa/carcue-full-sdk-intro-credits.txt`다.

@@ -1,41 +1,36 @@
-# 실제 SDK 문 상태를 담은 CarCue 소개 영상
+# 모든 기능을 같은 SDK 앱에서 촬영한 CarCue 소개
 
-2026-11-14. 최신 소개 영상은 `output/qa/carcue-sdk-app-intro.mp4`다. 실제 Pleos SDK에서 받은 문 GET·열림 콜백·닫힘 콜백으로 앱 안의 차량 이미지가 바뀌는 장면을 기존 소개에 반영했다. 한국어·영어·일본어 선택/전환과 기능별 약 2초 구성, Scott Buckley의 무료 음악 A Kind Of Hope를 유지한다.
+2026-11-14. 최신 소개 영상은 `output/qa/carcue-full-sdk-intro.mp4`다. 한국어·영어·일본어 전환과 가이드·질문·이용 종료까지 **동일 Pleos SDK 연결 APK/프로세스**에서 새로 촬영했다. demo APK 화면은 사용하지 않는다. 첫 문구는 사용자 방향에 맞춰 “언제, 어디서든, 평소와 같은 경험을.”로 바꿨다.
 
-34초·1920×1080·30fps다. 두 실제 앱 녹화의 출처를 장면별로 구분한다. SDK 장면은 공식 Pleos AVD의 `pleos` APK, 나머지 언어·기능 장면은 `demo` APK다. 시작 카드의 차량·안전벨트도 두 APK에 동일하게 동봉한 원본 PNG다.
+영상은 34초·1920×1080·30fps다. 기능 화면 14개는 각각 2초이며 시작/마무리는 3초다. Scott Buckley의 기존 무료 음악 A Kind Of Hope, 같은 12초 시작 구간·gain 0.32·페이드를 유지한다. 디코딩된 음악 PCM도 이전 34초 영상과 정확히 일치한다.
 
-| 시간 | 구성 | 앱/수신 출처 |
-| --- | --- | --- |
-| 0–3초 | CarCue 시작 · 원본 차량·안전벨트 | 동봉 PNG |
-| 3–7초 | 차량 선택·한국어/영어/일본어 선택 | demo APK · Mock |
-| 7–9초 | SDK 최초 닫힘 상태 | pleos APK · 실제 SDK GET 0 |
-| 9–11초 | 문 열림에 따라 차량 시각화 전환 | pleos APK · 실제 SDK callback 1 |
-| 11–13초 | 문 닫힘에 따라 원래 차량 표시로 복귀 | pleos APK · 실제 SDK callback 0 |
-| 13–15초 | 안전벨트 원본 안내 이미지 | pleos APK · 착용 상태 미연결 |
-| 15–19초 | 이미지가 있는 가이드 목록·충전 단계 | demo APK · Mock 가이드 |
-| 19–21초 | 질문 화면 · AI 답변 연결 준비 중 | demo APK · 실제 AI 호출 없음 |
-| 21–29초 | 영어 선택·홈, 일본어 선택·홈 | demo APK · Mock |
-| 29–31초 | 이용 종료 확인 | demo APK |
-| 31–34초 | CarCue 마무리 | SDK 문 상태와 Mock 기능 구분 |
+| 시간 | 화면 · 모두 같은 SDK 앱 |
+| --- | --- |
+| 0–3초 | “언제, 어디서든, 평소와 같은 경험을.” 시작 카드 |
+| 3–7초 | 차량 선택·한국어/영어/일본어 선택 |
+| 7–9초 | 실제 SDK 최초 문 닫힘 |
+| 9–11초 | 실제 SDK 열림 콜백과 앱 차량 개폐 전환 |
+| 11–13초 | 실제 SDK 닫힘 콜백과 차량 이미지 복귀 |
+| 13–15초 | 안전벨트 원본 안내 · 센서 미연결 표시 |
+| 15–19초 | SDK 개발 앱의 가이드 목록·충전 이미지 단계 예시 |
+| 19–21초 | 같은 앱의 질문 화면 · AI 답변 연결 준비 중 |
+| 21–29초 | 영어 선택·홈, 일본어 선택·홈 |
+| 29–31초 | 같은 SDK 앱의 이용 종료 확인 |
+| 31–34초 | “익숙한 경험을, 어디서나.” 마무리 |
 
-## 실제 녹화와 편집
+## 한 APK 원본과 출처 확인
 
-`Docs/app-intro.json`의 schema version 2는 `sources.demo`, `sources.sdk`와 각 장면의 `source`를 명시한다. SDK 화면에는 ‘실제 APK 실행 화면 · Pleos SDK 수신 · 전용 AVD’, demo 화면에는 ‘MOCK 데이터’를 표시한다. 실제 SDK라는 표현은 전용 AVD의 서비스/API 호출을 뜻하며 실차 센서 시험을 뜻하지 않는다.
+원본은 `output/qa/pleos-full-showcase/carcue-pleos-native-run.mp4`, 증거는 같은 이름의 JSON이다. 앱은 `com.carcue.app`, APK는 `output/apk/carcue-pleos-showcase-debug.apk`다. 설치 base.apk와 전달 APK SHA256을 대조하고, 한 프로세스에서 20개 장면을 연속 녹화했다. 모든 장면의 수신 출처·언어·페이지·문 값과 기기 단조 시각을 기록한다. 한국어에서 닫힘→열림→닫힘, 영어에서 열림, 일본어에서 닫힘의 실제 SDK 콜백을 받아 언어를 바꿔도 같은 연결이 동작함을 검사했다. 상세 시험은 `SDK_FULL_APP_SHOWCASE.md`를 따른다.
 
-SDK 입력은 `output/qa/pleos-sdk-retest/carcue-pleos-sdk-visual-check.mp4`, 검증 증거는 같은 폴더의 `result.json`이다. 원본 2560×1440에서 CarCue 앱 영역 x=854, y=90, w=1682, h=1051.25를 잘라 소개 화면 안에 확대한다. SDK 기본 차량 패널·상단 바·하단 공조 패널은 포함하지 않는다. 앱 내부 상태·차량 이미지·출처 표시는 원래 녹화 그대로다. 원본의 0.05–2.05초, 1.8–3.8초, 5.8–7.8초, 7.9–9.9초를 각각 사용한다. 개폐 중간 동작과 양 끝 자세가 포함됨을 프레임으로 확인한다.
+`app-intro.json`은 `sources.sdk` 하나만 사용한다. 렌더러는 다른 APK 입력이 섞이면 중단한다. 원본 2560×1440의 CarCue 영역 x=854, y=90, w=1682, h=1051.25를 동일하게 crop/확대하므로 모든 기능 화면의 크기·앱 메뉴·차량 프로필이 일관된다. 장면별 파일 마커 시각으로 2초 컷을 정렬하고 문 개폐 시작 직전도 포함한다. 왼쪽 Pleos 시스템 차량 패널은 넣지 않는다. 시작 카드의 차량/안전벨트는 이 APK에 동봉한 원본 PNG다.
 
-demo 입력은 `carcue-native-run.mp4`와 같은 이름의 JSON이다. 이전에 통과한 실제 앱 연속 촬영에서 언어 변경·가이드·종료 화면을 가져오며 기기 시각의 장면 마커로 편집 위치를 정렬한다. 화면을 새로 그리거나 차량 상태를 후처리로 합성하지 않는다. 두 APK·입력 MP4·검증 JSON·동봉 이미지의 해시를 렌더 전 확인한다.
-
-차량 시각화는 원본 렌더 프레임을 수신값에 맞춰 전환하는 앱 코드다. 공개 SDK 3D 위젯 이식은 아니다. 안전벨트 센서는 미연결이며 AI 실제 호출도 없다. 시각화의 출처·사용 범위는 `PLEOS_VISUAL_SOURCE.md`, SDK 수신 증거는 `SDK_VISUAL_RETEST.md`를 따른다.
-
-## 음악과 재현
-
-기존 외부 음원 파일의 SHA256, 원곡 12초부터 34초 사용, gain 0.32와 시작/끝 페이드를 유지했다. 최종 AAC를 PCM으로 디코딩해 이전 소개 영상의 음악과 샘플이 정확히 일치함을 확인했다. 곡명·작곡가·CC BY 4.0 크레딧을 영상과 별도 TXT에 유지한다. `MEDIA_CREDITS.md`를 따른다.
+하단에는 ‘실제 Pleos SDK 연결 앱 · 전용 AVD’를 표시한다. 차량 데이터는 실제 SDK 경로지만 가이드 콘텐츠는 debug 화면 예시, 안전벨트 센서는 미연결, AI 실제 호출은 없음이라는 구분을 앱/설명에 유지한다. 검수된 매뉴얼이나 실제 3D SDK 위젯이 연결된 것으로 소개하지 않는다. 출처·사용 범위는 `PLEOS_VISUAL_SOURCE.md`, 음악은 `MEDIA_CREDITS.md`를 따른다.
 
 ```bash
+python3 scripts/record_pleos_showcase.py
 python3 scripts/render_app_intro.py
 ```
 
-기존의 검증된 두 입력 녹화와 APK·증거 파일·음원이 있으면 재촬영 없이 재현한다. 새 SDK 검증이 필요하면 `scripts/validate_pleos.py --record`, 새 demo 촬영은 `scripts/record_native_showcase.py`를 사용한다. 검증 입력 해시가 달라지면 기존 자료로 렌더하지 않고 중단한다.
+촬영 원본과 APK·검증 JSON·음원 해시가 일치해야 재현된다. `carcue-full-sdk-intro.json`에 단일 입력·설치 APK·음악·편집 구간·SDK 증거를 기록하며 복사 가능한 출처는 `carcue-full-sdk-intro-credits.txt`다. 기본 `carcue-app-intro.mp4`, `carcue-sdk-app-intro.mp4`, `carcue-pleos-visual-intro.mp4`는 최종 검수 후 같은 새 영상으로 갱신한다. `carcue-mock-flow.mp4`는 이전 Mock 버전 그대로 보존한다.
 
-SDK 포함 소개 영상은 `carcue-sdk-app-intro.mp4`, 출처/편집 정보는 같은 이름의 JSON, 음악·그래픽 출처는 `carcue-sdk-app-intro-credits.txt`다. 기본 `carcue-app-intro.mp4`와 `carcue-pleos-visual-intro.mp4`도 검수 후 같은 최신 파일로 갱신한다. 기존 `carcue-mock-flow.mp4`는 이전 Mock 소개 그대로 유지한다. 이전 전체 Mock 소개와 JSON·크레딧은 `output/qa/archive-before-sdk-intro/`, 문서는 `history/APP_INTRO_VIDEO_PLEOS_REFERENCE_MOCK.md`에 보존한다. 원본 `carcue-pleos-sdk.mp4`와 SDK 시험 원본도 변경하지 않는다.
+이전 SDK/demo 혼합 영상·메타데이터·크레딧은 `output/qa/archive-before-full-sdk-intro/`, 문서는 `history/APP_INTRO_VIDEO_MIXED_SDK_DEMO.md`에 보존한다. 원본 기준 `carcue-pleos-sdk.mp4`, 이전 단일 SDK 시험 녹화와 기존 Mock 원본도 변경하지 않는다.
