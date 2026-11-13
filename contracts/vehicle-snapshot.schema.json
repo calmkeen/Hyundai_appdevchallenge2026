@@ -1,0 +1,191 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://carcue.invalid/contracts/vehicle-snapshot.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "profile_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source": {
+      "enum": [
+        "PLEOS",
+        "MOCK"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "readings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "property_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "area_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "area_label": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "capability_status": {
+            "enum": [
+              "UNKNOWN",
+              "SUPPORTED",
+              "UNSUPPORTED",
+              "CHECK_FAILED"
+            ]
+          },
+          "read_status": {
+            "enum": [
+              "NOT_REQUESTED",
+              "LOADING",
+              "VALUE",
+              "UNAVAILABLE",
+              "ERROR",
+              "STALE"
+            ]
+          },
+          "value": {
+            "type": [
+              "string",
+              "number",
+              "boolean",
+              "object",
+              "array",
+              "null"
+            ]
+          },
+          "unit": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "raw_value": {
+            "type": [
+              "string",
+              "number",
+              "boolean",
+              "object",
+              "array",
+              "null"
+            ]
+          },
+          "received_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "vehicle_sampled_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "checked_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "error_code": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "source": {
+            "enum": [
+              "PLEOS",
+              "MOCK"
+            ]
+          }
+        },
+        "required": [
+          "property_id",
+          "area_id",
+          "area_label",
+          "capability_status",
+          "read_status",
+          "value",
+          "unit",
+          "raw_value",
+          "received_at",
+          "vehicle_sampled_at",
+          "checked_at",
+          "error_code",
+          "source"
+        ],
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "read_status": {
+                  "const": "VALUE"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "value": {
+                  "not": {
+                    "type": "null"
+                  }
+                },
+                "received_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "capability_status": {
+                  "const": "SUPPORTED"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "read_status": {
+                  "enum": [
+                    "NOT_REQUESTED",
+                    "LOADING",
+                    "UNAVAILABLE",
+                    "ERROR",
+                    "STALE"
+                  ]
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "value": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "required": [
+    "profile_id",
+    "source",
+    "created_at",
+    "readings"
+  ]
+}

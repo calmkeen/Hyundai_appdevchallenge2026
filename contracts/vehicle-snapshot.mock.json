@@ -1,0 +1,37 @@
+{
+  "profile_id": "MOCK_UNVERIFIED_PROFILE",
+  "source": "MOCK",
+  "created_at": "2026-11-13T00:00:00Z",
+  "readings": [
+    {
+      "property_id": "door.position",
+      "area_id": "ROW_1_LEFT",
+      "area_label": "앞좌석 왼쪽",
+      "capability_status": "SUPPORTED",
+      "read_status": "VALUE",
+      "value": "OPEN",
+      "unit": null,
+      "raw_value": null,
+      "received_at": "2026-11-13T00:00:00Z",
+      "vehicle_sampled_at": null,
+      "checked_at": "2026-11-13T00:00:00Z",
+      "error_code": null,
+      "source": "MOCK"
+    },
+    {
+      "property_id": "ev.battery_soc",
+      "area_id": null,
+      "area_label": null,
+      "capability_status": "CHECK_FAILED",
+      "read_status": "ERROR",
+      "value": null,
+      "unit": null,
+      "raw_value": null,
+      "received_at": null,
+      "vehicle_sampled_at": null,
+      "checked_at": "2026-11-13T00:00:00Z",
+      "error_code": "MOCK_CAPABILITY_CHECK_FAILED",
+      "source": "MOCK"
+    }
+  ]
+}

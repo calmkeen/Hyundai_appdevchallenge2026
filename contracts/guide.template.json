@@ -1,0 +1,18 @@
+{
+  "guide_id": "DRAFT_REPLACE_ME",
+  "profile_ids": [
+    "UNVERIFIED_PROFILE_REPLACE_ME"
+  ],
+  "manual_set_id": null,
+  "source_version": null,
+  "topic": "REPLACE_ME",
+  "title": "검수 전 가이드 템플릿",
+  "body": "실제 차량 조작 안내가 아닙니다. 해당 사양의 공식 자료와 위치를 확인한 뒤 작성하세요.",
+  "locale": "ko-KR",
+  "source_locale": "ko-KR",
+  "glossary_version": null,
+  "lifecycle": "DRAFT",
+  "translation_review_status": "NOT_APPLICABLE",
+  "sources": [],
+  "steps": []
+}

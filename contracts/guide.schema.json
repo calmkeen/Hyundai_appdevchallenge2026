@@ -1,0 +1,253 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://carcue.invalid/contracts/guide.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "guide_id": {
+      "type": "string"
+    },
+    "profile_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "manual_set_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "source_version": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "topic": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "body": {
+      "type": "string"
+    },
+    "locale": {
+      "type": "string"
+    },
+    "source_locale": {
+      "type": "string"
+    },
+    "glossary_version": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "lifecycle": {
+      "enum": [
+        "PLANNED",
+        "DRAFT",
+        "REVIEWED",
+        "PUBLISHED"
+      ]
+    },
+    "translation_review_status": {
+      "enum": [
+        "NOT_APPLICABLE",
+        "UNREVIEWED",
+        "REVIEWED"
+      ]
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "source_id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "version": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "section": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "verification_status": {
+            "enum": [
+              "UNVERIFIED",
+              "VERIFIED"
+            ]
+          }
+        },
+        "required": [
+          "source_id",
+          "title",
+          "url",
+          "version",
+          "section",
+          "verification_status"
+        ]
+      }
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "step_id": {
+            "type": "string"
+          },
+          "order": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "title": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "image_asset_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "official_cautions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "source_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "related_properties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "enum": [
+                    "OPEN_GUIDE",
+                    "OPEN_MANUAL",
+                    "REFRESH_STATUS",
+                    "OPEN_SUPPORT",
+                    "SELECT_PROFILE"
+                  ]
+                },
+                "target_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "kind",
+                "target_id"
+              ]
+            }
+          }
+        },
+        "required": [
+          "step_id",
+          "order",
+          "title",
+          "body",
+          "image_asset_id",
+          "official_cautions",
+          "source_ids",
+          "related_properties",
+          "actions"
+        ]
+      }
+    }
+  },
+  "required": [
+    "guide_id",
+    "profile_ids",
+    "manual_set_id",
+    "source_version",
+    "topic",
+    "title",
+    "body",
+    "locale",
+    "source_locale",
+    "glossary_version",
+    "lifecycle",
+    "translation_review_status",
+    "sources",
+    "steps"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "lifecycle": {
+            "const": "PUBLISHED"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "manual_set_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source_version": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sources": {
+            "minItems": 1,
+            "items": {
+              "properties": {
+                "verification_status": {
+                  "const": "VERIFIED"
+                },
+                "version": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "section": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

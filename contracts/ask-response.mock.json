@@ -1,0 +1,15 @@
+{
+  "request_id": "mock-request-001",
+  "status": "NO_RELIABLE_SOURCE",
+  "locale": "ko-KR",
+  "answer": "이 차량에 맞는 설명을 아직 확인하지 못했어요. 차량 정보를 다시 확인하거나 공식 매뉴얼을 살펴봐 주세요.",
+  "citations": [],
+  "follow_up_question": null,
+  "actions": [
+    {
+      "kind": "SELECT_PROFILE",
+      "target_id": null
+    }
+  ],
+  "mode": "MOCK"
+}
