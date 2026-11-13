@@ -1,0 +1,24 @@
+{
+  "demo-ioniq5-2024-kr": {
+    "asset": "illustrations/ioniq5-real.jpg",
+    "model": "IONIQ 5",
+    "author": "crash71100",
+    "license": "CC0-1.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Hyundai_Ioniq_5_(front).jpg",
+    "photographed_at": "2021-07-04",
+    "specification_match_verified": false,
+    "sha256": "034487386750db27a0d756981799d1da68e45647b4616d08f1612491ccaf2667",
+    "display": "crop_bottom"
+  },
+  "demo-ioniq5n-2025-gb": {
+    "asset": "illustrations/ioniq5n-real.jpg",
+    "model": "IONIQ 5 N",
+    "author": "Calreyn88",
+    "license": "CC0-1.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Hyundai_ioniq_5_N.jpg",
+    "photographed_at": "2025-06-28",
+    "specification_match_verified": false,
+    "sha256": "3a70efbc200c5fc372a7e8918e05cbd7983b65a3bc22f357ca72518321495eb1",
+    "display": "fit"
+  }
+}

@@ -32,6 +32,8 @@ class CarCueFlowTest {
         image("02-home")
         rule.onNodeWithText("현재 차량 상태 보기 →").performScrollTo().performClick()
         rule.onNodeWithText("앞좌석 왼쪽 문이 열려 있어요").assertIsDisplayed()
+        rule.onNodeWithTag("vehicle_photo").assertExists()
+        rule.onNodeWithText("3D 위치 예시").performScrollTo().performClick()
         rule.onNodeWithTag("vehicle_3d").assertContentDescriptionEquals("앞좌석 왼쪽 문 · 열림")
         rule.onNodeWithText("MOCK · 닫힘 시연").performScrollTo().performClick()
         rule.onNodeWithTag("vehicle_3d").assertContentDescriptionEquals("앞좌석 왼쪽 문 · 닫힘")
@@ -41,6 +43,7 @@ class CarCueFlowTest {
         image("04-door-detail")
         rule.runOnIdle { vm.scenario("UNAVAILABLE"); vm.go(Page.STATUS) }
         rule.onNodeWithText("아직 차량 정보를 읽지 못했어요").assertIsDisplayed()
+        rule.onNodeWithText("3D 위치 예시").performScrollTo().performClick()
         rule.onNodeWithTag("vehicle_3d").assertContentDescriptionEquals("문 상태 미확인 · 위치만 표시")
         image("05-no-value")
         rule.runOnIdle { vm.scenario("CHECK_FAILED") }
@@ -112,5 +115,16 @@ class CarCueFlowTest {
         rule.onNodeWithText("이 차량의 안내 정보를 찾지 못했어요. 차량을 다시 선택해 주세요.").assertIsDisplayed()
         rule.runOnIdle { assertNull(vm.state.value.profile) }
         image("11-invalid-qr")
+    }
+    @Test fun realPhotosFollowVehicleProfileAndLanguage() {
+        begin()
+        rule.onNodeWithTag("vehicle_photo").assertContentDescriptionEquals("IONIQ 5 실차 참고사진")
+        rule.onNodeWithText("이용 설정 · 이용 마치기").performClick()
+        rule.onNodeWithText("차량 다시 선택").performScrollTo().performClick()
+        rule.onNodeWithText("IONIQ 5 N · 2025").performScrollTo().performClick()
+        rule.onNodeWithText("日本語").performScrollTo().performClick()
+        rule.onNodeWithTag("vehicle_photo").assertContentDescriptionEquals("IONIQ 5 Nの実車参考写真")
+        rule.runOnIdle { assertEquals("GB", vm.state.value.profile?.market) }
+        image("12-ioniq5n-real-photo")
     }
 }

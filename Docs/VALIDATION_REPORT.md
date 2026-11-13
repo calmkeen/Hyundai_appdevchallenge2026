@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | 서버 회귀 | `.venv/bin/python -m pytest backend/tests -q` | 26개 통과 (세 언어의 자료 부족 응답 포함) |
 | Android 단위 | `:app:testDemoDebugUnitTest` | 6개 통과, 실패/건너뜀 0 |
-| Mock 기기 회귀 | API 35 / 1280×800 / `CarCueFlowTest` | 3개 통과 |
+| Mock 기기 회귀 | API 35 / 1280×800 / `CarCueFlowTest` | 4개 통과 (실차 사진·차종·언어 매핑 포함) |
 | 실제 APK 연속 촬영 | API 35 / `NativeShowcaseTest` | 1개 통과, 실제 앱의 19개 화면·동작 |
 | 실제 SDK 기기 회귀 | Pleos 2.1 / API 34 / SDK 2.3.2 / Service 2.3.22 / `PleosSdkTest` | 1개 통과 |
 | SDK 전체 검증 도구 | `.venv/bin/python scripts/validate_pleos.py` | Capability·GET·변경 콜백·화면·unregister·release 조건 모두 통과 |
@@ -103,6 +103,12 @@ LIVE provider 시험은 **메서드/HTTP transport 대역**이다. 실제 OpenAI
 
 ### 최신 앱 소개 영상
 
+최신 수정은 외부 무료 음원과 실차 사진을 사용한다. Scott Buckley의 **A Kind Of Hope**를 원작자 페이지의 CC BY 4.0·출처 표기 조건으로 확인해 내려받았다. 영상 크레딧과 별도 게시용 텍스트를 만들었다. 음원 합성 코드는 제거했고, 원곡을 구간 선택·음량 조정·페이드만 적용한다. 차량 기본 화면과 시작 카드에는 CC0 IONIQ 5 실차 사진을 사용하고 N 프로필에는 별도 N 사진을 매핑했다. 출처는 `MEDIA_CREDITS.md`에 정리했다.
+
+demo·pleos·기기 테스트 APK 빌드가 성공했다. 기기 회귀 4개와 실제 촬영 1개가 통과했다. 새 테스트에서는 IONIQ 5에서 N으로 변경 후 일본어를 선택해도 N 사진·GB 시장이 유지됨을 확인했다. 136개 UI 자원의 세 언어 누락·치환 변수 검사도 통과했다. 사진 변경 전의 영상·APK는 별도 파일로 보존했다.
+
+최종 소개 영상은 32초·1920×1080이다. 9개 시점의 프레임에서 시작 카드의 실차 사진, 실제 APK의 사진·상태·가이드·일본어, 음원 크레딧·마무리를 확인했다. 최종 AAC 디코딩 결과는 32초·2채널·44,100Hz, peak 0.2324, RMS 0.0196, 클리핑 표본 0이다. 결과는 `real-photo-intro-video-check.txt`와 `real-photo-intro-audio-check.json`이다. 아래의 자체 음악 수치는 이전 버전의 이력이다.
+
 사용자 요청에 따라 실제 앱 원본을 바탕으로 `carcue-app-intro.mp4`를 제작했다. 시작·기능별 짧은 설명·세 언어 전환·이용 종료·마무리와 직접 만든 배경음악을 포함한다. 32초·1920×1080·30fps이며 기능 구간은 2초씩이다. 모든 기능 화면은 같은 APK 녹화에서 잘라 썼다. Mock 표시를 유지하며 AI 질문에는 답변 연결 준비 중임을 명시한다. 실제 앱 원본과 APK는 변경하지 않았다.
 
 15개 장면의 중앙 프레임을 디코딩하고 시작·자막·3D·사진·질문·일본어·마무리를 육안 확인했다. 최종 첫 프레임의 브랜드 노출과 주요 자막도 재확인했다. MP4의 AAC를 디코딩한 결과 길이 32초, 44,100Hz, peak 0.2411, RMS 0.0609, 클리핑 표본 0이다. `app-intro-video-check.txt`, `app-intro-video-check-final.txt`, `app-intro-audio-check.json`에 증거를 남겼다. 기본 `carcue-mock-flow.mp4`는 이 소개 영상으로 갱신한다. 기획·재현은 `APP_INTRO_VIDEO.md`를 따른다.
@@ -115,4 +121,4 @@ LIVE provider 시험은 **메서드/HTTP transport 대역**이다. 실제 OpenAI
 
 SDK·AVD·JDK 바이너리와 APK/영상은 Git에 포함하지 않았다. source, 계약, 테스트, 실행 안내는 feature 브랜치에서 관리한다. 원격 push·병합·배포·공모전 제출은 수행하지 않았다.
 
-최종 실제 앱 원본의 길이는 45.9814초, 해상도는 1280×800이다. `native-run-video-check-final.txt`와 `native-run-scene-check.txt`의 프레임 디코딩을 확인했고, 문 열림·닫힘·회전·가이드 사진·영어·일본어·깨끗한 종료 화면을 육안 확인했다. 새 demo APK의 SHA256은 `3a30d6912c214d89c1e12ad86a00b5f8b6860f812bec95f93be237b39d3fbdbb`이며, 설치된 APK와 일치했다.
+실차 사진을 추가하기 전 앱 원본의 길이는 45.9814초, 해상도는 1280×800이다. `native-run-video-check-final.txt`와 `native-run-scene-check.txt`의 프레임 디코딩을 확인했고, 문 열림·닫힘·회전·가이드 사진·영어·일본어·깨끗한 종료 화면을 육안 확인했다. 실차 사진 추가 전 demo APK의 SHA256은 `3a30d6912c214d89c1e12ad86a00b5f8b6860f812bec95f93be237b39d3fbdbb`이며, 설치된 APK와 일치했다.

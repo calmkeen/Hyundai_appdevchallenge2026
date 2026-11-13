@@ -179,10 +179,10 @@ fun CarCueApp(vm: CarCueViewModel) {
     BoxWithConstraints {
         if (maxWidth >= 760.dp) Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             HomeStatusCard(vm, ko, Modifier.weight(1f))
-            VehicleSceneCard(s.reading, ko, Modifier.weight(1f), interactive = false)
+            VehicleSceneCard(s.reading, ko, Modifier.weight(1f), interactive = false, profile = s.profile)
         } else Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
             HomeStatusCard(vm, ko)
-            VehicleSceneCard(s.reading, ko, interactive = false)
+            VehicleSceneCard(s.reading, ko, interactive = false, profile = s.profile)
         }
     }
     Panel(ko.get("ui_96918379aa24"), ko.get("ui_b5935d7ba17c"), onClick = { vm.go(Page.GUIDES) })
@@ -213,11 +213,11 @@ private fun Reading.description(ko: UiCopy): String = when {
     val demo: ((String) -> Unit)? = if (BuildConfig.IS_MOCK && interactive) vm::scenario else null
     BoxWithConstraints {
         if (maxWidth >= 760.dp) Row(horizontalArrangement = Arrangement.spacedBy(18.dp)) {
-            VehicleSceneCard(s.reading, ko, Modifier.weight(1f), interactive, demo)
+            VehicleSceneCard(s.reading, ko, Modifier.weight(1f), interactive, demo, profile = s.profile)
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) { DoorReadingPanel(vm, s, ko) }
         } else Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
             DoorReadingPanel(vm, s, ko)
-            VehicleSceneCard(s.reading, ko, interactive = interactive, onScenario = demo)
+            VehicleSceneCard(s.reading, ko, interactive = interactive, onScenario = demo, profile = s.profile)
         }
     }
     Panel(ko.get("ui_c5c585276916"), ko.get("ui_d694ff301ced"))
@@ -242,7 +242,7 @@ private fun Reading.description(ko: UiCopy): String = when {
 }
 @Composable private fun DetailScreen(vm: CarCueViewModel, s: UiState, ko: UiCopy) {
     Heading(s.reading.description(ko), ko.get("ui_27fb61365bb5"))
-    VehicleSceneCard(s.reading, ko, interactive = s.ux.known && !s.ux.restricted)
+    VehicleSceneCard(s.reading, ko, interactive = s.ux.known && !s.ux.restricted, profile = s.profile)
     Notice(ko.get("ui_94ee6190b2e4"))
     Action(ko.get("ui_3b6510d9d5ee"), s.reading.status != ReadStatus.LOADING) { vm.refresh() }
     OutlinedButton(onClick = { vm.go(Page.GUIDES) }, modifier = Modifier.fillMaxWidth().heightIn(min = 60.dp)) { Text(ko.get("ui_1577a2d2afdc")) }
@@ -278,10 +278,10 @@ private fun Reading.description(ko: UiCopy): String = when {
     if (guide.locale != s.locale) Notice(ko.get("ui_original_locale").replace("{locale}", guide.locale))
     if (guide.id == "__layout_preview__") BoxWithConstraints {
         if (maxWidth >= 760.dp) Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            Box(Modifier.weight(1f)) { if (s.guideStep == 1) GuidePreviewPhoto(ko) else VehicleModel3D(s.reading, ko, Modifier.fillMaxWidth().height(200.dp), interactive = false) }
+            Box(Modifier.weight(1f)) { if (s.guideStep == 1) GuidePreviewPhoto(ko) else VehicleRealPhoto(s.profile, ko, Modifier.fillMaxWidth(), height = 180) }
             Column(Modifier.weight(1f)) { step?.let { Panel(it.first, it.second) } }
         } else Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            if (s.guideStep == 1) GuidePreviewPhoto(ko) else VehicleModel3D(s.reading, ko, Modifier.fillMaxWidth().height(190.dp), interactive = false)
+            if (s.guideStep == 1) GuidePreviewPhoto(ko) else VehicleRealPhoto(s.profile, ko, Modifier.fillMaxWidth(), height = 180)
             step?.let { Panel(it.first, it.second) }
         }
     } else step?.let { Panel(it.first, it.second) }

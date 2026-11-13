@@ -643,5 +643,40 @@
     "ko-KR": "MOCK · 이미지 예시이며 실제 조작 절차가 아닙니다",
     "en": "MOCK · reference image, not operating instructions",
     "ja-JP": "MOCK · 参考画像であり、実際の操作手順ではありません"
+  },
+  "ui_photo_title": {
+    "ko-KR": "실제 차량 사진",
+    "en": "Vehicle photograph",
+    "ja-JP": "実際の車両写真"
+  },
+  "ui_photo_tab": {
+    "ko-KR": "실차 사진",
+    "en": "Vehicle photo",
+    "ja-JP": "実車写真"
+  },
+  "ui_model_tab": {
+    "ko-KR": "3D 위치 예시",
+    "en": "3D location example",
+    "ja-JP": "3D位置の例"
+  },
+  "ui_photo_notice": {
+    "ko-KR": "외관 참고사진 · 연식·옵션과 현재 상태는 사진으로 판단하지 않아요",
+    "en": "Appearance reference only · not evidence of year, options or current state",
+    "ja-JP": "外観の参考写真 · 年式・装備・現在の状態を示すものではありません"
+  },
+  "ui_photo_credit": {
+    "ko-KR": "사진: {credit} · CC0",
+    "en": "Photo: {credit} · CC0",
+    "ja-JP": "写真：{credit} · CC0"
+  },
+  "ui_photo_description": {
+    "ko-KR": "{model} 실차 참고사진",
+    "en": "{model} reference photograph",
+    "ja-JP": "{model}の実車参考写真"
+  },
+  "ui_photo_unavailable": {
+    "ko-KR": "이 차량의 참고사진은 준비 중이에요",
+    "en": "Reference photo is not available yet",
+    "ja-JP": "この車両の参考写真は準備中です"
   }
 }

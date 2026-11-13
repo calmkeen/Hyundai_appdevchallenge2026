@@ -103,7 +103,7 @@ info = {
     "avd": adb("shell", "getprop", "ro.boot.qemu.avd_name"), "display": adb("shell", "wm", "size"),
     "hold_seconds_per_function": 2, "scenes": events,
     "recording_started_device_ms_approx": started,
-    "graphics": "Native Compose procedural 3D mesh and bundled image, all inside this APK",
+    "graphics": "Bundled CC0 IONIQ 5 / IONIQ 5 N real photographs; generic 3D remains an optional location illustration",
     "inserted_external_frames": False, "pleos_system_ui_inserted": False,
     "vehicle_data": "MOCK", "external_ai_called": False,
 }

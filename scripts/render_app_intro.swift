@@ -17,7 +17,12 @@ private struct Shot: Decodable {
     let detail: String?
     var key: String { [kind, title, subtitle, chapter ?? "", detail ?? ""].joined(separator: "|") }
 }
-private struct Plan: Decodable { let output: String, source: String, audio: String; let segments: [Shot] }
+private struct Plan: Decodable {
+    let output: String, source: String, audio: String, music_credit: String
+    let audio_start: Double
+    let audio_volume: Float
+    let segments: [Shot]
+}
 private struct Overlay { let shot: Shot, start: Double; var duration: Double }
 
 private func text(_ value: String, _ rect: NSRect, _ size: CGFloat, _ color: NSColor,
@@ -41,7 +46,7 @@ private func bitmap(_ draw: () -> Void) -> CGImage {
     NSGraphicsContext.restoreGraphicsState()
     return b.cgImage!
 }
-private func overlayImage(_ shot: Shot) -> CGImage {
+private func overlayImage(_ shot: Shot, credit: String) -> CGImage {
     bitmap {
         if shot.kind == "video" {
             pale.setFill(); NSRect(x: 0, y: 0, width: W, height: H).fill()
@@ -59,31 +64,33 @@ private func overlayImage(_ shot: Shot) -> CGImage {
                 text(detail, NSRect(x: 80, y: 294, width: 295, height: 30), 19, NSColor(srgbRed: 0.54, green: 0.30, blue: 0.05, alpha: 1), .medium)
             }
             text("실제 APK 실행 화면 · MOCK 데이터 · 개발 중", NSRect(x: 64, y: 24, width: 1600, height: 30), 18, muted)
+            text(credit, NSRect(x: 832, y: 28, width: 1030, height: 24), 15, muted)
         } else if shot.kind == "intro" {
             NSColor.white.setFill(); NSRect(x: 0, y: 0, width: W, height: H).fill()
             rounded(NSRect(x: 1140, y: 166, width: 620, height: 740), pale, radius: 52)
-            rounded(NSRect(x: 1240, y: 318, width: 420, height: 420), blue, radius: 80)
-            // A simple brand illustration, distinct from the real UI in later shots.
-            let car = NSBezierPath(roundedRect: NSRect(x: 1305, y: 405, width: 290, height: 130), xRadius: 22, yRadius: 22)
-            car.lineWidth = 7; NSColor.white.setStroke(); car.stroke()
-            let roof = NSBezierPath()
-            roof.move(to: NSPoint(x: 1324, y: 535)); roof.line(to: NSPoint(x: 1375, y: 625))
-            roof.line(to: NSPoint(x: 1525, y: 625)); roof.line(to: NSPoint(x: 1576, y: 535)); roof.lineWidth = 7; roof.stroke()
-            for x in [1340.0, 1520.0] { rounded(NSRect(x: x, y: 450, width: 38, height: 18), .white, radius: 7) }
-            for x in [1338.0, 1525.0] { rounded(NSRect(x: x, y: 377, width: 30, height: 40), .white, radius: 8) }
-            text("차량 상태  ·  3D 위치  ·  사용 가이드", NSRect(x: 1180, y: 228, width: 540, height: 50), 23, blue, .semibold, center: true)
+            let carPhoto = NSImage(contentsOfFile: "content/illustrations/ioniq5-real.jpg")!
+            let photoHeight = 552 * carPhoto.size.height / carPhoto.size.width
+            let photoRect = NSRect(x: 1174, y: 342 + (430 - photoHeight) / 2, width: 552, height: photoHeight)
+            NSGraphicsContext.saveGraphicsState()
+            NSBezierPath(roundedRect: photoRect, xRadius: 24, yRadius: 24).addClip()
+            carPhoto.draw(in: photoRect)
+            NSGraphicsContext.restoreGraphicsState()
+            text("HYUNDAI IONIQ 5", NSRect(x: 1180, y: 278, width: 540, height: 44), 26, blue, .semibold, center: true)
+            text("Photo: crash71100 · CC0", NSRect(x: 1180, y: 240, width: 540, height: 30), 17, muted, center: true)
             text("CarCue", NSRect(x: 112, y: 884, width: 800, height: 100), 70, blue, .bold)
             text(shot.title, NSRect(x: 112, y: 477, width: 960, height: 260), 83, ink, .bold, line: 112)
             text(shot.subtitle, NSRect(x: 118, y: 343, width: 920, height: 70), 34, muted)
             rounded(NSRect(x: 116, y: 211, width: 420, height: 56), pale, radius: 14)
             text("한국어  ·  English  ·  日本語", NSRect(x: 134, y: 223, width: 396, height: 34), 24, blue, .medium)
             text("개발 중인 Mock 앱 소개", NSRect(x: 116, y: 80, width: 800, height: 40), 22, muted)
+            text(credit, NSRect(x: 116, y: 28, width: 1680, height: 30), 18, muted)
         } else {
             NSGradient(starting: blue, ending: NSColor(srgbRed: 0.06, green: 0.22, blue: 0.69, alpha: 1))!.draw(in: NSRect(x: 0, y: 0, width: W, height: H), angle: -25)
             text("CarCue", NSRect(x: 180, y: 802, width: 1560, height: 120), 78, .white, .bold, center: true)
             text(shot.title, NSRect(x: 220, y: 428, width: 1480, height: 270), 83, .white, .bold, center: true, line: 114)
             text(shot.subtitle, NSRect(x: 220, y: 284, width: 1480, height: 60), 32, .white, .medium, center: true)
             text("실제 APK 기반 Mock 시연", NSRect(x: 220, y: 103, width: 1480, height: 50), 22, NSColor.white.withAlphaComponent(0.8), center: true)
+            text(credit, NSRect(x: 150, y: 42, width: 1620, height: 35), 18, NSColor.white.withAlphaComponent(0.85), center: true)
         }
     }
 }
@@ -151,11 +158,16 @@ private func blankMovie(_ url: URL, duration: Double) async throws {
         let soundAsset = AVURLAsset(url: root.appendingPathComponent(plan.audio))
         let soundSource = try await soundAsset.loadTracks(withMediaType: .audio).first!
         let soundTrack = composition.addMutableTrack(withMediaType: .audio, preferredTrackID: kCMPersistentTrackID_Invalid)!
-        try soundTrack.insertTimeRange(CMTimeRange(start: .zero, duration: CMTime(seconds: cursor, preferredTimescale: 600)), of: soundSource, at: .zero)
+        try soundTrack.insertTimeRange(CMTimeRange(start: CMTime(seconds: plan.audio_start, preferredTimescale: 600), duration: CMTime(seconds: cursor, preferredTimescale: 600)), of: soundSource, at: .zero)
+        let volume = AVMutableAudioMixInputParameters(track: soundTrack)
+        volume.setVolume(plan.audio_volume, at: .zero)
+        volume.setVolumeRamp(fromStartVolume: 0, toEndVolume: plan.audio_volume, timeRange: CMTimeRange(start: .zero, duration: CMTime(seconds: 0.8, preferredTimescale: 600)))
+        volume.setVolumeRamp(fromStartVolume: plan.audio_volume, toEndVolume: 0, timeRange: CMTimeRange(start: CMTime(seconds: cursor - 1.4, preferredTimescale: 600), duration: CMTime(seconds: 1.4, preferredTimescale: 600)))
+        let audioMix = AVMutableAudioMix(); audioMix.inputParameters = [volume]
         let parent = CALayer(); parent.frame = CGRect(x: 0, y: 0, width: W, height: H); parent.backgroundColor = pale.cgColor
         let renderedVideo = CALayer(); renderedVideo.frame = parent.bounds; parent.addSublayer(renderedVideo)
         for overlay in overlays {
-            let layer = CALayer(); layer.frame = parent.bounds; layer.contents = overlayImage(overlay.shot); layer.opacity = 0
+            let layer = CALayer(); layer.frame = parent.bounds; layer.contents = overlayImage(overlay.shot, credit: plan.music_credit); layer.opacity = 0
             let s = overlay.start / cursor, end = (overlay.start + overlay.duration) / cursor, fade = 0.14 / cursor
             let animation = CAKeyframeAnimation(keyPath: "opacity")
             if overlay.shot.kind == "outro" {
@@ -181,8 +193,8 @@ private func blankMovie(_ url: URL, duration: Double) async throws {
         video.instructions = instructions; video.animationTool = AVVideoCompositionCoreAnimationTool(postProcessingAsVideoLayer: renderedVideo, in: parent)
         let output = root.appendingPathComponent(plan.output); try? FileManager.default.removeItem(at: output)
         let export = AVAssetExportSession(asset: composition, presetName: AVAssetExportPresetHighestQuality)!
-        export.videoComposition = video; export.shouldOptimizeForNetworkUse = true
+        export.videoComposition = video; export.audioMix = audioMix; export.shouldOptimizeForNetworkUse = true
         try await export.export(to: output, as: .mp4)
-        print("EXPORTED \(cursor)s, 1920×1080, 30fps, original music")
+        print("EXPORTED \(cursor)s, 1920×1080, 30fps, licensed external music")
     }
 }
