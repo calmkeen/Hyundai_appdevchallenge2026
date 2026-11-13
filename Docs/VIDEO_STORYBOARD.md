@@ -1,4 +1,8 @@
-# 실제 앱 실행 영상 구성
+# CarCue 영상 구성
+
+최신 소개 영상은 **`output/qa/carcue-app-intro.mp4`**다. 실제 APK 녹화를 바탕으로 시작·기능 설명·언어 전환·마무리를 구성한 32초 소개용 편집본이다. 자막과 배경음악이 있으며 일반 기능 장면은 2초다. 기획·출처·재현 방법은 `APP_INTRO_VIDEO.md`, 편집 구간은 `app-intro.json`을 따른다. 기본 `carcue-mock-flow.mp4`도 이 소개 영상으로 갱신한다.
+
+## 실제 앱 실행 원본
 
 2026-11-13. 최신 기준은 새 APK를 실행한 화면의 연속 녹화다. 차량 3D·그림·가이드 사진이 APK 내부에서 표시되고 실제 버튼·드래그·언어 변경으로 진행한다.
 
@@ -36,6 +40,6 @@
 python3 scripts/record_native_showcase.py
 ```
 
-설치된 APK의 해시를 전달 APK와 대조하며, 앱이 준비된 뒤 녹화를 시작하고 마지막 화면이 유지되는 동안 녹화를 마친다. 기본 `carcue-mock-flow.mp4`도 이 최신 연속 녹화로 갱신한다.
+설치된 APK의 해시를 전달 APK와 대조하며, 앱이 준비된 뒤 녹화를 시작하고 마지막 화면이 유지되는 동안 녹화를 마친다. 이 원본은 `carcue-native-run.mp4`로 보존하며 소개 영상의 실제 기능 장면에 사용한다.
 
 이전 28초·32초 편집본과 무편집 언어 전환 영상은 원래 파일명으로 보존했다. 이전 편집 구성은 `history/VIDEO_STORYBOARD_EDITED.md`, `video-short.json`과 `render_mock_short.py`로 재현할 수 있다. 최신 실제 앱 실행 영상과 별도 결과다.

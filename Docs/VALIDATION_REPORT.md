@@ -15,6 +15,7 @@
 | 앱 빌드 | `assembleDemoDebug`, `assemblePleosDebug` | APK 2종 성공 |
 | 기기 테스트 빌드 | `assembleDemoDebugAndroidTest`, `assemblePleosDebugAndroidTest` | 성공 |
 | 계약 | `scripts/check_contracts.py` | Schema 3종과 제공 예제 3개, UI 문자열 키 검사 통과 |
+| 앱 소개 영상 | 실제 APK 녹화 기반 편집·AAC 디코딩 | 32초·1920×1080·30fps, 15개 장면 프레임과 오디오 확인 |
 | 인계 패키지 | SHA256SUMS 전체 대조 | 일치 |
 
 최종 기준 JDK는 Temurin 17.0.21+9 ARM64, Gradle 8.10.2, AGP 8.8.2, Kotlin 2.0.0이다. compile/target SDK 35, min SDK 28이다.
@@ -98,13 +99,19 @@ LIVE provider 시험은 **메서드/HTTP transport 대역**이다. 실제 OpenAI
 
 사용자의 의도에 맞춰 사진·3D를 실제 APK 안에 구현했다. 홈·상태·상세의 일반 차량 위치 모형은 Compose Canvas에서 원근 투영하며 드래그로 회전한다. 신선한 문 상태만 열림·닫힘으로 연결하고 미수신·미지원·오류·오래된 값은 미확인으로 표시한다. 가이드 사진도 APK의 자산을 읽어 실제 Image 컴포넌트로 표시한다. 모델은 차종의 정확한 외형이 아니다. 세부 구현과 출처는 `NATIVE_VISUALS.md`에 있다.
 
-`carcue-native-run.mp4`는 동일 APK에서 19개 기능 화면·동작을 실제로 실행한 연속 screenrecord 원본이다. 각 화면은 2초 유지하며 영상에 다른 이미지·Pleos 시스템 UI를 삽입하지 않는다. 설치 APK 해시를 전달 APK와 대조했다. 기본 `carcue-mock-flow.mp4`는 이 실제 앱 녹화와 같다. 촬영 중 고정 메뉴에 스크롤을 요청한 자동화 실패는 표시 중인 메뉴를 바로 누르도록 수정했다. 종료 직전 대화상자 잔상이 최종 프레임으로 남지 않도록 실제 앱의 마지막 터치까지 녹화한다.
+`carcue-native-run.mp4`는 동일 APK에서 19개 기능 화면·동작을 실제로 실행한 연속 screenrecord 원본이다. 각 화면은 2초 유지하며 영상에 다른 이미지·Pleos 시스템 UI를 삽입하지 않는다. 설치 APK 해시를 전달 APK와 대조했다. 촬영 중 고정 메뉴에 스크롤을 요청한 자동화 실패는 표시 중인 메뉴를 바로 누르도록 수정했다. 종료 직전 대화상자 잔상이 최종 프레임으로 남지 않도록 실제 앱의 마지막 터치까지 녹화한다.
+
+### 최신 앱 소개 영상
+
+사용자 요청에 따라 실제 앱 원본을 바탕으로 `carcue-app-intro.mp4`를 제작했다. 시작·기능별 짧은 설명·세 언어 전환·이용 종료·마무리와 직접 만든 배경음악을 포함한다. 32초·1920×1080·30fps이며 기능 구간은 2초씩이다. 모든 기능 화면은 같은 APK 녹화에서 잘라 썼다. Mock 표시를 유지하며 AI 질문에는 답변 연결 준비 중임을 명시한다. 실제 앱 원본과 APK는 변경하지 않았다.
+
+15개 장면의 중앙 프레임을 디코딩하고 시작·자막·3D·사진·질문·일본어·마무리를 육안 확인했다. 최종 첫 프레임의 브랜드 노출과 주요 자막도 재확인했다. MP4의 AAC를 디코딩한 결과 길이 32초, 44,100Hz, peak 0.2411, RMS 0.0609, 클리핑 표본 0이다. `app-intro-video-check.txt`, `app-intro-video-check-final.txt`, `app-intro-audio-check.json`에 증거를 남겼다. 기본 `carcue-mock-flow.mp4`는 이 소개 영상으로 갱신한다. 기획·재현은 `APP_INTRO_VIDEO.md`를 따른다.
 
 - APK: `output/apk/carcue-demo-debug.apk`, `output/apk/carcue-pleos-debug.apk`.
 - Mock 캡처: `output/qa/qa/01-profile.png` 등 기본 흐름. 최신 언어 선택·일본어 화면은 `09a-three-languages.png`, `09b-japanese-home.png`, `09c-japanese-status.png`.
 - 실제 SDK 캡처: `pleos-initial-get.png`, `pleos-changed-callback.png`, `pleos-session-ended.png`.
 - 로그: `output/qa/mock-instrumentation.txt`, `pleos-instrumentation.txt`, `pleos-sdk-events.txt`, `pleos-console-events.json`, `pleos-ux-events.txt`.
-- 영상: 최신 실제 앱 `output/qa/carcue-native-run.mp4` (`carcue-mock-flow.mp4`와 동일), 이전 편집본 `carcue-mock-visuals-3d.mp4`·`carcue-mock-short.mp4`, 이전 언어 녹화 `carcue-mock-languages.mp4`, 최초 `carcue-mock-flow-initial.mp4`, 별도 실제 SDK 영상. SDK 화면과 Mock 화면의 출처를 혼동하지 않는다.
+- 영상: 최신 소개용 `output/qa/carcue-app-intro.mp4` (`carcue-mock-flow.mp4`와 동일), 실제 실행 원본 `carcue-native-run.mp4`, 이전 편집본 `carcue-mock-visuals-3d.mp4`·`carcue-mock-short.mp4`, 이전 언어 녹화 `carcue-mock-languages.mp4`, 최초 `carcue-mock-flow-initial.mp4`, 별도 실제 SDK 영상. SDK 화면과 Mock 화면의 출처를 혼동하지 않는다.
 
 SDK·AVD·JDK 바이너리와 APK/영상은 Git에 포함하지 않았다. source, 계약, 테스트, 실행 안내는 feature 브랜치에서 관리한다. 원격 push·병합·배포·공모전 제출은 수행하지 않았다.
 
