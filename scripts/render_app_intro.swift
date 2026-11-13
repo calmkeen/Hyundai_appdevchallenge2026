@@ -18,10 +18,12 @@ private struct Shot: Decodable {
     var key: String { [kind, title, subtitle, chapter ?? "", detail ?? ""].joined(separator: "|") }
 }
 private struct Plan: Decodable {
-    let output: String, source: String, audio: String, music_credit: String, model_credit: String
+    let output: String, source: String, audio: String, music_credit: String, visual_credit: String
     let audio_start: Double
     let audio_volume: Float
-    let model_hero: String
+    let hero_asset: String
+    let hero_title: String
+    let hero_caption: String
     let segments: [Shot]
 }
 private struct Overlay { let shot: Shot, start: Double; var duration: Double }
@@ -47,7 +49,7 @@ private func bitmap(_ draw: () -> Void) -> CGImage {
     NSGraphicsContext.restoreGraphicsState()
     return b.cgImage!
 }
-private func overlayImage(_ shot: Shot, credit: String, hero: String, modelCredit: String) -> CGImage {
+private func overlayImage(_ shot: Shot, credit: String, hero: String, visualCredit: String, heroTitle: String, heroCaption: String) -> CGImage {
     bitmap {
         if shot.kind == "video" {
             pale.setFill(); NSRect(x: 0, y: 0, width: W, height: H).fill()
@@ -65,7 +67,7 @@ private func overlayImage(_ shot: Shot, credit: String, hero: String, modelCredi
                 text(detail, NSRect(x: 80, y: 294, width: 295, height: 30), 19, NSColor(srgbRed: 0.54, green: 0.30, blue: 0.05, alpha: 1), .medium)
             }
             text("실제 APK 실행 화면 · MOCK 데이터 · 개발 중", NSRect(x: 64, y: 24, width: 1600, height: 30), 18, muted)
-            text(modelCredit, NSRect(x: 832, y: 53, width: 1030, height: 20), 14, muted)
+            text(visualCredit, NSRect(x: 832, y: 53, width: 1030, height: 20), 14, muted)
             text(credit, NSRect(x: 832, y: 28, width: 1030, height: 24), 15, muted)
         } else if shot.kind == "intro" {
             NSColor.white.setFill(); NSRect(x: 0, y: 0, width: W, height: H).fill()
@@ -77,15 +79,15 @@ private func overlayImage(_ shot: Shot, credit: String, hero: String, modelCredi
             NSBezierPath(roundedRect: photoRect, xRadius: 24, yRadius: 24).addClip()
             carPhoto.draw(in: photoRect)
             NSGraphicsContext.restoreGraphicsState()
-            text("HYUNDAI IONIQ 5 · 2022", NSRect(x: 1180, y: 278, width: 540, height: 44), 26, blue, .semibold, center: true)
-            text("실제 앱의 3D · OpenX Assets", NSRect(x: 1180, y: 240, width: 540, height: 30), 17, muted, center: true)
+            text(heroTitle, NSRect(x: 1180, y: 278, width: 540, height: 44), 26, blue, .semibold, center: true)
+            text(heroCaption, NSRect(x: 1180, y: 240, width: 540, height: 30), 17, muted, center: true)
             text("CarCue", NSRect(x: 112, y: 884, width: 800, height: 100), 70, blue, .bold)
             text(shot.title, NSRect(x: 112, y: 477, width: 960, height: 260), 83, ink, .bold, line: 112)
             text(shot.subtitle, NSRect(x: 118, y: 343, width: 920, height: 70), 34, muted)
             rounded(NSRect(x: 116, y: 211, width: 420, height: 56), pale, radius: 14)
             text("한국어  ·  English  ·  日本語", NSRect(x: 134, y: 223, width: 396, height: 34), 24, blue, .medium)
             text("개발 중인 Mock 앱 소개", NSRect(x: 116, y: 80, width: 800, height: 40), 22, muted)
-            text(modelCredit, NSRect(x: 116, y: 58, width: 1680, height: 20), 14, muted)
+            text(visualCredit, NSRect(x: 116, y: 58, width: 1680, height: 20), 14, muted)
             text(credit, NSRect(x: 116, y: 28, width: 1680, height: 30), 18, muted)
         } else {
             NSGradient(starting: blue, ending: NSColor(srgbRed: 0.06, green: 0.22, blue: 0.69, alpha: 1))!.draw(in: NSRect(x: 0, y: 0, width: W, height: H), angle: -25)
@@ -93,7 +95,7 @@ private func overlayImage(_ shot: Shot, credit: String, hero: String, modelCredi
             text(shot.title, NSRect(x: 220, y: 428, width: 1480, height: 270), 83, .white, .bold, center: true, line: 114)
             text(shot.subtitle, NSRect(x: 220, y: 284, width: 1480, height: 60), 32, .white, .medium, center: true)
             text("실제 APK 기반 Mock 시연", NSRect(x: 220, y: 103, width: 1480, height: 50), 22, NSColor.white.withAlphaComponent(0.8), center: true)
-            text(modelCredit, NSRect(x: 150, y: 18, width: 1620, height: 22), 14, NSColor.white.withAlphaComponent(0.85), center: true)
+            text(visualCredit, NSRect(x: 150, y: 18, width: 1620, height: 22), 14, NSColor.white.withAlphaComponent(0.85), center: true)
             text(credit, NSRect(x: 150, y: 42, width: 1620, height: 35), 18, NSColor.white.withAlphaComponent(0.85), center: true)
         }
     }
@@ -171,7 +173,7 @@ private func blankMovie(_ url: URL, duration: Double) async throws {
         let parent = CALayer(); parent.frame = CGRect(x: 0, y: 0, width: W, height: H); parent.backgroundColor = pale.cgColor
         let renderedVideo = CALayer(); renderedVideo.frame = parent.bounds; parent.addSublayer(renderedVideo)
         for overlay in overlays {
-            let layer = CALayer(); layer.frame = parent.bounds; layer.contents = overlayImage(overlay.shot, credit: plan.music_credit, hero: plan.model_hero, modelCredit: plan.model_credit); layer.opacity = 0
+            let layer = CALayer(); layer.frame = parent.bounds; layer.contents = overlayImage(overlay.shot, credit: plan.music_credit, hero: plan.hero_asset, visualCredit: plan.visual_credit, heroTitle: plan.hero_title, heroCaption: plan.hero_caption); layer.opacity = 0
             let s = overlay.start / cursor, end = (overlay.start + overlay.duration) / cursor, fade = 0.14 / cursor
             let animation = CAKeyframeAnimation(keyPath: "opacity")
             if overlay.shot.kind == "outro" {

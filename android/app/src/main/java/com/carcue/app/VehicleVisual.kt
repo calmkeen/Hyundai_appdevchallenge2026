@@ -36,7 +36,7 @@ private fun Reading.visualState(): String = when {
 fun VehicleSceneCard(reading: Reading, copy: UiCopy, modifier: Modifier = Modifier,
                      interactive: Boolean = true, onScenario: ((String) -> Unit)? = null,
                      profile: Profile? = null) {
-    var showModel by remember(profile?.id) { mutableStateOf(true) }
+    var showModel by remember(profile?.id) { mutableStateOf(false) }
     val photo = !showModel && profile != null
     Surface(modifier, shape = RoundedCornerShape(20.dp), color = Color(0xFFF4F7FC),
         border = BorderStroke(1.dp, Color(0xFFDCE4F1))) {

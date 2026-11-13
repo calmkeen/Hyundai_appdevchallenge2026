@@ -32,7 +32,8 @@ class CarCueFlowTest {
         image("02-home")
         rule.onNodeWithText("현재 차량 상태 보기 →").performScrollTo().performClick()
         rule.onNodeWithText("앞좌석 왼쪽 문이 열려 있어요").assertIsDisplayed()
-        rule.onNodeWithTag("vehicle_3d").assertExists()
+        rule.onNodeWithTag("vehicle_photo").assertExists()
+        rule.onNodeWithText("3D 모델").performScrollTo().performClick()
         rule.onNodeWithTag("vehicle_3d").assertContentDescriptionEquals("앞좌석 왼쪽 문 · 열림")
         rule.onNodeWithText("MOCK · 닫힘 시연").performScrollTo().performClick()
         rule.onNodeWithTag("vehicle_3d").assertContentDescriptionEquals("앞좌석 왼쪽 문 · 닫힘")
@@ -42,6 +43,7 @@ class CarCueFlowTest {
         image("04-door-detail")
         rule.runOnIdle { vm.scenario("UNAVAILABLE"); vm.go(Page.STATUS) }
         rule.onNodeWithText("아직 차량 정보를 읽지 못했어요").assertIsDisplayed()
+        rule.onNodeWithText("3D 모델").performScrollTo().performClick()
         rule.onNodeWithTag("vehicle_3d").assertContentDescriptionEquals("문 상태 미확인 · 위치만 표시")
         image("05-no-value")
         rule.runOnIdle { vm.scenario("CHECK_FAILED") }
@@ -132,6 +134,7 @@ class CarCueFlowTest {
     @Test fun actualGpuDoorAnimationAndRotation() {
         begin()
         rule.onNodeWithText("현재 차량 상태 보기 →").performScrollTo().performClick()
+        rule.onNodeWithText("3D 모델").performScrollTo().performClick()
         val scene = renderedScene()
         rule.waitForIdle()
         Thread.sleep(850)
@@ -165,9 +168,10 @@ class CarCueFlowTest {
         rule.onNodeWithTag("vehicle_3d").assertContentDescriptionEquals("문 상태 미확인 · 위치만 표시")
         image("13-actual-gpu-unknown")
     }
-    @Test fun auxiliaryPhotosFollowVehicleProfileAndLanguage() {
+    @Test fun primaryPhotosFollowVehicleProfileAndLanguage() {
         begin()
-        rule.onNodeWithTag("vehicle_3d").assertExists()
+        rule.onNodeWithTag("vehicle_photo").assertContentDescriptionEquals("IONIQ 5 실차 참고사진")
+        rule.onNodeWithTag("vehicle_3d").assertDoesNotExist()
         rule.onNodeWithText("현재 차량 상태 보기 →").performScrollTo().performClick()
         rule.onNodeWithText("실차 사진").performScrollTo().performClick()
         rule.onNodeWithTag("vehicle_photo").assertContentDescriptionEquals("IONIQ 5 실차 참고사진")

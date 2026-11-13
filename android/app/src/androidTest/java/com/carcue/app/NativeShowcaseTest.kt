@@ -38,20 +38,6 @@ class NativeShowcaseTest {
         node.performClick()
         rule.waitForIdle()
     }
-    private fun saveModelHero() {
-        fun find(v: android.view.View): ArticulatedVehicleView? {
-            if (v is ArticulatedVehicleView) return v
-            if (v is android.view.ViewGroup) for (i in 0 until v.childCount) find(v.getChildAt(i))?.let { return it }
-            return null
-        }
-        rule.runOnIdle {
-            val scene = checkNotNull(find(rule.activity.window.decorView))
-            check(kotlin.math.abs(scene.renderedDoorAngle-62f)<.5f && scene.renderedFrames>0)
-            signal("model-hero.png").outputStream().use {
-                checkNotNull(scene.bitmap).compress(android.graphics.Bitmap.CompressFormat.PNG,100,it)
-            }
-        }
-    }
     @Test fun recordNativeScreens() {
         assumeTrue(BuildConfig.IS_MOCK && InstrumentationRegistry.getArguments().getString("recordShowcase") == "true")
         listOf("go", "stop", "done", "events.jsonl").forEach { signal(it).delete() }
@@ -63,27 +49,23 @@ class NativeShowcaseTest {
             click("IONIQ 5 · 2024")
             show("세 언어 선택")
             click("한국어")
-            rule.onNodeWithTag("vehicle_3d").assertExists()
-            show("홈 · IONIQ 5 스타일 3D")
+            rule.onNodeWithTag("vehicle_photo").assertExists()
+            show("홈 · IONIQ 5 실차 사진")
             click("현재 차량 상태 보기 →")
-            rule.onNodeWithTag("vehicle_3d").assertExists()
+            rule.onNodeWithTag("vehicle_photo").assertExists()
             show("차량 상태 · 문 열림")
-            saveModelHero()
             click("MOCK · 닫힘 시연")
             rule.onNodeWithText("앞좌석 왼쪽 문이 닫혀 있어요").assertIsDisplayed()
             show("차량 상태 · 문 닫힘")
-            click("MOCK · 열림 시연")
-            show("3D 문 열리는 애니메이션")
-            rule.onNodeWithTag("vehicle_3d").performTouchInput { swipe(center, center + androidx.compose.ui.geometry.Offset(110f,0f), 650) }
-            show("3D 모델 · 드래그 회전")
+            show("실차 사진 · 상태 정보 별도 표시")
             click("MOCK · 열림 시연")
             click("앞좌석 왼쪽 문이 열려 있어요")
-            show("문 상세 · 3D 모델")
+            show("문 상세 · 실차 사진")
             click("사용 가이드")
             rule.onNodeWithTag("guide_image_card").performScrollTo()
             show("가이드 목록 · 앱 내 사진")
             click("MOCK · 단계별 화면 시연")
-            show("가이드 1단계 · 3D 모델")
+            show("가이드 1단계 · 실차 사진")
             click("다음")
             rule.onNodeWithTag("guide_preview_image").assertExists()
             show("가이드 2단계 · 앱 내 사진")

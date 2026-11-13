@@ -278,10 +278,10 @@ private fun Reading.description(ko: UiCopy): String = when {
     if (guide.locale != s.locale) Notice(ko.get("ui_original_locale").replace("{locale}", guide.locale))
     if (guide.id == "__layout_preview__") BoxWithConstraints {
         if (maxWidth >= 760.dp) Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            Box(Modifier.weight(1f)) { if (s.guideStep == 1) GuidePreviewPhoto(ko) else VehicleModel3D(s.reading, ko, Modifier.fillMaxWidth().height(180.dp), interactive = false) }
+            Box(Modifier.weight(1f)) { if (s.guideStep == 1) GuidePreviewPhoto(ko) else VehicleRealPhoto(s.profile, ko, Modifier.fillMaxWidth(), height = 180) }
             Column(Modifier.weight(1f)) { step?.let { Panel(it.first, it.second) } }
         } else Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            if (s.guideStep == 1) GuidePreviewPhoto(ko) else VehicleModel3D(s.reading, ko, Modifier.fillMaxWidth().height(180.dp), interactive = false)
+            if (s.guideStep == 1) GuidePreviewPhoto(ko) else VehicleRealPhoto(s.profile, ko, Modifier.fillMaxWidth(), height = 180)
             step?.let { Panel(it.first, it.second) }
         }
     } else step?.let { Panel(it.first, it.second) }

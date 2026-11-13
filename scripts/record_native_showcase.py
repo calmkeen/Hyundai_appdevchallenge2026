@@ -3,6 +3,7 @@ import hashlib
 import json
 import subprocess
 import tempfile
+import zipfile
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -56,6 +57,11 @@ with tempfile.TemporaryDirectory(dir=ROOT / ".tooling") as temp:
     adb("pull", base, str(installed))
     installed_hash = sha(installed)
     assert installed_hash == sha(apk)
+    hero_asset = "content/illustrations/ioniq5-real.jpg"
+    with zipfile.ZipFile(installed) as archive:
+        hero_bytes = archive.read("assets/illustrations/ioniq5-real.jpg")
+    assert hero_bytes == (ROOT / hero_asset).read_bytes()
+    hero_sha256 = hashlib.sha256(hero_bytes).hexdigest()
 adb("shell", "pm", "clear", PACKAGE)
 OUT.mkdir(parents=True, exist_ok=True)
 log = (OUT / "native-showcase-instrumentation.txt").open("w")
@@ -94,10 +100,6 @@ assert "OK (1 test)" in result, result[-3000:]
 video = OUT / "carcue-native-run.mp4"
 adb("pull", remote, str(video))
 assert video.stat().st_size > 100000
-hero = subprocess.run([str(ADB), "-s", SERIAL, "exec-out", "run-as", PACKAGE, "cat", f"{MARKERS}/model-hero.png"],
-                      capture_output=True, check=True).stdout
-assert hero.startswith(b"\x89PNG\r\n\x1a\n")
-(OUT / "ioniq5-app-3d.png").write_bytes(hero)
 events = [json.loads(line) for line in marker("events.jsonl").splitlines()]
 info = {
     "type": "UNEDITED_REAL_APK_SCREENRECORD",
@@ -107,10 +109,9 @@ info = {
     "avd": adb("shell", "getprop", "ro.boot.qemu.avd_name"), "display": adb("shell", "wm", "size"),
     "hold_seconds_per_function": 2, "scenes": events,
     "recording_started_device_ms_approx": started,
-    "graphics": "Licensed OpenX IONIQ 5 2022 model (andikapratamaw / Dogan Ulus), original hinge, smooth normals and metallic/roughness materials",
-    "model": json.loads((ROOT / "content/models/ioniq5-articulated.json").read_text()),
-    "model_hero": "output/qa/ioniq5-app-3d.png",
-    "model_hero_sha256": sha(OUT / "ioniq5-app-3d.png"),
+    "graphics": "Bundled CC0 real IONIQ 5 / IONIQ 5 N photos; received status displayed separately; 3D remains an optional app tab",
+    "hero_asset": hero_asset, "hero_asset_sha256": hero_sha256,
+    "model_shown_in_recording": False,
     "inserted_external_frames": False, "pleos_system_ui_inserted": False,
     "vehicle_data": "MOCK", "external_ai_called": False,
 }

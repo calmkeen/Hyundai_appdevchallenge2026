@@ -2,6 +2,7 @@
 import hashlib
 import json
 import subprocess
+import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -11,7 +12,10 @@ sha = lambda p: hashlib.sha256(p.read_bytes()).hexdigest()
 recording = json.loads((ROOT / "output/qa/carcue-native-run.json").read_text())
 assert sha(ROOT / plan["source"]) == recording["video_sha256"], "Source recording hash mismatch"
 assert sha(Path(recording["apk"])) == recording["apk_sha256"] == recording["installed_apk_sha256"], "Record the current APK before editing"
-assert sha(ROOT / plan["model_hero"]) == recording["model_hero_sha256"], "Hero must come from the recorded APK"
+assert plan["hero_asset"] == recording["hero_asset"]
+assert sha(ROOT / plan["hero_asset"]) == recording["hero_asset_sha256"], "Hero must match the recorded APK asset"
+with zipfile.ZipFile(recording["apk"]) as package:
+    assert package.read("assets/" + plan["hero_asset"].removeprefix("content/")) == (ROOT / plan["hero_asset"]).read_bytes()
 # Each new run has slightly different real touch/transition times. Align cuts
 # with the device timestamps rather than reusing offsets from an older APK.
 events = {s["scene"]: s for s in recording["scenes"]}
@@ -46,18 +50,18 @@ meta = {
     "apk_sha256": json.loads((ROOT / "output/qa/carcue-native-run.json").read_text())["apk_sha256"],
     "music": music, "music_excerpt_start": plan["audio_start"], "music_volume": plan["audio_volume"],
     "vehicle_data": "MOCK",
-    "model": json.loads((ROOT / "content/models/ioniq5-articulated.json").read_text()),
-    "model_hero_sha256": sha(ROOT / plan["model_hero"]), "external_ai_called": False,
+    "vehicle_photos": sources["vehicle_photos"], "model_shown_in_intro": False,
+    "hero_asset_sha256": sha(ROOT / plan["hero_asset"]), "external_ai_called": False,
     "functional_screens": "All functional screens are cuts from the same verified APK recording",
     "segments": plan["segments"],
 }
 out.with_suffix(".json").write_text(json.dumps(meta, ensure_ascii=False, indent=2) + "\n")
 credits = music["required_credit"] + "\n" + music["source_page"] + "\n" + music["license_url"] + "\n\n"
 credits += "Music excerpt trimmed, volume adjusted and faded for this video.\nFor YouTube, include the music credit in the video description.\n\n"
-credits += plan["model_credit"] + "\n"
+credits += "Optional 3D model available in the APK, not used in this video:\n3D: andikapratamaw (2022), Dogan Ulus (2026), MPL-2.0 AND CC-BY-4.0, adapted.\n"
 credits += "https://github.com/vevalabs/openx-assets\nhttps://sketchfab.com/andikapratamaw\nhttps://www.mozilla.org/MPL/2.0/\nhttps://creativecommons.org/licenses/by/4.0/\n"
 credits += "Adapted: axes, original front-left hinge/door group, animation, native materials and contact shadow. Original model/source and license texts are included in the APK.\n"
-credits += "Auxiliary vehicle photos: crash71100 / Calreyn88, CC0 1.0, Wikimedia Commons.\n"
+credits += "Vehicle photos used in the app/video: crash71100 / Calreyn88, CC0 1.0, Wikimedia Commons.\n"
 for image in sources["vehicle_photos"]: credits += image["source"] + "\n"
 out.with_name("carcue-app-intro-credits.txt").write_text(credits)
 print(f"SAVED {out} (licensed external music)", flush=True)

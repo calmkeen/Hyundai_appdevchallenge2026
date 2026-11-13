@@ -9,13 +9,13 @@
 | 서버 회귀 | `.venv/bin/python -m pytest backend/tests -q` | 26개 통과 (세 언어의 자료 부족 응답 포함) |
 | Android 단위 | `:app:testDemoDebugUnitTest` | 6개 통과, 실패/건너뜀 0 |
 | Mock 기기 회귀 | API 35 / 1280×800 / `CarCueFlowTest` | 5개 통과 (실제 GPU 개폐·회전·미확인 자세·보조 사진 포함) |
-| 실제 APK 연속 촬영 | API 35 / `NativeShowcaseTest` | 1개 통과, 실제 앱의 20개 화면·동작 |
+| 실제 APK 연속 촬영 | API 35 / `NativeShowcaseTest` | 1개 통과, 실제 앱의 19개 화면·동작 |
 | 실제 SDK 기기 회귀 | Pleos 2.1 / API 34 / SDK 2.3.2 / Service 2.3.22 / `PleosSdkTest` | 1개 통과 |
 | SDK 전체 검증 도구 | `.venv/bin/python scripts/validate_pleos.py` | Capability·GET·변경 콜백·화면·unregister·release 조건 모두 통과 |
 | 앱 빌드 | `assembleDemoDebug`, `assemblePleosDebug` | APK 2종 성공 |
 | 기기 테스트 빌드 | `assembleDemoDebugAndroidTest`, `assemblePleosDebugAndroidTest` | 성공 |
 | 계약 | `scripts/check_contracts.py` | Schema 3종과 제공 예제 3개, UI 문자열 키 검사 통과 |
-| 앱 소개 영상 | 실제 APK 녹화 기반 편집·AAC 디코딩 | 34초·1920×1080·30fps, 실제 3D 개폐·회전·언어 전환 |
+| 앱 소개 영상 | 실제 APK 녹화 기반 편집·AAC 디코딩 | 32초·1920×1080·30fps, 실차 사진·상태 표시·언어 전환 |
 | 인계 패키지 | SHA256SUMS 전체 대조 | 일치 |
 
 최종 기준 JDK는 Temurin 17.0.21+9 ARM64, Gradle 8.10.2, AGP 8.8.2, Kotlin 2.0.0이다. compile/target SDK 35, min SDK 28이다.
@@ -24,7 +24,15 @@
 
 앱 내 시각 요소를 추가한 뒤 demo·pleos·기기 테스트 APK를 빌드했다. Mock 회귀 3개에는 3D 열림·닫힘·미수신·오래된 값과 가이드 사진 검사도 추가해 통과했다. 3D 가림을 다듬은 최종 APK로 `NativeShowcaseTest`의 19개 실제 UI 동작을 통과하고 연속 녹화했다. SDK 수신과 서버 코드는 이번 UI 변경에서 수정하지 않았다. UI 문구 129개의 세 언어 누락·치환 변수를 검사했다.
 
-## 최신: 외부 IONIQ 5 전용 모델 교체 · 2026-11-14
+## 최신: 실차 사진 중심으로 복원 · 2026-11-14
+
+사용자가 초기 사진 중심 영상의 완성도를 선호해 홈·상태·문 상세·Mock 가이드 차량 자리를 실제 IONIQ 5/N 사진으로 복원했다. 사진은 외관 참고용으로 두고 문 수신 상태를 별도 표시한다. 기존 3D 개폐·회전·미확인 처리와 라이선스는 보조 탭에 유지한다. 소개 영상에는 3D를 넣지 않는다.
+
+두 APK와 기기 테스트 APK 빌드가 통과했다(`photo-return-build.txt`). 실제 기기 5개 시험이 21.074초에 통과했다(`photo-return-instrumentation.txt`). 기본 홈에 사진이 표시되고 3D가 생성되지 않는 것, 차종·언어 변경 후 사진 매핑, 별도 탭에서 GPU 개폐·회전·미확인 자세가 유지되는 것을 검사했다. 기존 오류·UX 제한·가이드 복귀·로컬 HTTP Mock 왕복도 통과했다. 두 APK의 3D 원본·소스·라이선스 묶음이 그대로 포함됨을 검사했다.
+
+실제 연속 촬영 시험 1개가 49.05초에 통과했다. 19개 장면의 새 녹화에서 설치/전달 APK의 해시와 실제 APK 안의 원본 사진 바이트를 대조했다. 소개 영상은 32초·1920×1080·30fps이며 시작·실차 사진·상태 카드·가이드·영어·일본어·마무리를 육안 확인했다(`photo-return-video-check.txt`). AAC 디코딩은 32초·2채널·44,100Hz, peak 0.23239, RMS 0.01959, 클리핑 0이다(`photo-return-audio-check.json`). 두 APK의 IONIQ 5/N 사진이 원본 JPEG와 동일하고 기록된 SHA256이 맞는지 검사했다. 기능 화면은 해당 APK에서 촬영하며, 사진을 문 개폐 영상으로 설명하지 않는다. 이번 변경은 실제 차량·새 SDK 수신·실제 AI 호출 검증이 아니다. 기존 SDK·서버 연결 상태와 이전 시험은 그대로 유지한다.
+
+## 이전: 외부 IONIQ 5 전용 모델 교체 · 2026-11-14
 
 기존 각진 자체 모형을 OpenX Assets의 Hyundai IONIQ 5 2022 모델로 교체했다. 원작자 andikapratamaw, 후속 가공 Dogan Ulus이며 MPL-2.0 AND CC-BY-4.0이다. 원본 Blend SHA256을 고정 커밋 LFS 포인터와 대조했다. 원본 GLB에서 37,350삼각형·30재질·44메시를 읽고 앞좌석 왼쪽 문·유리·미러 그룹과 원본 경첩을 유지했다. 물리적 왼쪽·바깥 개폐·유한 좌표·단위 법선·원본/변환 해시·정상 애니메이션 GLB를 검사했다. 8,602개 삼각형의 서로 다른 정점 법선이 변환 후에도 보존되어 곡면 보간에 사용되는지 확인했다.
 
