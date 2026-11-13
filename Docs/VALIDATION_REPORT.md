@@ -1,0 +1,76 @@
+# 검증 결과
+
+2026-11-13. 실차, 공식 전용 AVD의 실제 SDK, 일반 AVD의 Mock, 외부 AI 대역을 구분한다.
+
+## 최종 통과 결과
+
+| 구분 | 명령/환경 | 결과 |
+| --- | --- | --- |
+| 서버 회귀 | `.venv/bin/python -m pytest backend/tests -q` | 24개 통과 |
+| Android 단위 | `:app:testDemoDebugUnitTest` | 6개 통과, 실패/건너뜀 0 |
+| Mock 기기 회귀 | API 35 / 1280×800 / `CarCueFlowTest` | 3개 통과 |
+| 실제 SDK 기기 회귀 | Pleos 2.1 / API 34 / SDK 2.3.2 / Service 2.3.22 / `PleosSdkTest` | 1개 통과 |
+| SDK 전체 검증 도구 | `.venv/bin/python scripts/validate_pleos.py` | Capability·GET·변경 콜백·화면·unregister·release 조건 모두 통과 |
+| 앱 빌드 | `assembleDemoDebug`, `assemblePleosDebug` | APK 2종 성공 |
+| 기기 테스트 빌드 | `assembleDemoDebugAndroidTest`, `assemblePleosDebugAndroidTest` | 성공 |
+| 계약 | `scripts/check_contracts.py` | Schema 3종과 제공 예제 3개, UI 문자열 키 검사 통과 |
+| 인계 패키지 | SHA256SUMS 전체 대조 | 일치 |
+
+최종 기준 JDK는 Temurin 17.0.21+9 ARM64, Gradle 8.10.2, AGP 8.8.2, Kotlin 2.0.0이다. compile/target SDK 35, min SDK 28이다.
+
+## SDK 실제 수신 증거
+
+`output/qa/pleos-sdk-events.txt`에서 다음 흐름을 확인했다.
+
+1. Capability: `ROW_1_LEFT`, min 0 / max 1, READ_WRITE.
+2. 최초 GET: 실제 SDK 값 0, 앱 수신 시각 기록.
+3. Listener 등록과 실제 최초 콜백 0을 각각 기록.
+4. 공식 Virtual Console에서 앞좌석 왼쪽 문을 열림으로 변경.
+5. 실제 SDK 변경 콜백 1과 UI의 ‘앞좌석 왼쪽 문이 열려 있어요’ 확인.
+6. 같은 Listener/영역의 `LISTENER_UNREGISTER_RETURNED`, `RELEASE_RETURNED` 확인.
+
+값 0/1은 시험한 영역과 범위에서만 CLOSED/OPEN으로 정규화한다. 다른 영역/범위를 같은 의미로 확대하지 않는다. 등록 성공 문구나 GET만으로 변경 콜백 성공을 판단하지 않았다.
+
+`output/qa/pleos-console-events.json`은 테스트 도구가 공식 콘솔에 보낸 시뮬레이션 요청이다. 앱에는 SDK SET을 넣지 않았다. 물리 차량을 제어하거나 실차 센서를 검증한 결과가 아니다.
+
+## 실제 차량 UX 제한 검증
+
+공식 Virtual Console에서 주차→Drive 및 20 km/h 조건→정차·Park를 시뮬레이션했다. 실제 `CarUxRestrictionsManager` 초기 GET false/0, 변경 callback true/80, 복귀 callback false/0을 확인했다. 로그는 `output/qa/pleos-ux-events.txt`, 화면은 `pleos-driving-restriction.png`다. 값이 없을 때 허용으로 처리하지 않으며, 실제 속도/기어로 앱이 제한을 추론하지 않는다. 속도/기어 변경은 테스트 도구의 가상 입력일 뿐이다. 실차·모든 지역 정책 검증은 아니다.
+
+## Mock 기기 회귀 범위
+
+- 실제 버튼으로 차량 선택 → 한국어 → 홈 → 상태 → 상세 → 종료.
+- null/미수신, 지원 확인 실패, 실제 미지원, 오래된 값의 서로 다른 표시.
+- Mock 주행 제한 변경 시 열린 질문 입력 제거와 제한 화면 표시.
+- 가이드 단계 2에서 질문 후 돌아와도 단계 유지.
+- 계획 언어인 아랍어 선택 시 영어 대체 안내와 RTL 배치. 단계 숫자 방향이 뒤집힌 문제를 수정 후 재검증.
+- 언어 변경 후 대한민국 사양 유지.
+- 실제 HTTP로 로컬 FastAPI Mock 서버 왕복, NO_RELIABLE_SOURCE와 MOCK 모드 표시.
+- 미등록 QR 프로필 오류 및 세션 종료 후 프로필·언어·상태·대화 초기화.
+
+이는 48개 언어의 번역 완료나 모든 디스플레이·글자 확대 검증을 뜻하지 않는다. 한국어/영어 UI도 초안이며, 가이드 예시는 실제 조작 매뉴얼이 아니다.
+
+## 서버 회귀 범위
+
+세션 소유·프로필 불일치, 자료 부족 Schema, 게시 전 템플릿 배제, 문서 버전/차종/언어/검수 상태에 따른 검색, 출처 ID 대조, 근거 없는 재서술 차단, 중복 요청·요청 ID 충돌, 삭제·만료·늦은 응답, 요청 한도, 번역 숫자·단위 보존 검사를 확인했다.
+
+LIVE provider 시험은 **메서드/HTTP transport 대역**이다. 실제 OpenAI 요청은 수행하지 않았다. 실행 환경에 OPENAI_API_KEY와 OPENAI_MODEL이 설정되지 않은 것도 비밀값 출력 없이 확인했다. 자동 고장 진단·차량 제어 action을 생성하지 않으며 초기 답변은 검수 원문의 직접 추출로 제한한다. 번역의 부정·순서·부품명 등 의미 검수는 별도 과제로 남는다.
+
+## 해결한 실패와 남은 검증
+
+- 초기 JDK 18의 의존성 DNS 오류: 최신 JDK 17로 전환해 다운로드·빌드 성공.
+- 초기 일반 API 37 AVD 부팅 미완료: 별도 API 35 AVD를 설치해 3개 기기 회귀 통과.
+- Pleos 이미지의 표준 android.car 공유 라이브러리 필수 선언으로 설치 거부: 선택 선언과 클래스 존재 확인으로 수정, 설치·앱 실행·SDK 시험 통과. 런타임 제한 값은 SDK 조사 보고서에 별도로 기록한다.
+- 서로 다른 사용자 저장소: Pleos 실행 사용자 10의 캡처를 `run-as --user 10`으로 분리해 수집.
+- 실제 매뉴얼 검수, OpenAI 실호출, 실차, 다른 지역별 UX 정책, 전체 언어·폰 QR 카메라·로터리·접근성은 미검증.
+- 의존 라이브러리의 비치명 경고: Starlette/AnyIO alias deprecation, 표준 Car.createCar/connect deprecation. 빌드/테스트 실패는 아님.
+
+## 결과 파일
+
+- APK: `output/apk/carcue-demo-debug.apk`, `output/apk/carcue-pleos-debug.apk`.
+- Mock 캡처: `output/qa/qa/01-profile.png` 등 11개.
+- 실제 SDK 캡처: `pleos-initial-get.png`, `pleos-changed-callback.png`, `pleos-session-ended.png`.
+- 로그: `output/qa/mock-instrumentation.txt`, `pleos-instrumentation.txt`, `pleos-sdk-events.txt`, `pleos-console-events.json`, `pleos-ux-events.txt`.
+- 영상: `output/qa/carcue-mock-flow.mp4`와 별도 실제 SDK 영상. SDK 화면과 Mock 화면의 출처를 혼동하지 않는다.
+
+SDK·AVD·JDK 바이너리와 APK/영상은 Git에 포함하지 않았다. source, 계약, 테스트, 실행 안내는 feature 브랜치에서 관리한다. 원격 push·병합·배포·공모전 제출은 수행하지 않았다.
