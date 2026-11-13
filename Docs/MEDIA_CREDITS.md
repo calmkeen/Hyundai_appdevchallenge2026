@@ -21,10 +21,18 @@
 
 두 원본 페이지에서 CC0 공개를 확인했다. 앱 사진 아래에 촬영자와 CC0를 표시하고, 원본 주소와 해시를 함께 보관한다. 사진은 해당 차종의 외관 참고용이며 선택한 차량의 정확한 연식·시장·옵션이나 현재 문 상태를 증명하지 않는다. 프로필별 파일을 분리하고 언어를 바꿔도 사진·판매지역이 유지되도록 한다.
 
-## 3D 모델과 이전 이미지
+## IONIQ 5 전용 3D 모델
 
-현재 기본 3D는 `scripts/build_ioniq5_model.py`로 직접 제작한 IONIQ 5 스타일 메시다. 차체와 경첩 문을 분리한 GLB·네이티브 메시·제작 소스를 저장소에 보관한다. 다운로드한 외부 모델·현대 공식 CAD·스캔 데이터가 아니며 특정 연식/트림 일치를 검증하지 않았다. 비율·외형은 [현대 브로슈어](https://ioniq5.hyundai.co.in/ioniq-5-brochure.pdf)를 참고했고 브로슈어 이미지나 CAD를 추출해 포함하지 않았다. 상세 출처·해시는 `content/models/ioniq5-articulated.json`을 따른다.
+현재 모델은 [vevalabs/openx-assets](https://github.com/vevalabs/openx-assets/tree/main/src/vehicles/hyundai_ioniq_5_2022)의 **Hyundai Ioniq 5 2022**다. 원작자 andikapratamaw(2022), 후속 가공 Dogan Ulus(2026). [저작권·라이선스 기록](https://github.com/vevalabs/openx-assets/blob/1a63f13b5cfee3e01207a84b13b40fc172d92a95/src/REUSE.toml)은 MPL-2.0 AND CC-BY-4.0을 명시한다.
 
-이전 일반 Canvas 차량과 사진 중심 시작 카드는 Git 이력과 이전 산출물로 보존했다. 현재 시작 카드는 실제 APK의 3D 뷰를 캡처한 이미지이며 모든 기능 장면도 같은 앱의 실행 화면이다. 실차 사진은 보조 탭에서만 사용한다.
+원본 GLB는 [20261015 릴리스](https://github.com/vevalabs/openx-assets/releases/tag/20261015), 편집 가능한 Blend는 고정 커밋 `1a63f13b5cfee3e01207a84b13b40fc172d92a95`에서 받았다. Blend 파일의 SHA256을 LFS 포인터와 대조했다. 출처·해시는 `content/models/ioniq5-articulated.json`에 기록한다. 변경은 좌표 변환, 원본 앞좌석 왼쪽 문 그룹/경첩 유지, 개폐 애니메이션, 앱용 메시 스트림과 접지 그림자다. 원본 곡면 법선·30재질을 보존한다.
+
+앱 설정과 영상에 다음 저작자/라이선스/변경 사실을 표시하고, 별도 게시용 텍스트에 원작자·저장소·라이선스 링크를 넣는다.
+
+> 3D: andikapratamaw (2022), Dogan Ulus (2026) · MPL-2.0 + CC BY 4.0 · adapted
+
+APK의 `assets/models/source/`와 저장소 `content/models/source/`에 원본 Blend/GLB, 변환 소스, 원본 저작권 기록, [MPL 2.0](https://www.mozilla.org/MPL/2.0/)·[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) 전문을 포함한다. 변환된 모델과 개폐 클립도 일반 GLB로 제공한다. 모델은 현대 공식 CAD·공식 지원 또는 특정 연식·트림 일치를 뜻하지 않는다.
+
+기존 자체 제작의 각진 모형과 사진 중심 영상은 Git 이력과 이전 산출물로 보존했다. 현재 소개 영상의 기능 장면·시작 카드의 모델도 실제 APK에서 촬영/캡처한 것이다.
 
 충전 가이드 사진은 사용자가 제공한 인계 ZIP의 `assets/ui/guide.svg` 내장 PNG다. 외부 원작자·별도 사용권은 인계 자료에서 확인되지 않았다. 기존 개발 Mock 예시로 유지하며 실제 게시용 검수 완료로 표시하지 않는다.

@@ -350,6 +350,7 @@ private fun Reading.description(ko: UiCopy): String = when {
     Notice(ko.get("ui_b791275db7bd"))
     Action(ko.get("ui_48af33bc151c")) { confirm = true }
     if (s.deletionPending) Text(ko.get("ui_cc3578c46b23"), color = Muted)
+    Panel(ko.get("ui_model_credit_title"), "3D: andikapratamaw (2022), Dogan Ulus (2026)\nMPL-2.0 AND CC-BY-4.0\nhttps://github.com/vevalabs/openx-assets\nhttps://sketchfab.com/andikapratamaw\nhttps://www.mozilla.org/MPL/2.0/\nhttps://creativecommons.org/licenses/by/4.0/\n" + ko.get("ui_model_credit_notice"))
     if (s.eventLog.isNotEmpty()) {
         Text(ko.get("ui_2f65004bce0e"), fontWeight = FontWeight.Bold)
         Text(s.eventLog.takeLast(8).joinToString("\n"), fontSize = 12.sp, color = Muted)

@@ -107,7 +107,7 @@ info = {
     "avd": adb("shell", "getprop", "ro.boot.qemu.avd_name"), "display": adb("shell", "wm", "size"),
     "hold_seconds_per_function": 2, "scenes": events,
     "recording_started_device_ms_approx": started,
-    "graphics": "Native depth-tested OpenGL IONIQ 5 inspired articulated mesh; real door animation and drag rotation",
+    "graphics": "Licensed OpenX IONIQ 5 2022 model (andikapratamaw / Dogan Ulus), original hinge, smooth normals and metallic/roughness materials",
     "model": json.loads((ROOT / "content/models/ioniq5-articulated.json").read_text()),
     "model_hero": "output/qa/ioniq5-app-3d.png",
     "model_hero_sha256": sha(OUT / "ioniq5-app-3d.png"),

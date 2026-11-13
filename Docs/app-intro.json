@@ -12,7 +12,7 @@
     {
       "kind": "video",
       "duration": 2,
-      "start": 1.22,
+      "start": 1.17,
       "chapter": "01  시작하기",
       "title": "내 차량에 맞춰\n시작하세요",
       "subtitle": "차종과 연식을 확인하고\n편한 언어를 선택해요",
@@ -21,7 +21,7 @@
     {
       "kind": "video",
       "duration": 2,
-      "start": 3.59,
+      "start": 3.47,
       "chapter": "01  시작하기",
       "title": "내 차량에 맞춰\n시작하세요",
       "subtitle": "차종과 연식을 확인하고\n편한 언어를 선택해요",
@@ -30,7 +30,7 @@
     {
       "kind": "video",
       "duration": 2,
-      "start": 9.58,
+      "start": 9.29,
       "chapter": "02  문 개폐",
       "title": "문이 열리고 닫히는\n모습까지",
       "subtitle": "앱에서 실제로 움직이는\n앞좌석 왼쪽 문을 확인해요",
@@ -39,7 +39,7 @@
     {
       "kind": "video",
       "duration": 2,
-      "start": 11.01,
+      "start": 10.8,
       "chapter": "02  문 개폐",
       "title": "문이 열리고 닫히는\n모습까지",
       "subtitle": "앱에서 실제로 움직이는\n앞좌석 왼쪽 문을 확인해요",
@@ -49,17 +49,17 @@
     {
       "kind": "video",
       "duration": 2,
-      "start": 13.23,
+      "start": 13.06,
       "chapter": "02  문 개폐",
       "title": "문이 열리고 닫히는\n모습까지",
-      "subtitle": "IONIQ 5 스타일 3D로\n수신 상태를 표시해요",
+      "subtitle": "IONIQ 5 전용 3D 모델로\n수신 상태를 표시해요",
       "source_scene": "3D 문 열리는 애니메이션",
       "lead_in_seconds": 0.8
     },
     {
       "kind": "video",
       "duration": 2,
-      "start": 15.09,
+      "start": 14.91,
       "chapter": "03  3D 차량 모델",
       "title": "차량을 돌려 보며\n확인하세요",
       "subtitle": "앱 안의 3D 모델을\n드래그해 살펴봐요",
@@ -69,7 +69,7 @@
     {
       "kind": "video",
       "duration": 2,
-      "start": 22.22,
+      "start": 20.52,
       "chapter": "04  사용 가이드",
       "title": "사진과 함께\n단계별로",
       "subtitle": "필요한 안내를 열고\n한 단계씩 살펴봐요",
@@ -78,7 +78,7 @@
     {
       "kind": "video",
       "duration": 2,
-      "start": 28.11,
+      "start": 24.98,
       "chapter": "04  사용 가이드",
       "title": "사진과 함께\n단계별로",
       "subtitle": "필요한 안내를 열고\n한 단계씩 살펴봐요",
@@ -87,7 +87,7 @@
     {
       "kind": "video",
       "duration": 2,
-      "start": 30.33,
+      "start": 27.16,
       "chapter": "05  질문 화면",
       "title": "궁금한 순간,\n바로 질문",
       "subtitle": "살펴보던 가이드에서\n질문 화면으로 이어져요",
@@ -97,7 +97,7 @@
     {
       "kind": "video",
       "duration": 2,
-      "start": 32.74,
+      "start": 29.67,
       "chapter": "06  언어 선택",
       "title": "익숙한 언어로\n이어지는 경험",
       "subtitle": "한국어\nEnglish\n日本語",
@@ -106,7 +106,7 @@
     {
       "kind": "video",
       "duration": 2,
-      "start": 35.09,
+      "start": 32.01,
       "chapter": "06  언어 선택",
       "title": "익숙한 언어로\n이어지는 경험",
       "subtitle": "한국어\nEnglish\n日本語",
@@ -115,7 +115,7 @@
     {
       "kind": "video",
       "duration": 2,
-      "start": 39.51,
+      "start": 36.74,
       "chapter": "06  언어 선택",
       "title": "익숙한 언어로\n이어지는 경험",
       "subtitle": "한국어\nEnglish\n日本語",
@@ -124,7 +124,7 @@
     {
       "kind": "video",
       "duration": 2,
-      "start": 42.28,
+      "start": 39.16,
       "chapter": "06  언어 선택",
       "title": "익숙한 언어로\n이어지는 경험",
       "subtitle": "한국어\nEnglish\n日本語",
@@ -133,7 +133,7 @@
     {
       "kind": "video",
       "duration": 2,
-      "start": 47.31,
+      "start": 44.5,
       "chapter": "07  이용 마치기",
       "title": "이용이 끝나면\n가볍게 마무리",
       "subtitle": "이번 이용의 선택과\n임시 기록을 정리해요",
@@ -149,5 +149,6 @@
   "audio_start": 12,
   "audio_volume": 0.32,
   "music_credit": "'A Kind Of Hope' by Scott Buckley - released under CC-BY 4.0. www.scottbuckley.com.au",
-  "model_hero": "output/qa/ioniq5-app-3d.png"
+  "model_hero": "output/qa/ioniq5-app-3d.png",
+  "model_credit": "3D: andikapratamaw (2022), Dogan Ulus (2026) · MPL-2.0 + CC BY 4.0 · adapted"
 }

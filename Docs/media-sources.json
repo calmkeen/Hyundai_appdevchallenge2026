@@ -38,42 +38,76 @@
     }
   ],
   "vehicle_3d": {
-    "name": "CarCue IONIQ 5 inspired articulated illustration",
-    "author": "CarCue project (original geometry)",
+    "name": "Hyundai IONIQ 5 2022 — OpenX Assets / CarCue articulated adaptation",
+    "author": "andikapratamaw (2022), Dogan Ulus (2026); CarCue articulation/runtime adaptation",
+    "license": "MPL-2.0 AND CC-BY-4.0",
     "official_hyundai_asset": false,
     "verified_trim_or_cad": false,
-    "reference_dimensions_m": [
-      4.635,
-      1.89,
-      1.605
+    "geometry_downloaded": true,
+    "source_car_triangles": 37350,
+    "material_count": 30,
+    "source_repo": "https://github.com/vevalabs/openx-assets",
+    "source_commit": "1a63f13b5cfee3e01207a84b13b40fc172d92a95",
+    "source_release": "https://github.com/vevalabs/openx-assets/releases/tag/20261015",
+    "source_asset": "src/vehicles/hyundai_ioniq_5_2022/",
+    "source_sha256": "ac137a4687945b5bdd48217f66d3c88ffd423a980679690f9fdd7589522cbc8a",
+    "copyrights": [
+      "2022 andikapratamaw, CC BY 4.0",
+      "2026 Dogan Ulus, MPL 2.0"
     ],
-    "wheelbase_m": 3.0,
+    "changes": [
+      "Coordinate conversion to app axes",
+      "Original front-left door subtree and hinge retained",
+      "Open/close animation",
+      "Native smooth-normal/roughness/metal/alpha stream",
+      "Contact shadow"
+    ],
     "front_axis": "-Z",
     "physical_left_axis": "-X",
     "hinge_m": [
-      -0.932,
-      0,
-      -1.12
+      -0.9395864009857178,
+      0.9142935276031494,
+      -0.9544365406036377
     ],
     "door_open_degrees": 62,
+    "door_source_node": "Grp_Door_Left_0",
+    "moving_source_nodes": [
+      "Door_Left_0",
+      "Light_Indicator_Left_1",
+      "Grp_Light_Indicator_Left_1",
+      "Grp_Mirror_Side_View_Left_0",
+      "Mirror_Side_Left_0",
+      "Grp_Mirror_Side_Joint_Left_0",
+      "Grp_Mirror_Side_Mounting_Left_0",
+      "Grp_Door_Left_0"
+    ],
     "parts": [
       {
-        "name": "Body",
-        "vertices": 43728,
-        "triangles": 14576
+        "name": "BodyOpaque",
+        "vertices": 111051,
+        "triangles": 37017
       },
       {
-        "name": "FrontLeftDoor",
-        "vertices": 474,
-        "triangles": 158
+        "name": "FrontLeftDoorOpaque",
+        "vertices": 3210,
+        "triangles": 1070
+      },
+      {
+        "name": "BodyTransparent",
+        "vertices": 1413,
+        "triangles": 471
+      },
+      {
+        "name": "FrontLeftDoorTransparent",
+        "vertices": 120,
+        "triangles": 40
       }
     ],
-    "reference": "https://ioniq5.hyundai.co.in/ioniq-5-brochure.pdf",
     "source": "scripts/build_ioniq5_model.py",
-    "geometry_downloaded": false,
     "files": {
-      "ioniq5-articulated.ccmesh": "cbf003433152b3394c8d107446ab08e40a42c1b12a92899509a944bc572a0e8f",
-      "ioniq5-articulated.glb": "cb3129de2d65e6cea24a7ae3f0f073a6346549e9c278e830b39efbfe8f730401"
-    }
+      "ioniq5-articulated.ccmesh": "89ec27c4404aa42b49faf5c5134f176251e5d85909795b6c7c871a964e787f4f",
+      "ioniq5-articulated.glb": "173434d0f436a2f925486848c7a547e690ec2ed7c9d51ab594243e644ebb74cb"
+    },
+    "checked_date": "2026-11-14"
   }
 }

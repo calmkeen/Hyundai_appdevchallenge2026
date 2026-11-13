@@ -30,6 +30,7 @@ class ArticulatedVehicleView(context: Context) : TextureView(context), TextureVi
     private var program = 0
     private val counts: IntArray
     private val vertices: Array<FloatBuffer>
+    private val hinge = FloatArray(3)
     private var state = "unknown"
     private var doorAngle = 22f
     private var fromAngle = 22f
@@ -57,12 +58,13 @@ class ArticulatedVehicleView(context: Context) : TextureView(context), TextureVi
         isOpaque = true
         val data = context.assets.open("models/ioniq5-articulated.ccmesh").use { it.readBytes() }
         val bytes = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
-        check(bytes.int == 0x314D4343) { "Invalid CarCue mesh" }
-        counts = intArrayOf(bytes.int, bytes.int)
-        check(counts.all { it > 0 && it % 3 == 0 } && data.size == 12 + counts.sum()*40)
-        vertices = Array(2) { i ->
-            ByteBuffer.allocateDirect(counts[i]*40).order(ByteOrder.nativeOrder()).asFloatBuffer().also { buffer ->
-                repeat(counts[i]*10) { buffer.put(bytes.float) }; buffer.position(0)
+        check(bytes.int == 0x324D4343) { "Invalid CarCue mesh" }
+        counts = IntArray(4) { bytes.int }
+        repeat(3) { hinge[it] = bytes.float }
+        check(counts.all { it > 0 && it % 3 == 0 } && data.size == 32 + counts.sum()*48)
+        vertices = Array(4) { i ->
+            ByteBuffer.allocateDirect(counts[i]*48).order(ByteOrder.nativeOrder()).asFloatBuffer().also { buffer ->
+                repeat(counts[i]*12) { buffer.put(bytes.float) }; buffer.position(0)
             }
         }
     }
@@ -155,24 +157,26 @@ class ArticulatedVehicleView(context: Context) : TextureView(context), TextureVi
         Matrix.multiplyMM(vp,0,projection,0,view,0)
         glUseProgram(program)
         glUniform3fv(glGetUniformLocation(program,"uEye"),1,eye,0)
-        for (i in 0..1) {
+        for (i in 0..3) {
+            if (i == 2) { glEnable(GL_BLEND); glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); glDepthMask(false) }
             Matrix.setIdentityM(model,0)
-            if (i==1) {
-                Matrix.translateM(model,0,-.932f,0f,-1.12f)
+            if (i%2==1) {
+                Matrix.translateM(model,0,hinge[0],hinge[1],hinge[2])
                 Matrix.rotateM(model,0,-doorAngle,0f,1f,0f)
             }
             Matrix.multiplyMM(mvp,0,vp,0,model,0)
             glUniformMatrix4fv(glGetUniformLocation(program,"uMvp"),1,false,mvp,0)
             glUniformMatrix4fv(glGetUniformLocation(program,"uModel"),1,false,model,0)
-            glUniform1f(glGetUniformLocation(program,"uUnknown"),if (i==1 && state=="unknown") 1f else 0f)
-            for ((name, offset, size) in listOf(Triple("aPosition",0,3),Triple("aNormal",3,3),Triple("aColour",6,4))) {
+            glUniform1f(glGetUniformLocation(program,"uUnknown"),if (i%2==1 && state=="unknown") 1f else 0f)
+            for ((name, offset, size) in listOf(Triple("aPosition",0,3),Triple("aNormal",3,3),Triple("aColour",6,3),Triple("aSurface",9,3))) {
                 val location=glGetAttribLocation(program,name)
                 vertices[i].position(offset)
                 glEnableVertexAttribArray(location)
-                glVertexAttribPointer(location,size,GL_FLOAT,false,40,vertices[i])
+                glVertexAttribPointer(location,size,GL_FLOAT,false,48,vertices[i])
             }
             glDrawArrays(GL_TRIANGLES,0,counts[i])
         }
+        glDepthMask(true); glDisable(GL_BLEND)
         check(glGetError()==GL_NO_ERROR) { "CarCue OpenGL render error" }
         check(EGL14.eglSwapBuffers(display,surface))
         renderedFrames++
@@ -197,28 +201,58 @@ class ArticulatedVehicleView(context: Context) : TextureView(context), TextureVi
     companion object {
         private const val VERTEX = """
             uniform mat4 uMvp; uniform mat4 uModel;
-            attribute vec3 aPosition; attribute vec3 aNormal; attribute vec4 aColour;
-            varying vec3 vPosition; varying vec3 vNormal; varying vec4 vColour;
+            attribute vec3 aPosition; attribute vec3 aNormal; attribute vec3 aColour; attribute vec3 aSurface;
+            varying vec3 vPosition; varying vec3 vNormal; varying vec3 vColour; varying vec3 vSurface;
             void main() { vPosition=(uModel*vec4(aPosition,1.0)).xyz;
-                vNormal=mat3(uModel)*aNormal; vColour=aColour;
+                vNormal=mat3(uModel)*aNormal; vColour=aColour; vSurface=aSurface;
                 gl_Position=uMvp*vec4(aPosition,1.0); }
         """
+        // Smooth imported normals and metallic/roughness BRDF under a procedural
+        // studio sky. No downloaded HDRI, raster car image or external viewer.
         private const val FRAGMENT = """
             precision mediump float;
             uniform vec3 uEye; uniform float uUnknown;
-            varying vec3 vPosition; varying vec3 vNormal; varying vec4 vColour;
+            varying vec3 vPosition; varying vec3 vNormal; varying vec3 vColour; varying vec3 vSurface;
+            const float PI=3.14159265;
+            vec3 fresnel(float cosine, vec3 f0) { return f0+(1.0-f0)*pow(1.0-cosine,5.0); }
+            vec3 sky(vec3 r, float rough) {
+                vec3 c=mix(vec3(0.20,0.23,0.28),vec3(0.85,0.91,1.0),smoothstep(-0.35,0.75,r.y));
+                float strip=pow(max(dot(r,normalize(vec3(-0.5,1.0,-0.8))),0.0),mix(28.0,4.0,rough));
+                c+=vec3(1.5)*strip;
+                return mix(c,vec3(0.65,0.70,0.76),rough*0.45);
+            }
+            vec3 lamp(vec3 n,vec3 v,vec3 l,vec3 base,vec3 f0,float rough,float metal,vec3 radiance) {
+                vec3 h=normalize(v+l);
+                float nv=max(dot(n,v),0.001); float nl=max(dot(n,l),0.0);
+                float nh=max(dot(n,h),0.0); float vh=max(dot(v,h),0.0);
+                float a=rough*rough; float aa=a*a;
+                float den=nh*nh*(aa-1.0)+1.0;
+                float d=aa/max(PI*den*den,0.0001);
+                float k=(rough+1.0)*(rough+1.0)/8.0;
+                float g=(nv/(nv*(1.0-k)+k))*(nl/(nl*(1.0-k)+k));
+                vec3 f=fresnel(vh,f0);
+                vec3 spec=d*g*f/max(4.0*nv*nl,0.001);
+                vec3 diffuse=(1.0-f)*(1.0-metal)*base/PI;
+                return (diffuse+spec)*radiance*nl;
+            }
             void main() {
-                if(vColour.a<0.0) {gl_FragColor=vec4(vColour.rgb,1.0); return;}
+                if(vSurface.x<0.0) { gl_FragColor=vec4(vColour,1.0); return; }
                 vec3 n=normalize(vNormal); if(!gl_FrontFacing) n=-n;
                 vec3 v=normalize(uEye-vPosition);
-                vec3 key=normalize(vec3(-3.0,6.0,-4.0));
-                float diffuse=max(dot(n,key),0.0);
-                float fill=max(dot(n,normalize(vec3(4.0,3.0,2.0))),0.0);
-                float spec=pow(max(dot(n,normalize(key+v)),0.0),48.0)*vColour.a;
-                float fresnel=pow(1.0-max(dot(n,v),0.0),3.0)*vColour.a;
-                vec3 c=vColour.rgb*(0.48+diffuse*0.42+fill*0.16)+vec3(spec*.42+fresnel*.13);
-                if(uUnknown>0.5) c=mix(c,vec3(0.63,0.67,0.72),0.55);
-                gl_FragColor=vec4(c,1.0);
+                float rough=clamp(vSurface.x,0.12,1.0); float metal=clamp(vSurface.y,0.0,1.0);
+                float alpha=vSurface.z; vec3 base=vColour;
+                if(uUnknown>0.5) { base=mix(base,vec3(0.33,0.38,0.44),0.65); rough=max(rough,0.65); }
+                vec3 f0=mix(vec3(0.04),base,metal);
+                vec3 c=base*(1.0-metal)*(0.16+0.18*max(n.y,0.0));
+                c+=sky(reflect(-v,n),rough)*fresnel(max(dot(n,v),0.0),f0)*(0.7-rough*0.25);
+                c+=lamp(n,v,normalize(vec3(-3.0,6.0,-4.0)),base,f0,rough,metal,vec3(3.2,3.3,3.5));
+                c+=lamp(n,v,normalize(vec3(4.0,2.5,2.0)),base,f0,rough,metal,vec3(1.2,1.3,1.5));
+                if(alpha<0.99) {
+                    c+=vec3(0.015,0.025,0.033);
+                    alpha=clamp(alpha+pow(1.0-max(dot(n,v),0.0),4.0)*0.35,0.0,0.85);
+                }
+                c=clamp((c*(2.51*c+0.03))/(c*(2.43*c+0.59)+0.14),0.0,1.0);
+                gl_FragColor=vec4(pow(c,vec3(1.0/2.2)),alpha);
             }
         """
     }

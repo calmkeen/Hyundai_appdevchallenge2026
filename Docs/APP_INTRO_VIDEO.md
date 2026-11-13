@@ -1,6 +1,6 @@
 # CarCue 앱 소개 영상
 
-2026-11-13. 최신 요청은 IONIQ 5처럼 생긴 3D 모델이 실제 앱 안에서 문을 열고 닫으며, 소개 영상에도 같은 장면이 나오는 것이다. 최종 구성은 34초, 1920×1080, 30fps다. 기능 장면은 약 2초씩 보여준다.
+2026-11-14. 최신 요청은 IONIQ 5처럼 생긴 3D 모델이 실제 앱 안에서 문을 열고 닫으며, 소개 영상에도 같은 장면이 나오는 것이다. 최종 구성은 34초, 1920×1080, 30fps다. 기능 장면은 약 2초씩 보여준다.
 
 | 시간 | 메시지 | 실제 화면 |
 | --- | --- | --- |
@@ -14,9 +14,9 @@
 | 29–31초 | 이용 마무리 | 종료 확인 |
 | 31–34초 | 낯선 차를 더 익숙하게 | 브랜드 마무리 |
 
-모든 기능 장면은 `carcue-native-run.mp4` 한 번의 실제 APK 실행 녹화에서 가져온다. 설치 APK와 전달 APK SHA256을 대조한다. 문·유리·미러의 개폐와 회전은 앱의 OpenGL 렌더러가 수행한다. 다른 앱의 차량 3D나 외부 렌더 영상을 붙이지 않는다. 시작 카드도 같은 APK의 3D 뷰 비트맵 `ioniq5-app-3d.png`를 사용한다.
+모든 기능 장면은 `carcue-native-run.mp4` 한 번의 실제 APK 실행 녹화에서 가져온다. 설치 APK와 전달 APK SHA256을 대조한다. 문·유리·미러의 개폐와 회전은 앱의 OpenGL 렌더러가 수행한다. 다른 앱의 차량 3D나 외부 렌더 영상을 붙이지 않는다. 시작 카드도 같은 APK의 실제 모델 3D 뷰 비트맵 `ioniq5-app-3d.png`를 사용한다.
 
-모델은 자체 제작한 IONIQ 5 스타일 외형 참고 모델이다. 현대 공식 CAD·정확한 연식/트림 일치를 뜻하지 않는다. 차량 데이터와 개폐 시연은 **MOCK**이며 차량을 실제로 제어하지 않는다. 실제 OpenAI 답변 생성도 이번 영상에 없다. 출처와 범위는 `NATIVE_VISUALS.md`, `MEDIA_CREDITS.md`를 따른다.
+모델은 OpenX Assets에서 공개한 IONIQ 5 2022 전용 모델이다. 현대 공식 CAD가 아니며 선택 프로필의 연식/트림 일치는 미검증이다. 차량 데이터와 개폐 시연은 **MOCK**이며 차량을 실제로 제어하지 않는다. 실제 OpenAI 답변 생성도 이번 영상에 없다. 원작자 andikapratamaw·Dogan Ulus, MPL 2.0·CC BY 4.0과 변경 사실을 영상에 표시한다. 원본·변환 소스·라이선스 전문은 APK에도 포함한다. 출처와 범위는 `NATIVE_VISUALS.md`, `MEDIA_CREDITS.md`를 따른다.
 
 배경음악은 기존 외부 무료 음원 **Scott Buckley — A Kind Of Hope (CC BY 4.0)**를 유지한다. 원곡 12초 지점부터 영상 길이만큼 사용하고 음량·페이드만 조정한다. 곡명·원작자·라이선스·사이트를 영상과 게시용 텍스트에 표기한다. 음악을 생성하지 않는다. 게시 시 필요한 설명란 표기는 `carcue-app-intro-credits.txt`에 있다.
 
@@ -25,4 +25,4 @@ python3 scripts/record_native_showcase.py
 python3 scripts/render_app_intro.py
 ```
 
-기기 준비·최신 APK 빌드 후 녹화한다. 촬영 도구가 모델 비트맵도 앱 저장소에서 `output/qa/ioniq5-app-3d.png`로 가져온다. 소개 렌더 도구는 전달/설치 APK·원본 영상·모델 캡처의 해시를 검사하고 원본 JSON 장면 시각에 맞춰 `app-intro.json`의 시작점을 자동 정렬한다. 문 개폐는 표식보다 0.8초, 회전은 1초 앞에서 시작해 실제 터치·움직임도 편집 구간에 남긴다. 현재 산출물은 `output/qa/carcue-app-intro.mp4`, 동일 기본 링크는 `carcue-mock-flow.mp4`다. 이전 사진 버전·APK는 `output/qa/archive-before-articulated-3d/`와 `output/apk/*-before-articulated-3d.apk`에 보존한다.
+기기 준비·최신 APK 빌드 후 녹화한다. 촬영 도구가 모델 비트맵도 앱 저장소에서 `output/qa/ioniq5-app-3d.png`로 가져온다. 소개 렌더 도구는 전달/설치 APK·원본 영상·모델 캡처의 해시를 검사하고 원본 JSON 장면 시각에 맞춰 `app-intro.json`의 시작점을 자동 정렬한다. 문 개폐는 표식보다 0.8초, 회전은 1초 앞에서 시작해 실제 터치·움직임도 편집 구간에 남긴다. 현재 산출물은 `output/qa/carcue-app-intro.mp4`, 동일 기본 링크는 `carcue-mock-flow.mp4`다. 이전 각진 자체 모형·APK·영상은 `output/qa/archive-before-real-model/`, `output/apk/*-before-real-model.apk`에 보존한다. 더 이른 사진 버전도 기존 보관 경로에 유지한다.

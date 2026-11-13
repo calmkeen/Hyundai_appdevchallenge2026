@@ -595,9 +595,9 @@
     "ja-JP": "車種は未確認 · 状態の読み取り専用"
   },
   "ui_visual_title": {
-    "ko-KR": "IONIQ 5 스타일 · 3D",
-    "en": "IONIQ 5 inspired · 3D",
-    "ja-JP": "IONIQ 5スタイル · 3D"
+    "ko-KR": "IONIQ 5 · 3D",
+    "en": "IONIQ 5 · 3D",
+    "ja-JP": "IONIQ 5 · 3D"
   },
   "ui_visual_open": {
     "ko-KR": "앞좌석 왼쪽 문 · 열림",
@@ -615,9 +615,9 @@
     "ja-JP": "ドア状態は未確認 · 位置のみ表示"
   },
   "ui_visual_drag": {
-    "ko-KR": "드래그해 돌려보기 · 자체 제작 외형 모델",
-    "en": "Drag to rotate · original appearance model",
-    "ja-JP": "ドラッグで回転 · 独自制作の外観モデル"
+    "ko-KR": "드래그해 돌려보기 · IONIQ 5 2022 외형 참고",
+    "en": "Drag to rotate · IONIQ 5 2022 reference model",
+    "ja-JP": "ドラッグで回転 · IONIQ 5 2022の外観モデル"
   },
   "ui_visual_shape": {
     "ko-KR": "IONIQ 5 외형 참고 모델 · 연식·트림 일치 미검증",
@@ -678,5 +678,15 @@
     "ko-KR": "이 차량의 참고사진은 준비 중이에요",
     "en": "Reference photo is not available yet",
     "ja-JP": "この車両の参考写真は準備中です"
+  },
+  "ui_model_credit_title": {
+    "ko-KR": "3D 모델 출처·라이선스",
+    "en": "3D model credits & licenses",
+    "ja-JP": "3Dモデルの出典・ライセンス"
+  },
+  "ui_model_credit_notice": {
+    "ko-KR": "OpenX Assets의 IONIQ 5 2022 모델을 개폐·앱 표시용으로 변환했습니다. 모델 원본·변환 소스·라이선스 전문을 APK의 models/source에 포함했습니다. 선택한 차량의 연식·트림 일치는 미검증입니다.",
+    "en": "Adapted the OpenX Assets IONIQ 5 2022 model for door animation and app rendering. Original model, conversion source and full licenses are included in the APK at models/source. Selected vehicle year/trim match is unverified.",
+    "ja-JP": "OpenX AssetsのIONIQ 5 2022モデルを開閉アニメーションとアプリ表示用に変換しました。原本・変換ソース・ライセンス全文をAPKのmodels/sourceに同梱しています。選択車両の年式・グレードとの一致は未検証です。"
   }
 }

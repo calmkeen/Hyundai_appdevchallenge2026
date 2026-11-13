@@ -54,7 +54,9 @@ meta = {
 out.with_suffix(".json").write_text(json.dumps(meta, ensure_ascii=False, indent=2) + "\n")
 credits = music["required_credit"] + "\n" + music["source_page"] + "\n" + music["license_url"] + "\n\n"
 credits += "Music excerpt trimmed, volume adjusted and faded for this video.\nFor YouTube, include the music credit in the video description.\n\n"
-credits += "3D: original CarCue IONIQ 5 inspired articulated illustration; not official Hyundai CAD.\n"
+credits += plan["model_credit"] + "\n"
+credits += "https://github.com/vevalabs/openx-assets\nhttps://sketchfab.com/andikapratamaw\nhttps://www.mozilla.org/MPL/2.0/\nhttps://creativecommons.org/licenses/by/4.0/\n"
+credits += "Adapted: axes, original front-left hinge/door group, animation, native materials and contact shadow. Original model/source and license texts are included in the APK.\n"
 credits += "Auxiliary vehicle photos: crash71100 / Calreyn88, CC0 1.0, Wikimedia Commons.\n"
 for image in sources["vehicle_photos"]: credits += image["source"] + "\n"
 out.with_name("carcue-app-intro-credits.txt").write_text(credits)
