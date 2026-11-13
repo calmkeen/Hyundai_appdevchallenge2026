@@ -1,0 +1,11 @@
+{
+  "version": "draft-1",
+  "status": "DRAFT",
+  "terms": [
+    {
+      "id": "ROW_1_LEFT",
+      "ko-KR": "앞좌석 왼쪽 문",
+      "en": "Front-left door"
+    }
+  ]
+}

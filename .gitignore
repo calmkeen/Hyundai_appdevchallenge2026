@@ -11,3 +11,13 @@ local.properties
 *.aar
 *.apk
 *.aab
+.tooling/
+.handoff/
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+*.sqlite3
+*.sqlite3-*
+output/
+!backend/.env.example
