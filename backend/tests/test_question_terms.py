@@ -97,7 +97,8 @@ def test_native_prompt_hints_and_api_term_guard_keep_new_translation_unreviewed(
         return httpx.Response(200, json={"model": "qwen3:4b", "done": True, "done_reason": "stop",
             "prompt_eval_count": 30, "eval_count": 20, "message": {"role": "assistant", "content": json.dumps(
                 {"source_locale": detected, "translated_text": translated}, ensure_ascii=False)}})
-    provider = OllamaProvider(model="qwen3:4b", transport=httpx.MockTransport(handler))
+    provider = OllamaProvider(model="qwen3:4b", transport=httpx.MockTransport(handler),
+                              enable_draft_question_translation=True)
     app = create_app(db_path=":memory:", provider=provider, mode="LIVE")
     with TestClient(app) as client:
         session = client.post("/v1/sessions", json={"profile_id": PROFILE, "locale": target}).json()
