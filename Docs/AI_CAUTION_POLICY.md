@@ -58,3 +58,5 @@ request ID의 다른 입력 재사용은 기존 409이며 fingerprint를 바꾸�
 로컬 검증 결과: 관련 회귀 **272개 통과 / 3.63초**, 최종 전체 backend **462개 통과 / 6.79초**. 신규 정책/API/캐시 회귀 82개를 포함한다. 기존 단독 3단위 번역 조합은 새 단일 bundle의 모든 언어 방향·명시/자동 source 선택 조합으로 바꾸고, 과거 3단위는 거절 회귀로 검증한다. `scripts/check_contracts.py`도 통과했다(필수 bundle1개·실제 3언어 payload/text 핀·기존 지원/상태 규칙·UI185자원).
 
 실제 출력은 ignored `output/qa/ai-complete-cautions-tests-02.txt`, `ai-complete-cautions-backend-full-02.txt`에 보존했다. 이전 실패한 개발 단계 출력도 덮어쓰지 않았다. `ai-complete-cautions-policy-01.json`은 정책·최종 단위 SHA와 기준선 대비 게시 3파일 보존 확인 기록이다.
+
+후속 실제 검증은 [AI_CAUTION_VALIDATION.md](AI_CAUTION_VALIDATION.md)에 기록했다. 실제 API9개와 SDK 앱3답변/3저장 번역을 무료 Ollama로 확인했다. 초기 실패와 독립 검토를 별도 보존하며 이 정책의 합성 회귀 결과와 구분한다.

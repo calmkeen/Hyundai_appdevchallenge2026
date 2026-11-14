@@ -52,14 +52,23 @@ class PleosLocalAiFlowTest {
             .single { it.getString("guide_id") == guideId }
     }
     private fun answerUnits(guide: JSONObject): Map<String, String> = buildMap {
-        put("body", guide.getString("body"))
+        val protectedClosing = guide.getString("guide_id") == guideId
+        if (!protectedClosing) put("body", guide.getString("body"))
         val steps = guide.getJSONArray("steps")
+        if (protectedClosing) assertEquals(2, steps.length())
+        val completeClosing = mutableListOf(guide.getString("body"))
         for (i in 0 until steps.length()) {
             val step = steps.getJSONObject(i)
             val cautions = step.getJSONArray("official_cautions")
+            if (protectedClosing) {
+                assertEquals(listOf("check-pinch-area", "check-closure-display")[i], step.getString("step_id"))
+                assertTrue(cautions.length() > 0)
+            }
             val text = listOf(step.getString("body")) + (0 until cautions.length()).map { cautions.getString(it) }
-            put("step:${step.getString("step_id")}", text.joinToString("\n"))
+            if (!protectedClosing) put("step:${step.getString("step_id")}", text.joinToString("\n"))
+            completeClosing.addAll(text)
         }
+        if (protectedClosing) put("closing-bundle:v1", completeClosing.joinToString("\n"))
     }
     private fun capture(phase: String, elapsed: Long) {
         val s = vm.state.value
@@ -169,6 +178,7 @@ class PleosLocalAiFlowTest {
                 clickText(vm.content.copy(source).get("ui_af7d9b9636de"))
                 rule.onNodeWithTag("question_input").performScrollTo().performTextInput(question)
                 val askMs = send(false)
+                val expectedBundle = answerUnits(rawGuide(source)).getValue("closing-bundle:v1")
                 rule.runOnIdle {
                     val s = vm.state.value
                     assertEquals("LIVE", s.answerMode)
@@ -176,8 +186,9 @@ class PleosLocalAiFlowTest {
                     assertEquals(source, s.answerLocale)
                     assertEquals(AiProvider.OLLAMA_LOCAL, s.answerProvider)
                     assertEquals(expectedModel, s.answerModel)
-                    assertTrue(s.answer.isNotBlank())
-                    assertTrue(s.citations.isNotEmpty())
+                    assertEquals(expectedBundle, s.answer)
+                    assertEquals(listOf("hyundai-ne1-2024-kr-door-open-warning", "hyundai-ne1-2024-kr-door-pinch-caution"),
+                        s.officialCitations.map { it.sourceId })
                     assertTrue(s.citations.all { it.second.startsWith("https://ownersmanual.hyundai.com/") })
                 }
                 capture("ask-$source", askMs)

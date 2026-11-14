@@ -69,3 +69,12 @@ OF-001 구현 `e816d61`, 철회 navigation 보완 `684556c`/`e7c58ad`, SE-001 �
 | LK-002 실제 앱 외부 연결 | `feature/official-resource-actions` | typed source/citation·답변고유request binding·latest세션/UXguard·공식AVD debug브라우저호환·결과/경로구분. 통합JVM110·링크8회76.488초·SDK9단계20.564초 |
 
 기존코드·게시가이드·이미지·음원·영상·main과 모든실패증거를 보존한다. 유료 AI/생성질문번역 보류를 유지했다. 최종 무료AI호출의 출처/action실행과 질문의 완전한 의미적합성을 구분하며 상세는 `OFFICIAL_RESOURCE_APP_VALIDATION.md`를 따른다. 작업별검증·커밋 후 develop에 no-ff 통합하고 feature/develop을 원격반영하며 실제 remoteSHA와 CI결과를 확인한다.
+
+## AI 답변 주의문 보완 · 2026-11-14
+
+| 작업 | 브랜치 | 구현·검증 |
+| --- | --- | --- |
+| AI-006 완전한 주의문 답변 | `feature/ai-complete-caution-answers` | `c8af3b1`. 등록 문 안내의 전체 bundle/3언어 payload·text 핀, 불완전 답변/과거 캐시 차단, GUIDE 보존. backend462·신규정책82·계약 통과 |
+| AI-007 실제 호출·SDK 화면 | `feature/ai-caution-validation` | 공식 두 절 재대조, 실제 API9개/ANSWER6방향, 실제 SDK 앱3답변/3저장번역73.640초·물리 화면, 독립 의미 검토·실패 증거·재현 도구/Docs |
+
+기준 develop `7852159`, 기존 main `ba28cdb`와 게시 가이드3파일·앱 자산·영상·음원을 보존했다. 기존 step2 누락 사례를 같은 질문으로 검증하고 답변 후보/서버 검증/저장 번역/캐시 경로에서 모두 전체 주의문을 요구한다. 유료 AI·생성 질문 번역 기본 보류는 유지한다. API/앱/대역과 실제 모델 선택/저장 문자열을 [AI_CAUTION_VALIDATION.md](AI_CAUTION_VALIDATION.md)에 구분한다. 작업별 검증·커밋 뒤 develop에 no-ff 통합하고 두 feature와 develop의 실제 원격 SHA·CI를 확인한다.

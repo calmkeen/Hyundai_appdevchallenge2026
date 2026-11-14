@@ -105,7 +105,7 @@ def target_unit(unit, source, target):
     identity = lambda guide: ":".join((guide["guide_id"], guide["locale"], guide["source_version"]))
     require(unit["unit_id"].startswith(identity(source) + ":"), "INVALID_SOURCE_ANSWER_UNIT")
     suffix = unit["unit_id"][len(identity(source)):]
-    require(suffix == ":body" or suffix.startswith(":step:"), "INVALID_SOURCE_ANSWER_UNIT")
+    require(suffix in {":body", ":closing-bundle:v1"} or suffix.startswith(":step:"), "INVALID_SOURCE_ANSWER_UNIT")
     matches = [candidate for candidate in answer_units([target]) if candidate["unit_id"] == identity(target) + suffix]
     require(len(matches) == 1 and set(matches[0]["source_ids"]) == set(unit["source_ids"]), "CANONICAL_TARGET_ANSWER_UNIT_REQUIRED")
     return matches[0]

@@ -96,3 +96,7 @@ UX 연결 복구는 [UX_CONNECTION_RECOVERY.md](UX_CONNECTION_RECOVERY.md)를 �
 
 
 최종 환경 정리는 `environment-cleanup.json`에 기록했다. 자체 lease 둘과 bootstrap lease의 closing 요청/스레드 종료를 확인한 뒤 AVD를 정상 종료했고 launcher exit0·ADB 장치 제거를 확인했다. AVD userdata와 app/cache를 지우지 않았다. 무료 서버8001/LIVE 및 Ollama0.40.16은 계속 실행 중이다.
+
+## 후속: 닫기 전 주의문 누락 보완 · 2026-11-14
+
+위 run06의 부분 답변과 당시 한계는 보존한다. 후속 `feature/ai-complete-caution-answers`에서 해당 문 안내의 본문·두 단계·모든 주의문을 묶은 단위만 허용하고, 과거 부분 답변/번역 캐시도 차단했다. 같은 닫기 전 질문을 3언어×3문맥 실제 API9개와 실제 SDK 앱3문맥/3저장번역으로 재시험했다. 출처 두 절 재검토·물리 화면·독립 의미 검토·실패 이력·범위는 [AI_CAUTION_VALIDATION.md](AI_CAUTION_VALIDATION.md)를 따른다. 유료 AI와 생성 QUESTION 번역 기본 보류를 유지하며 임의 질문 전체의 정확성 완료로 확대하지 않는다.
