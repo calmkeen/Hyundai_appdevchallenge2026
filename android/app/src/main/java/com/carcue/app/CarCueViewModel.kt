@@ -107,11 +107,12 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
     }
     fun language() { languageReturn = mutable.value.page; go(Page.LANGUAGE) }
     fun go(page: Page) {
-        if (mutable.value.sessionStarted && isLong(page) && restricted()) { mutable.update { it.copy(error = "PARK_REQUIRED") }; return }
-        if (page !in listOf(Page.ASK, Page.TRANSLATE, Page.LANGUAGE) ||
+        val destination = GuideSelectionPolicy.destination(page, mutable.value.selectedGuide)
+        if (mutable.value.sessionStarted && isLong(destination) && restricted()) { mutable.update { it.copy(error = "PARK_REQUIRED") }; return }
+        if (destination !in listOf(Page.ASK, Page.TRANSLATE, Page.LANGUAGE) ||
             mutable.value.page !in listOf(Page.ASK, Page.TRANSLATE, Page.LANGUAGE)) assistantGuideContext = null
-        mutable.update { it.copy(page = page, error = null) }
-        if (page == Page.GUIDES) loadGuides()
+        mutable.update { it.copy(page = destination, error = null) }
+        if (destination == Page.GUIDES) loadGuides()
     }
     fun openAssistant() {
         val current = mutable.value
@@ -155,7 +156,19 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
         if (mutable.value.sessionStarted && restricted()) { mutable.update { it.copy(error = "PARK_REQUIRED") }; return }
         chooseProfile(profile)
     }
-    fun openGuide(guide: Guide) { mutable.update { it.copy(selectedGuide = guide, guideStep = 0) }; go(Page.GUIDE) }
+    fun openGuide(guide: Guide) {
+        val current = mutable.value
+        if (!current.sessionStarted) return
+        if (restricted()) { mutable.update { it.copy(error = "PARK_REQUIRED") }; return }
+        val selected = if (BuildConfig.DEBUG && BuildConfig.IS_MOCK && guide.id == "__layout_preview__") guide
+            else current.profile?.let { GuideSelectionPolicy.resolveOpen(guide, it, current.locale, current.guides) }
+        if (selected == null) {
+            mutable.update { it.copy(error = "GUIDE_UNAVAILABLE") }
+            return
+        }
+        mutable.update { it.copy(selectedGuide = selected, guideStep = 0) }
+        go(Page.GUIDE)
+    }
     fun relatedDoorGuide(now: Instant = Instant.now()): Guide? = content.relatedDoorGuide(mutable.value, now)
     fun openRelatedDoorGuide(guideId: String) {
         // The displayed button can outlive its reading. Recheck freshness, UX and metadata at the tap.
@@ -164,9 +177,11 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
     fun step(delta: Int) { mutable.update { it.copy(guideStep = (it.guideStep + delta).coerceIn(0, (it.selectedGuide?.steps?.size ?: 1).minus(1).coerceAtLeast(0))) } }
     fun refreshGuides() { if (mutable.value.sessionStarted && !restricted()) loadGuides() }
     private fun applyGuides(profile: Profile, locale: String, guides: List<Guide>, connection: String? = null) {
+        var removedSelection = false
         mutable.update { current ->
             val selected = GuideSelectionPolicy.reconcile(current.selectedGuide, profile, locale, guides)
             val removed = current.selectedGuide?.publicationVerified == true && selected == null
+            removedSelection = removed
             current.copy(guides = guides, selectedGuide = selected,
                 guideStep = current.guideStep.coerceAtMost((selected?.steps?.size ?: 1).minus(1).coerceAtLeast(0)),
                 page = if (removed && current.page == Page.GUIDE) Page.GUIDES else current.page,
@@ -174,6 +189,10 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
                 guideConnection = connection ?: current.guideConnection,
                 guidesLoading = connection == null,
                 serverConnection = if (connection == "CONNECTED") connection else current.serverConnection)
+        }
+        if (removedSelection) {
+            assistantGuideContext = null
+            if (assistantReturn == Page.GUIDE) assistantReturn = Page.GUIDES
         }
     }
     private fun loadGuides() {

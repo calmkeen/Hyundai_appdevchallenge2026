@@ -26,4 +26,17 @@ class GuideSelectionPolicyTest {
         val preview = original.copy(publicationVerified = false, origin = GuideOrigin.NONE)
         assertEquals(preview, GuideSelectionPolicy.reconcile(preview, profile, preview.locale, emptyList()))
     }
+    @Test fun staleTapCannotReopenWithdrawnOrDifferentLocaleContent() {
+        assertNull(GuideSelectionPolicy.resolveOpen(original, profile, original.locale, emptyList()))
+        assertNull(GuideSelectionPolicy.resolveOpen(original, profile, "ja-JP", listOf(original)))
+    }
+    @Test fun tapUsesCurrentCanonicalBodyInsteadOfTheCapturedOldObject() {
+        val current = original.copy(body = "Corrected synthetic body", origin = GuideOrigin.SERVER)
+        assertEquals(current, GuideSelectionPolicy.resolveOpen(original, profile, original.locale, listOf(current)))
+    }
+    @Test fun missingSelectedGuideCannotNavigateToAnEmptyGuideScreen() {
+        assertEquals(Page.GUIDES, GuideSelectionPolicy.destination(Page.GUIDE, null))
+        assertEquals(Page.GUIDE, GuideSelectionPolicy.destination(Page.GUIDE, original))
+        assertEquals(Page.ASK, GuideSelectionPolicy.destination(Page.ASK, null))
+    }
 }
