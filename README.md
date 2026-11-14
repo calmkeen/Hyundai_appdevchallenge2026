@@ -19,6 +19,7 @@ CarCue는 낯선 차량의 상태와 사용법을 자신의 언어로 확인하�
 - [검수 가이드 등록·조회 절차](Docs/GUIDE_CONTENT_WORKFLOW.md)
 - [2024 한국 아이오닉 5 공식 매뉴얼 검토](Docs/MANUAL_REVIEW_IONIQ5_2024_KR.md)
 - [실제 SDK 문 상태와 공식 가이드 연결·검증](Docs/SDK_OFFICIAL_GUIDE_VALIDATION.md)
+- [Console 503 복구·최신 APK 전체 재시험](Docs/PLEOS_CONSOLE_RECOVERY.md)
 - [화면 명세](Docs/SCREEN_SPEC.md) · [API 계약](Docs/DATA_API_SPEC.md) · [완료 기준](Docs/ACCEPTANCE.md)
 
 `android/`는 네이티브 Compose 앱, `backend/`는 서버, `content/`는 프로필·언어·가이드 데이터입니다. 공식 2024 한국시장 아이오닉 5 매뉴얼을 대조한 문 안내 1개를 한국어·영어·일본어로 등록했습니다. 기존 개발 프로필과 `contracts/guide.template.json`은 미검수/비게시로 보존합니다. OpenAI 키는 서버 환경변수에만 설정하며 실제 AI 호출 완료와 구분합니다.

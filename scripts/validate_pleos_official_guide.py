@@ -20,6 +20,8 @@ from pathlib import Path
 from urllib.parse import urlencode, urlparse
 from urllib.request import Request, urlopen
 
+from pleos_console import PleosConsoleSession
+
 ROOT = Path(__file__).resolve().parents[1]
 PACKAGE = "com.carcue.app"
 PROFILE_ID = "ioniq5-ne1-2024-kr"
@@ -71,6 +73,7 @@ def main():
     parser.add_argument("--test-apk", default="android/app/build/outputs/apk/androidTest/pleos/debug/app-pleos-debug-androidTest.apk")
     parser.add_argument("--install", action="store_true", help="Replace both APKs with -r; preserve app data")
     parser.add_argument("--install-timeout", type=int, default=180, help="Host APK-install deadline; SDK/UI assertions keep their own deadlines")
+    parser.add_argument("--console-ready-timeout", type=int, default=60, help="Bounded wait for the Console door/speed/gear DDS bridge before fixture writes")
     parser.add_argument("--source-version", default=SOURCE_VERSION)
     parser.add_argument("--run-id", default=datetime.now(timezone.utc).strftime("official-guide-%Y%m%dT%H%M%SZ-") + secrets.token_hex(3))
     parser.add_argument("--output-dir", default="output/qa/pleos-official-guide", help="Parent directory; run ID is appended")
@@ -78,6 +81,7 @@ def main():
     parser.add_argument("--normal-launch-evidence", help="Previously verified normal-launch-smoke.json from this installed app build")
     args = parser.parse_args()
     require(90 <= args.install_timeout <= 600, "Install timeout must be between 90 and 600 seconds")
+    require(5 <= args.console_ready_timeout <= 180, "Console readiness timeout must be between 5 and 180 seconds")
     require(bool(re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{0,63}", args.run_id)), "Invalid run ID")
     require(bool(re.fullmatch(r"[A-Za-z0-9_-]{1,100}", args.source_version)), "Invalid source version")
     require(args.serial.startswith("emulator-"), "Refusing a physical device")
@@ -101,7 +105,7 @@ def main():
             return json.load(response)
 
     def console(path, method="GET"):
-        return request("http://127.0.0.1:8088" + path, method)
+        return lease.request(path, method)
 
     def app(*parts, check=True):
         return adb("shell", "run-as", PACKAGE, "--user", user, *parts, check=check)
@@ -180,7 +184,7 @@ def main():
     device_timezone = adb("shell", "getprop", "persist.sys.timezone")
     # Directory creation is exclusive in the instrumentation as well; never remove previous evidence.
     adb("forward", "tcp:8088", "tcp:8088")
-    heartbeat = "/browser/session?client=carcue-" + args.run_id
+    lease = PleosConsoleSession(base_url="http://127.0.0.1:8088", client="carcue-" + args.run_id)
     fixtures, handled = [], set()
     process = recorder = record_log = None
     recorder_pid = None
@@ -190,6 +194,7 @@ def main():
     success = False
     sdk_events = []
     error = None
+    cleanup_errors = []
     cleanup_attempts = []
     restored_fixture = None
     command = base + ["shell", "am", "instrument", "--user", user, "-w", "-r",
@@ -217,110 +222,120 @@ def main():
             record_log.close()
             recorder = None
 
-    try:
-        console(heartbeat, "POST")
-        fixture("INITIAL_PARK", "/vehicle/controls?speed=0&accelerator=0&brake=0")
-        fixture("INITIAL_PARK", "/vehicle/gear?gear=Park")
-        fixture("INITIAL_CLOSED", "/vehicle/body?door_fl=0")
-        if args.record:
-            record_log = (out / "screenrecord.txt").open("x")
-            recorder = subprocess.Popen(base + ["shell", "screenrecord", "--bit-rate", "6000000", "--time-limit", "180", remote_video],
-                                        stdout=record_log, stderr=subprocess.STDOUT)
-            until = time.monotonic() + 5
-            while time.monotonic() < until:
-                pid = adb("shell", "pidof", "screenrecord", check=False)
-                if pid.isdigit() and remote_video in adb("shell", "cat", "/proc/" + pid + "/cmdline", check=False):
-                    recorder_pid = pid
-                    break
-                if recorder.poll() is not None:
-                    break
-                time.sleep(.1)
-            if recorder_pid is not None:
-                recording_started = True
-            elif recorder.poll() is not None:
-                recording_error = {"phase": "STARTUP", "exit_code": recorder.returncode}
-                record_log.close()
-                recorder = None
-                print("OPTIONAL RECORDING FAILED: recorder exited before startup; SDK/UI assertions will still run", flush=True)
-            else:
-                require(False, "Could not identify this run's recorder")
-        with (out / "instrumentation.txt").open("x") as log:
-            process = subprocess.Popen(command, stdout=log, stderr=subprocess.STDOUT)
-            print("INSTRUMENTATION STARTED: " + args.run_id, flush=True)
-            deadline = time.monotonic() + 240
-            while time.monotonic() < deadline:
-                console(heartbeat, "POST")
-                present = marker_files()
-                for marker, paths in [
-                    ("request-open", ["/vehicle/body?door_fl=1"]),
-                    ("request-close", ["/vehicle/body?door_fl=0"]),
-                    ("request-drive", ["/vehicle/gear?gear=Drive", "/vehicle/controls?speed=20&accelerator=0&brake=0"]),
-                    ("request-park", ["/vehicle/controls?speed=0&accelerator=0&brake=0", "/vehicle/gear?gear=Park"]),
-                ]:
-                    if marker in present and marker not in handled:
-                        for path in paths:
-                            fixture(marker, path)
-                        handled.add(marker)
-                        print("EXTERNAL CONSOLE FIXTURE: " + marker, flush=True)
-                if "done" in present:
-                    success = True
-                    app("touch", markers + "/host-finished")
-                    break
-                require(process.poll() is None, "Instrumentation exited before done")
-                time.sleep(.25)
-            require(success, "SDK official-guide validation timed out")
-            process.wait(timeout=30)
-    except Exception as exc:
-        # Do not serialize arbitrary response contents or user/device data into the report.
-        error = type(exc).__name__
-        raise
-    finally:
-        stop_recording()
-        if process is not None and process.poll() is None:
-            app("touch", markers + "/host-finished", check=False)
-            process.terminate()
-            process.wait(timeout=10)
-        logs = adb("logcat", "-d", "-v", "brief", "-s", "CarCueVehicle:I", "CarCueOfficialGuide:I", "*:S")
-        begin = logs.find("OFFICIAL_GUIDE:" + args.run_id + ":BEGIN")
-        scoped = logs[begin:] if begin >= 0 else ""
-        end = scoped.find("OFFICIAL_GUIDE:" + args.run_id + ":DONE")
-        if end >= 0:
-            scoped = scoped[:end]
-        sdk_events = [match.group(1) for line in scoped.splitlines() if (match := SDK_EVENT.search(line))]
-        (out / "sdk-events.txt").write_text("\n".join(sdk_events) + "\n")
-        # Recording/process teardown can outlive the console's browser lease.
-        # Reacquire it before restoration rather than treating HTTP 503 as an SDK failure.
-        for attempt in range(1, 4):
-            try:
-                console(heartbeat, "POST")
-                fixture("RESTORE_PARK", "/vehicle/controls?speed=0&accelerator=0&brake=0")
-                fixture("RESTORE_PARK", "/vehicle/gear?gear=Park")
-                fixture("RESTORE_CLOSED", "/vehicle/body?door_fl=0")
-                body = console("/vehicle/body")
-                controls = console("/vehicle/controls")
-                gear = console("/vehicle/gear")
-                restored_fixture = {"front_left": body.get("body", body)["doors"]["front_left"],
-                                    "speed_kph": controls["speed_kph"], "gear": gear["actual"]["value"]}
-                require(restored_fixture == {"front_left": False, "speed_kph": 0, "gear": "Park"},
-                        "Final external fixture values differ from Park/0/CLOSED")
-                cleanup_attempts.append({"attempt": attempt, "restored": True})
-                print("RESTORE PASS: external console confirms Park / speed 0 / front-left closed", flush=True)
-                break
-            except Exception as exc:
-                cleanup_attempts.append({"attempt": attempt, "restored": False, "error_type": type(exc).__name__,
-                                         "http_status": getattr(exc, "code", None)})
-                time.sleep(.5)
+    def cleanup_step(phase, action, default=None):
         try:
-            console(heartbeat + "&closing=1", "POST")
+            return action()
         except Exception as exc:
-            cleanup_attempts.append({"phase": "CLOSE_LEASE", "error_type": type(exc).__name__,
-                                     "http_status": getattr(exc, "code", None)})
-        (out / "console-events.json").write_text(json.dumps(fixtures, indent=2) + "\n")
-        (out / "run-status.json").write_text(json.dumps({"run_id": args.run_id, "instrumentation_done": success,
-                                                        "error_type": error, "cleanup_attempts": cleanup_attempts,
-                                                        "restored_fixture": restored_fixture,
-                                                        "physical_vehicle_tested": False}, indent=2) + "\n")
+            cleanup_errors.append({"phase": phase, "error_type": type(exc).__name__})
+            return default
 
+    with lease:
+        try:
+            lease.wait_ready(timeout=args.console_ready_timeout)
+            (out / "console-readiness.json").write_text(json.dumps(lease.diagnostics(), indent=2) + "\n")
+            print("CONSOLE READY: independent heartbeat; door/speed/pedals DDS and gear bridge verified", flush=True)
+            fixture("INITIAL_PARK", "/vehicle/controls?speed=0&accelerator=0&brake=0")
+            fixture("INITIAL_PARK", "/vehicle/gear?gear=Park")
+            fixture("INITIAL_CLOSED", "/vehicle/body?door_fl=0")
+            if args.record:
+                record_log = (out / "screenrecord.txt").open("x")
+                recorder = subprocess.Popen(base + ["shell", "screenrecord", "--bit-rate", "6000000", "--time-limit", "180", remote_video],
+                                            stdout=record_log, stderr=subprocess.STDOUT)
+                until = time.monotonic() + 5
+                while time.monotonic() < until:
+                    pid = adb("shell", "pidof", "screenrecord", check=False)
+                    if pid.isdigit() and remote_video in adb("shell", "cat", "/proc/" + pid + "/cmdline", check=False):
+                        recorder_pid = pid
+                        break
+                    if recorder.poll() is not None:
+                        break
+                    time.sleep(.1)
+                if recorder_pid is not None:
+                    recording_started = True
+                elif recorder.poll() is not None:
+                    recording_error = {"phase": "STARTUP", "exit_code": recorder.returncode}
+                    record_log.close()
+                    recorder = None
+                    print("OPTIONAL RECORDING FAILED: recorder exited before startup; SDK/UI assertions will still run", flush=True)
+                else:
+                    require(False, "Could not identify this run's recorder")
+            with (out / "instrumentation.txt").open("x") as log:
+                process = subprocess.Popen(command, stdout=log, stderr=subprocess.STDOUT)
+                print("INSTRUMENTATION STARTED: " + args.run_id, flush=True)
+                deadline = time.monotonic() + 240
+                while time.monotonic() < deadline:
+                    present = marker_files()
+                    for marker, paths in [
+                        ("request-open", ["/vehicle/body?door_fl=1"]),
+                        ("request-close", ["/vehicle/body?door_fl=0"]),
+                        ("request-drive", ["/vehicle/gear?gear=Drive", "/vehicle/controls?speed=20&accelerator=0&brake=0"]),
+                        ("request-park", ["/vehicle/controls?speed=0&accelerator=0&brake=0", "/vehicle/gear?gear=Park"]),
+                    ]:
+                        if marker in present and marker not in handled:
+                            for path in paths:
+                                fixture(marker, path)
+                            handled.add(marker)
+                            print("EXTERNAL CONSOLE FIXTURE: " + marker, flush=True)
+                    if "done" in present:
+                        success = True
+                        app("touch", markers + "/host-finished")
+                        break
+                    require(process.poll() is None, "Instrumentation exited before done")
+                    time.sleep(.25)
+                require(success, "SDK official-guide validation timed out")
+                process.wait(timeout=30)
+        except Exception as exc:
+            # Do not serialize arbitrary response contents or user/device data into the report.
+            error = type(exc).__name__
+            raise
+        finally:
+            # An ADB/recording timeout must not skip external Park/0/CLOSED restoration.
+            # Retain such failures and reject an overall pass after restoration.
+            cleanup_step("STOP_RECORDING", stop_recording)
+            if process is not None and process.poll() is None:
+                cleanup_step("RELEASE_INSTRUMENTATION_WAIT", lambda: app("touch", markers + "/host-finished", check=False))
+                process.terminate()
+                cleanup_step("WAIT_HOST_PROCESS", lambda: process.wait(timeout=10))
+            logs = cleanup_step("READ_SCOPED_LOGS", lambda: adb("logcat", "-d", "-v", "brief", "-s", "CarCueVehicle:I", "CarCueOfficialGuide:I", "*:S"), "")
+            begin = logs.find("OFFICIAL_GUIDE:" + args.run_id + ":BEGIN")
+            scoped = logs[begin:] if begin >= 0 else ""
+            end = scoped.find("OFFICIAL_GUIDE:" + args.run_id + ":DONE")
+            if end >= 0:
+                scoped = scoped[:end]
+            sdk_events = [match.group(1) for line in scoped.splitlines() if (match := SDK_EVENT.search(line))]
+            (out / "sdk-events.txt").write_text("\n".join(sdk_events) + "\n")
+            # The independent heartbeat remains alive through slow ADB calls and teardown.
+            # Require the actual domain bridge again before restoring external fixtures.
+            for attempt in range(1, 4):
+                try:
+                    lease.wait_ready(timeout=10)
+                    fixture("RESTORE_PARK", "/vehicle/controls?speed=0&accelerator=0&brake=0")
+                    fixture("RESTORE_PARK", "/vehicle/gear?gear=Park")
+                    fixture("RESTORE_CLOSED", "/vehicle/body?door_fl=0")
+                    body = console("/vehicle/body")
+                    controls = console("/vehicle/controls")
+                    gear = console("/vehicle/gear")
+                    restored_fixture = {"front_left": body.get("body", body)["doors"]["front_left"],
+                                        "speed_kph": controls["speed_kph"], "gear": gear["actual"]["value"]}
+                    require(restored_fixture == {"front_left": False, "speed_kph": 0, "gear": "Park"},
+                            "Final external fixture values differ from Park/0/CLOSED")
+                    cleanup_attempts.append({"attempt": attempt, "restored": True})
+                    print("RESTORE PASS: external console confirms Park / speed 0 / front-left closed", flush=True)
+                    break
+                except Exception as exc:
+                    cleanup_attempts.append({"attempt": attempt, "restored": False, "error_type": type(exc).__name__,
+                                             "http_status": getattr(exc, "code", None)})
+                    time.sleep(.5)
+            (out / "console-session.json").write_text(json.dumps(lease.diagnostics(), indent=2) + "\n")
+            (out / "console-events.json").write_text(json.dumps(fixtures, indent=2) + "\n")
+            (out / "run-status.json").write_text(json.dumps({"run_id": args.run_id, "instrumentation_done": success,
+                                                            "error_type": error, "cleanup_attempts": cleanup_attempts,
+                                                            "cleanup_errors": cleanup_errors,
+                                                            "restored_fixture": restored_fixture,
+                                                            "physical_vehicle_tested": False}, indent=2) + "\n")
+
+    (out / "console-session-final.json").write_text(json.dumps(lease.diagnostics(), indent=2) + "\n")
+    require(not cleanup_errors, "Host teardown/log capture failed; fixture restoration was still attempted")
     require(restored_fixture == {"front_left": False, "speed_kph": 0, "gear": "Park"}, "Host fixture restoration failed; inspect run-status.json")
     require("OK (1 test)" in (out / "instrumentation.txt").read_text(), "Instrumentation assertions failed")
     expected_events = [

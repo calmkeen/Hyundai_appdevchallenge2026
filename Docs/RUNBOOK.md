@@ -33,6 +33,8 @@ android/gradlew -p android :app:assemblePleosDebug \
 
 프로필은 사용자가 선택한 매뉴얼 범위이며 SDK의 자동 차종 인증이 아니다. 실제 자동차의 문을 조작한 검증과도 구분한다. 별도 Mock 흐름은 기존 회귀용으로 아래에 보존한다.
 
+Console503 재시험은 `PLEOS_CONSOLE_RECOVERY.md`를 따른다. 공식 설정대로 Cold boot한 전용 AVD의 부팅과 사용자10을 확인한다. 호스트 검증 도구는 독립 heartbeat를 유지하고 문/속도/페달/기어의 실제 DDS 준비를 확인한 뒤 fixture를 조작한다. 단일 heartbeat200을 준비 완료로 간주하지 않는다. 최신 e9 APK의 전체 SDK 시험은 run05에서 완료했다.
+
 ## Android
 
 JDK 17 또는 Gradle 8.10.2가 지원하는 JDK, Android Platform 35 / Build Tools 35.0.0이 필요하다. 최종 검증은 Temurin 17.0.21+9 ARM64로 수행했다. 이 작업 환경에서는 `JAVA_HOME=/Users/younsung/hyundai/.tooling/jdk-17.0.21+9/Contents/Home`을 사용한다.

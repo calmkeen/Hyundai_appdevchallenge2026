@@ -32,3 +32,5 @@ develop `4b8b65b`를 실제 push한 뒤 [첫 실행](https://github.com/calmkeen
 공식 문 안내 등록부터 계약 검사에 상태-가이드 규칙의 JSON Schema 및 실제 게시 콘텐츠 참조 검사를 포함한다. 백엔드 회귀에는 등록한 3언어 문 안내의 LIVE API 조회·다른 프로필/언어 차단·검수 콘텐츠의 초기화 방지 시험을 포함한다. 네트워크로 현대자동차 원문을 매 CI마다 가져오지는 않으며 원문 검토 증거와 해시는 별도로 보존한다.
 
 공식 콘텐츠 develop `25bb1c7`의 [원격 실행](https://github.com/calmkeen/Hyundai_appdevchallenge2026/actions/runs/43569403093)도 성공했다. SDK 전용 AVD 시험은 이 GitHub runner에서 수행하지 않았으며 별도 기기 증거로 관리한다.
+
+SDK 연결 develop `547da78`의 [원격 실행](https://github.com/calmkeen/Hyundai_appdevchallenge2026/actions/runs/43574314346)은 성공했다. 후속 Console 수정부터 백엔드 회귀에 로컬 HTTP 서버를 이용한 독립 heartbeat/준비 대기/종료 시험7개가 포함된다. 실제 Console503 재현과 최신 APK의 전체 SDK run05는 로컬 전용 AVD 증거이며 CI의 HTTP 대역 시험과 구분한다.
