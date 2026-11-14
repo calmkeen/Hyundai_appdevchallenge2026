@@ -1,6 +1,22 @@
 # 검증 결과
 
-2026-11-14. 실차, 공식 전용 AVD의 실제 SDK, 일반 AVD의 Mock, 외부 AI 대역을 구분한다.
+2026-11-15 (KST). 실차, 공식 전용 AVD의 실제 SDK, 일반 AVD의 Mock, 외부 AI 대역을 구분한다.
+
+## 최신: 다국어·SDK·종료 시연과 소개 영상 · 2026-11-15
+
+프런트 경계 구현 `78bd767`은 UI/답변/번역 원문·대상 언어, 맥락별 동의와 응답 적용, 가이드 → ASK → 번역 → ASK → 같은 단계 복귀를 분리한다. `d6be741`은 생성 QUESTION 번역이 기본 보류일 때 과거 opt-in 성공 캐시도 재생하지 않도록 한다. backend **468개**, Android JVM **127개**, 계약과 세 언어 UI **191개** 자원 검사 및 Pleos 앱/테스트 빌드를 통과했다. 합성 정책·provider HTTP 대역 회귀를 실제 SDK/모델 시험으로 계산하지 않는다.
+
+`sdk-session-showcase-20261115-03`은 native **194.754초**, host의 functional/video/overall 모두 PASS다. 같은 설치 APK/앱 프로세스에서 한국어·영어·일본어 실제 ASK **3회**, 전체 주의문을 보존한 저장 ANSWER 번역 **3회**(추가 모델0회), SDK 문 개폐와 차량 픽셀 변경/정확한 닫힘 복귀, 실제 CarUX Drive/Park, 원문 언어 표시·새 맥락의 동의 초기화·가이드 단계 복귀·이용 종료를 확인했다. 종료 후 sessions/results/history는 **0/0/0**, Console은 Park/0/CLOSED이며 자체 lease 해제와 cleanup 오류0을 확인했다.
+
+- 기능 APK: `output/apk/carcue-pleos-session-boundaries-debug.apk`, SHA256 `5ef560ba1a24e3ce206aeeb6f4f336018b6e8a182bec7214aabc5dd4a261479f`. 실제 설치본 pull 해시와 같다.
+- 시연 검증 테스트 APK: `output/apk/carcue-pleos-session-showcase-validated-test.apk`, SHA256 `82409ca5409eebdd7ead1a02a5da4ffb768804089a84e303ec9814c2bb92b884`. 후속 late 관측용 테스트 APK와 구분해 보존한다.
+- 실제 Mac Ollama `0.40.16`/`qwen3:4b`의 audit3개와 ASK 요청 hash를 1:1 대조했다. ASK는 등록 단위 선택 후 서버의 검토 문자열 조립이며, 번역은 같은 판본의 `STORED_GUIDE`다. 유료 AI·자동 전환·생성 QUESTION 번역은 호출하지 않았다.
+
+연속 원본은 **199.981초/2560×1440**, 기능 장면14개다. 새 소개 영상 `live-sdk-intro-20261115-03`은 **34초/1920×1080/30fps**, 기능당2초와 실제 언어 메뉴 선택, 기존 무료 음악의 PCM exact 일치를 확인했다. 원본과 최종 편집은 별도 시각·의미 검토 기록에 연결하며 예전 APK/영상을 섞지 않았다. 실행·해시·원해상도 검토와 한계는 [SDK_SESSION_VALIDATION.md](SDK_SESSION_VALIDATION.md), 편집·음악·최종 영상 SHA는 [SDK_LIVE_INTRO.md](SDK_LIVE_INTRO.md)를 따른다.
+
+**추가 late-response 경계 시험은 아직 미완료다.** late01~07의 실패를 보존하며, late07은 Keyguard 준비 단계에서 거절돼 모델0회다. 실제 모델 처리 중 locale/Drive/이용 종료 뒤 늦은 응답 차단의 세 경계가 native 전체 PASS했다고 쓰지 않는다. 일부 `Process crashed`는 host의 정리 force-stop 뒤 출력이므로 앱 Java 예외로 단정하지 않는다. 정상 응답 후 종료의 showcase 통과와 JVM의 scope/epoch 회귀는 이 추가 시험의 성공을 대신하지 않는다.
+
+SDK 값은 공식 AVD 시뮬레이션이며 실차·차종/VIN 인증이 아니다. 안전벨트 센서는 미연결이고 앱 차량은 사전 렌더 프레임이다. 선택된 3언어 사례의 의미 검토를 모든 질문·언어의 품질이나 OEM·인간 전문가 인증으로 확대하지 않는다. 아래 날짜별 API9·SDK9단계·이전 촬영은 각 당시 바이너리의 역사적 검증이며 최신 APK에서 같은 전체 시험을 다시 수행했다는 뜻이 아니다.
 
 ## AI 답변 주의문 보완 · 2026-11-14
 
@@ -40,30 +56,32 @@ run01 성공 및 run02 Console 준비 실패/run03 후반 진입 실패/같은�
 
 | 구분 | 명령/환경 | 결과 |
 | --- | --- | --- |
-| 서버/도구 회귀 | `.venv/bin/python -m pytest backend/tests -q` | 최신 140개 통과. 기존133 + Console heartbeat/readiness 로컬 HTTP7개. AnyIO deprecation warning 1개 |
+| 서버/도구 회귀 | `.venv/bin/python -m pytest backend/tests -q` | 최신 468개 통과. 생성 QUESTION 보류의 같은 DB 재시작/과거 캐시 차단 포함. 실제 모델 호출과 대역 회귀 구분 |
 | 가이드 카탈로그 | `.venv/bin/python scripts/import_guides.py check --json` | VALID, 공식 문 안내 3언어 PUBLISHED + DRAFT 1개 = 4개 레코드 |
 | 공식 매뉴얼 자료 | 포털 연식/시장/DocID 대조, HTML 및 PDF 인쇄 2-7/4-21 시각 대조, ko/en/ja 독립 의미 검토 | 한국시장 NE1/2024 범위 확인. AI 보조 검토이며 OEM/인간 전문가 검수 아님 |
 | 상태-가이드 규칙 | `scripts/check_contracts.py` | 1개 OPEN/ROW_1_LEFT 규칙의 스키마·프로필/판본·언어별 게시 가이드/관련 property 통과 |
-| GitHub Actions | develop `bfb548b`, run `43566021842` | 실제 원격 success. 계약/UI 자원·가이드 카탈로그·백엔드 회귀 단계 모두 성공. 최초 runner context 오류 수정 후 확인 |
-| Android 단위 | `:app:testDemoDebugUnitTest` | 최신 42개 통과 (이전31 + 실제SDK 상태별 가이드 정책11), 실패/오류/건너뜀0 |
-| 최신 SDK 공식 가이드 전체 | `PleosOfficialGuideTest`, run05 / 앱e9ab702d… / 테스트2cc2ef14… | 1개·19.188초 성공. 실제 설치SHA·GET0→OPEN/CLOSED callback/차량표시→공식 안내/재조회→실제 UX→해제·최종Park0CLOSED복구 |
+| 이전 GitHub Actions | develop `bfb548b`, run `43566021842` | 해당 SHA의 실제 원격 success. 최신 로컬 변경의 push/CI 성공으로 확대하지 않음 |
+| Android 단위 | `:app:testDemoDebugUnitTest` | 최신 127개 통과, 실패/오류/건너뜀0. 합성 boundary/복귀 정책과 실제 기기 시험 구분 |
+| 최신 SDK/AI 통합 시연 | `PleosSessionBoundariesTest.connectedShowcaseFlow`, showcase03 / 앱5ef560ba… / 테스트82409ca5… | 194.754초 PASS. 단일 APK/프로세스·3언어 ASK3/저장3·SDK 개폐/픽셀·Drive/Park·복귀·종료 DB0 |
+| 추가 in-flight 경계 | `lateResponseBoundaries`, late01~07 | 미완료. locale/Drive/종료 전체 PASS 없음. late07은 Keyguard 준비 거절/모델0 |
+| 이전 SDK 공식 가이드 전체 | `PleosOfficialGuideTest`, run05 / 앱e9ab702d… / 테스트2cc2ef14… | 당시 1개·19.188초 성공. 실제 설치SHA·GET0→OPEN/CLOSED callback/차량표시→공식 안내/재조회→실제 UX→해제·최종Park0CLOSED복구 |
 | 이전 SDK 공식 가이드 core | run03 / 앱118b9c86… / 테스트2cc2ef14… | 1개·43.685초 성공. 후속 e9 APK는 위 run05에서 직접 재시험 완료 |
 | Console 실제 회귀 | 전용 AVD 비활성→독립heartbeat/준비확인 | 같은 속도/페달0 요청503→200, 6초 주 작업 대기 중7회heartbeat/준비flag유지. run05 종료 뒤thread종료/lease종료오류없음 |
 | 시험 환경 실패 보존 | run01/02/04 및 추가 renderer 후보 | 설치90초timeout, host lease503은도구보완후run03성공. 이후AVD PackageManager/Integrity timeout/DDS inactive503은성공으로보고하지않음 |
 | Mock 기기 회귀 | API 35 / 1280×800 / `CarCueFlowTest` | 5개 통과, 원본 개폐 프레임 픽셀 차이·안전벨트 미연결·세 언어·기존 흐름 |
 | 실제 APK 연속 촬영 | API 35 / `NativeShowcaseTest` | 1개 통과, 20개 실제 화면·개폐·세 언어 전환 |
-| SDK 앱 전체 촬영 | `PleosShowcaseTest`, 전용 AVD/사용자 10 | 1개 통과, 79.742초, 같은 APK/프로세스 20개 장면·4회 실제 변경 콜백 |
-| 실제 SDK 기기 회귀 | Pleos 2.1 / API 34 / SDK 2.3.2 / Service 2.3.22 / `PleosSdkTest` | 최신 1개 통과, 16.747초. 실제 callback 0→1→0과 차량 이미지 픽셀 변경·복귀 |
-| SDK 전체 검증 도구 | `.venv/bin/python scripts/validate_pleos.py` | 최신 Capability·GET·양방향 콜백·차량 픽셀·영상·unregister·release 통과 |
-| 앱 빌드 | `assembleDemoDebug`, `assemblePleosDebug` | 이전 APK 2종 성공. 최신 공식 가이드/시각 개선 Pleos Debug APK e9ab702d… 빌드 성공 (JDK17/offline/max-workers2). 전체 기기 통과본과 해시 구분 |
+| 이전 SDK 앱 전체 촬영 | `PleosShowcaseTest`, 전용 AVD/사용자 10 | 당시 1개 통과, 79.742초, 같은 APK/프로세스 20개 장면·4회 실제 변경 콜백. 실제 AI 호출 없음 |
+| 이전 실제 SDK 기기 회귀 | Pleos 2.1 / API 34 / SDK 2.3.2 / Service 2.3.22 / `PleosSdkTest` | 당시 1개 통과, 16.747초. 실제 callback 0→1→0과 차량 이미지 픽셀 변경·복귀 |
+| 이전 SDK 전체 검증 도구 | `.venv/bin/python scripts/validate_pleos.py` | 해당 당시 Capability·GET·양방향 콜백·차량 픽셀·영상·unregister·release 통과 |
+| 앱 빌드 | `assemblePleosDebug` | 최신 기능 APK5ef560ba… 빌드·showcase03 설치 해시 일치. 이전 demo/Pleos APK도 보존 |
 | 기기 테스트 빌드 | `assembleDemoDebugAndroidTest`, `assemblePleosDebugAndroidTest` | 성공 |
-| 계약 | `scripts/check_contracts.py` | 기존 Schema/예제·공식 상태-가이드 규칙 1개·155개 세 언어 UI 문자열 키/치환 변수 검사 통과 |
-| 앱 소개 영상 | 실제 APK 녹화 기반 편집·AAC 디코딩 | 34초·1920×1080·30fps, 전체 기능/세 언어를 한 SDK 앱으로 통일, 기존 음악 PCM 일치 |
+| 계약 | `scripts/check_contracts.py` | 기존 Schema/예제·공식 상태-가이드 규칙 1개·191개 세 언어 UI 문자열 키/치환 변수 검사 통과 |
+| 최신 앱 소개 영상 | `live-sdk-intro-20261115-03`, 실제 APK 단일 원본·AVFoundation 검증 | 34초·1920×1080·30fps, 14기능 각2초·실제 언어 선택·기존 음악 PCM exact·별도 시각 검토 |
 | 인계 패키지 | SHA256SUMS 전체 대조 | 일치 |
 
 최종 기준 JDK는 Temurin 17.0.21+9 ARM64, Gradle 8.10.2, AGP 8.8.2, Kotlin 2.0.0이다. compile/target SDK 35, min SDK 28이다.
 
-검수 가이드 등록 feature는 API에서 불일치·미검수·중복 레코드 차단, CLI의 반복 등록·충돌·번역 분리·경로 이탈 방지·입출력 실패 시 보존을 검증했다. 테스트의 VERIFIED 프로필과 example.test 자료는 합성 fixture이며 기본 content에 반영하지 않았다. 계약 3종·148개 세 언어 UI 자원 검사 및 CI YAML 파싱도 통과했다. 이번 서버 변경으로 SDK/AI 실제 외부 연결을 재시험하거나 성공 판정하지 않는다. 기존 SDK 촬영·회귀 결과는 아래 이력과 구분한다.
+다음 단락과 날짜별 기록은 초기 feature 당시 결과다. 검수 가이드 등록 feature는 API에서 불일치·미검수·중복 레코드 차단, CLI의 반복 등록·충돌·번역 분리·경로 이탈 방지·입출력 실패 시 보존을 검증했다. 테스트의 VERIFIED 프로필과 example.test 자료는 합성 fixture이며 기본 content에 반영하지 않았다. 당시 계약 3종·148개 세 언어 UI 자원 검사 및 CI YAML 파싱도 통과했다. 해당 서버 변경만으로 SDK/AI 실제 외부 연결을 재시험하거나 성공 판정하지 않았다.
 
 앱 가이드 캐시 feature는 순수 Kotlin 게시 정책, 실제 File 캐시, coroutine API 대역으로 검증했다. 정상 레코드와 malformed 중복 레코드가 섞인 경우 모두 차단하고, 새 빈 응답 뒤 늦은 응답이 도착하거나 이미 쓰기 중인 이전 요청이 있어도 최종 캐시를 복원하지 않음을 확인했다. `org.json` 플랫폼 변환의 기기 시험 및 새 APK의 SDK 수신 재시험은 하지 않았다.
 
@@ -73,9 +91,9 @@ run01 성공 및 run02 Console 준비 실패/run03 후반 진입 실패/같은�
 
 앱 내 시각 요소를 추가한 뒤 demo·pleos·기기 테스트 APK를 빌드했다. Mock 회귀 3개에는 3D 열림·닫힘·미수신·오래된 값과 가이드 사진 검사도 추가해 통과했다. 3D 가림을 다듬은 최종 APK로 `NativeShowcaseTest`의 19개 실제 UI 동작을 통과하고 연속 녹화했다. SDK 수신과 서버 코드는 이번 UI 변경에서 수정하지 않았다. UI 문구 129개의 세 언어 누락·치환 변수를 검사했다.
 
-## 최신: 공식 SDK 문 안내 연결 · 2026-11-14
+## 이전: 공식 SDK 문 안내 연결 · 2026-11-14
 
-최신 앱e9ab702d…/테스트2cc2ef14…로 run05가 19.188초 통과했다. Console 독립 heartbeat와 DDS 준비 확인을 보완해 이전503 미완료 범위를 해소했다. 실제 SDK 문 개폐·차량 픽셀 변경/복귀·공식 안내/출처·재조회·주행 제한/복귀·구독 해제와 최종 Console 상태 복구까지 확인했다. 정상 런처 물리 표시도 같은 APK SHA에 연결했다. 상세는 `PLEOS_CONSOLE_RECOVERY.md`, 이전 APK 이력은 `SDK_OFFICIAL_GUIDE_VALIDATION.md`를 따른다. 기존 소개 영상은 아래 이전 APK의 기록으로 보존한다.
+당시 앱e9ab702d…/테스트2cc2ef14…로 run05가 19.188초 통과했다. Console 독립 heartbeat와 DDS 준비 확인을 보완해 이전503 미완료 범위를 해소했다. 실제 SDK 문 개폐·차량 픽셀 변경/복귀·공식 안내/출처·재조회·주행 제한/복귀·구독 해제와 최종 Console 상태 복구까지 확인했다. 정상 런처 물리 표시도 같은 APK SHA에 연결했다. 상세는 `PLEOS_CONSOLE_RECOVERY.md`, 이전 APK 이력은 `SDK_OFFICIAL_GUIDE_VALIDATION.md`를 따른다. 기존 소개 영상은 아래 이전 APK의 기록으로 보존한다.
 
 ## 이전: 전체 기능을 같은 SDK 앱에서 촬영 · 2026-11-14
 

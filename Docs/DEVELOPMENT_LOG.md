@@ -78,3 +78,16 @@ OF-001 구현 `e816d61`, 철회 navigation 보완 `684556c`/`e7c58ad`, SE-001 �
 | AI-007 실제 호출·SDK 화면 | `feature/ai-caution-validation` | 공식 두 절 재대조, 실제 API9개/ANSWER6방향, 실제 SDK 앱3답변/3저장번역73.640초·물리 화면, 독립 의미 검토·실패 증거·재현 도구/Docs |
 
 기준 develop `7852159`, 기존 main `ba28cdb`와 게시 가이드3파일·앱 자산·영상·음원을 보존했다. 기존 step2 누락 사례를 같은 질문으로 검증하고 답변 후보/서버 검증/저장 번역/캐시 경로에서 모두 전체 주의문을 요구한다. 유료 AI·생성 질문 번역 기본 보류는 유지한다. API/앱/대역과 실제 모델 선택/저장 문자열을 [AI_CAUTION_VALIDATION.md](AI_CAUTION_VALIDATION.md)에 구분한다. 작업별 검증·커밋 뒤 develop에 no-ff 통합하고 두 feature와 develop의 실제 원격 SHA·CI를 확인한다.
+
+## 다국어·차량 UX·이용 종료와 시연 갱신 · 2026-11-15
+
+`DEVELOPMENT_ORDER.md`의 단계 6 → 7 순서로 진행한다. 유료 AI·생성 질문 번역 기본 보류, 기존 게시 가이드·영상·음원·AVD userdata를 보존한다.
+
+| 작업 | 브랜치 | 범위·완료 조건 |
+| --- | --- | --- |
+| LC-001 답변·번역 언어 경계 | `feature/multilingual-assistant-boundaries` | `78bd767`. 실제 답변/번역 언어 표시, 과거 결과 혼동 방지, 동의·stale UI action 재검사, 가이드 복귀 보완. JVM127·UI191 |
+| AI-008 질문 번역 보류 캐시 | `feature/question-deferral-cache-boundary` | `d6be741`. 과거 개발 opt-in 번역을 현재 보류/MOCK 서버에서 재생하지 않음. 같은 DB 재시작 6개 포함 backend468개 통과 |
+| LC-002 실제 SDK 세션 검증 | `feature/sdk-session-validation` | showcase03 194.754초 PASS: KO/EN/JA 실제ASK3·저장번역3·SDK개폐/이미지·Drive/Park·가이드 복귀·세션삭제. **진행 중 요청의 3개 경계 시험은 AVD 준비/관측 실패로 미완료** |
+| DV-001 최신 앱 소개 | `feature/sdk-intro-refresh` | `27b0616`/`5bdc5c1`. 같은 최신 SDK APK/프로세스의 연속 원본에서 34초 편집·기능당2초·기존 음악 PCM exact·첫 문구 유지. 독립 시각 검토 PASS |
+
+구현/정적 회귀와 실제 모델/SDK/녹화 성공을 분리했다. 상세 결과와 실패 이력은 `SDK_SESSION_VALIDATION.md`, 영상은 `SDK_LIVE_INTRO.md`를 따른다. 최종 서버DB0/0/0·Console 복구·lease 종료·AVD 정상 종료를 확인했다. 단계6의 추가 진행 중 경계 기기 시험은 남아 있으며 완료로 세지 않는다. 작업별 feature를 유지하고 develop에 no-ff 통합·원격 반영 후 실제 remote SHA/CI를 별도 QA 기록으로 확인한다. main은 변경하지 않는다.

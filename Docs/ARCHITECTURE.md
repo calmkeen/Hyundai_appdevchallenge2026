@@ -99,3 +99,9 @@ backend/app/
 MVVM/UDF를 유지한다. ContentRepository는 동봉 공식등록과 게시메타데이터를 보존하고, 순수 OfficialResourcePolicy가 현재세션epoch/프로필/판본/출처/UX에서 실행대상을 다시해석한다. ViewModel은 typedcitation과 answerRequestId를 보존하며 Android전달은 OfficialResourceOpener 하나로 모은다. 모델URL은 실행하지 않는다. SDKdebug Browser2호환은 platform adapter 안에 한정한다.
 
 UXConnectionGate는Android밖에서 연결별소유권/실패예산만 관리한다. 실제 Car/manager/listener/Handler는 PlatformUxMonitor가 attempt별로 소유하고 fresh UX GET 전에는unknown을 유지한다. callback/stop/timer 순서와 실제 Car값은 분리한다. 이 변경을 위해 새프레임워크나 Gradle멀티모듈을 도입하지 않았다. `UX_CONNECTION_RECOVERY.md`와 `OFFICIAL_RESOURCE_APP_VALIDATION.md` 참조.
+
+## 다국어 응답과 실행 경계 · 2026-11-15
+
+MVVM/UDF와 기존 Repository/서버 Ports & Adapters를 유지한다. 순수 `AssistantBoundaryPolicy`는 epoch·프로필·UI언어·화면·번역 종류/원문과 현재 UX/활성 여부를 실행·응답 시점에 재검사한다. 화면에서 캡처한 scope를 새 세션에서 실행 권한으로 재사용하지 않는다. Compose의 동의 상태는 입력/맥락 변경에 맞춰 초기화하고, 취소·언어 변경·화면 이동·종료는 기존 operation/coroutine 경계와 함께 적용한다.
+
+답변 `answerLocale`, 번역 원문 언어, 요청 대상 UI언어와 완료 `translationTargetLocale`를 분리한다. 이전 답변은 원문 언어와 함께 보존하고 대상 변경 때 과거 번역 결과만 비워 새 번역으로 오표시하지 않는다. 질문 복귀와 번역 복귀 경로를 분리하며, 가이드 철회 시 기존 GuideSelectionPolicy를 통해 유효한 목적지만 남긴다. 서버의 생성 질문 번역 보류는 새 호출과 과거 캐시에 동일하게 적용한다. `MULTILINGUAL_ASSISTANT_BOUNDARIES.md`, `QUESTION_DEFERRAL_CACHE.md`, `SDK_SESSION_VALIDATION.md` 참조.
