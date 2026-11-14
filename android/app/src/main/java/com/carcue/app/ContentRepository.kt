@@ -20,7 +20,11 @@ class ContentRepository(private val context: Context) {
     val profiles: List<Profile> = array("profiles/catalog.json").let { data ->
         (0 until data.length()).map { data.getJSONObject(it).let { p ->
             Profile(p.getString("profile_id"), p.getString("display_name"), p.getInt("model_year"), p.getString("market_code"), p.getString("verification_status") == "VERIFIED",
-                p.optString("manual_set_id").takeUnless { s -> s == "null" || s.isBlank() }, p.optString("manual_version").takeUnless { s -> s == "null" || s.isBlank() }) } }
+                p.optString("manual_set_id").takeUnless { s -> s == "null" || s.isBlank() }, p.optString("manual_version").takeUnless { s -> s == "null" || s.isBlank() },
+                p.optJSONArray("support_contacts")?.let { contacts -> (0 until contacts.length()).mapNotNull { index ->
+                    runCatching { contacts.getJSONObject(index).let { c -> SupportContact(c.text("id"), c.text("kind"), c.text("title"), c.text("url"),
+                        c.text("market_code"), c.text("source_locale"), c.text("verification_status") == "VERIFIED") } }.getOrNull()
+                } } ?: emptyList()) } }
     }
     private val localeCatalog = array("locales/catalog.json")
     val languages: List<Language> = localeCatalog.let { data ->
@@ -53,6 +57,12 @@ class ContentRepository(private val context: Context) {
             }
             decodeGuides(data)
         } catch (_: Exception) { emptyList() }
+    }
+    internal val officialResources by lazy {
+        val manuals = profiles.flatMap { profile -> languages.flatMap { language ->
+            guidePolicy.published(bundledGuides, profile, language.tag).map { profile to it.toGuide() }
+        } }
+        OfficialResourcePolicy(profiles, manuals)
     }
     private val stateGuideRules: List<StateGuideRule> by lazy {
         try {

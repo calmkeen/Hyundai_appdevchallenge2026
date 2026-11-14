@@ -157,12 +157,26 @@ class PleosOfficialGuideTest {
             rule.waitUntil(30000) { vm.state.value.eventLog.count { it.contains("GET_RECEIVED:RANGE_VERIFIED:value=0") } > getCount }
             reading("CLOSED"); assertOfficialGuide()
             rule.onNodeWithTag("guide_live_door_status").performScrollTo(); screenshot("guide-refresh-get-closed")
-            event("EXPLICIT_REFRESH_GET_CLOSED"); signal("request-drive")
+            event("EXPLICIT_REFRESH_GET_CLOSED")
+            val parkedScope = vm.officialActionScope(vm.state.value)
+            val parkedSourceId = requireNotNull(vm.state.value.selectedGuide).officialSources.first().id
+            signal("request-drive")
 
             rule.waitUntil(45000) { vm.state.value.ux.known && vm.state.value.ux.restricted }
             rule.onNodeWithTag("guide_live_door_status").assertDoesNotExist()
             rule.onNodeWithTag("guide_manual_sources").assertDoesNotExist()
             screenshot("driving-guide-blocked"); event("DRIVING_GUIDE_BLOCKED")
+            rule.runOnIdle {
+                val dispatches = vm.state.value.eventLog.count { it.contains("OFFICIAL_RESOURCE INTENT_DISPATCHED") }
+                vm.openGuideSource(parkedScope, guideId, parkedSourceId)
+                assertEquals("PARK_REQUIRED", vm.state.value.error)
+                assertNull(vm.state.value.externalResource)
+                vm.openSupport(parkedScope, "hyundai-kr-customer-support")
+                assertEquals("PARK_REQUIRED", vm.state.value.error)
+                assertNull(vm.state.value.externalResource)
+                assertEquals(dispatches, vm.state.value.eventLog.count { it.contains("OFFICIAL_RESOURCE INTENT_DISPATCHED") })
+            }
+            event("RESTRICTED_EXTERNAL_ACTIONS_REJECTED")
             clickText(vm.content.copy("ko-KR").get("ui_6b02921768d6"))
             rule.onNodeWithTag("related_door_guide").assertDoesNotExist()
             rule.runOnIdle { vm.openRelatedDoorGuide(guideId) }
@@ -188,7 +202,7 @@ class PleosOfficialGuideTest {
                 .put("manual_set_id", manualSetId).put("source_version", manualVersion).put("guide_id", guideId)
                 .put("source_urls", JSONArray(sourceUrls.toList())).put("initial_closed_sha256", closedHash)
                 .put("callback_open_sha256", openHash).put("restored_closed_sha256", restoredHash)
-                .put("driving_guide_blocked", true).put("restricted_navigation_rejected", true)
+                .put("driving_guide_blocked", true).put("restricted_navigation_rejected", true).put("restricted_external_actions_rejected", true)
                 .put("explicit_refresh_get_closed", true).put("app_sdk_set_called", false)
                 .put("external_ai_called", false).put("seatbelt_status_connected", false).toString(2))
             android.util.Log.i("CarCueOfficialGuide", "OFFICIAL_GUIDE:$runId:DONE")

@@ -92,3 +92,10 @@ backend/app/
 화면의 Guide 객체는 실행 시 현재 목록에서 다시 찾는다. 같은 profile/manual/locale의 철회는 열린 가이드와 질문의 복귀 대상에도 반영하고, UI 언어만 바뀐 다른 원문은 임의로 철회하지 않는다.
 
 삭제 작업은 앱 프로세스 범위의 SessionDeletionRecovery에서 수행한다. 순수 SessionDeletionStore 포트와 단일 coordinator가 중복 trigger를 합치며 기본 최대3회(1초·3초 대기)로 제한한다. request/VM 취소와 독립이고, 늦은 세션 생성·연결 복구·foreground·이용 종료·수동 확인이 같은 처리기를 사용한다. 최소 삭제 자격 정보만 SharedPreferences에 남기며 본문·번역·차량값은 저장하지 않는다. HTTP200의 명시 DELETED 또는 정확한 세션 무효/만료401 확인 후에만 큐에서 제거한다. 프로세스 재시작 복구는 별도 실제 기기 검증으로 판단한다.
+
+
+## 공식 외부 자원과 UX 연결 소유권
+
+MVVM/UDF를 유지한다. ContentRepository는 동봉 공식등록과 게시메타데이터를 보존하고, 순수 OfficialResourcePolicy가 현재세션epoch/프로필/판본/출처/UX에서 실행대상을 다시해석한다. ViewModel은 typedcitation과 answerRequestId를 보존하며 Android전달은 OfficialResourceOpener 하나로 모은다. 모델URL은 실행하지 않는다. SDKdebug Browser2호환은 platform adapter 안에 한정한다.
+
+UXConnectionGate는Android밖에서 연결별소유권/실패예산만 관리한다. 실제 Car/manager/listener/Handler는 PlatformUxMonitor가 attempt별로 소유하고 fresh UX GET 전에는unknown을 유지한다. callback/stop/timer 순서와 실제 Car값은 분리한다. 이 변경을 위해 새프레임워크나 Gradle멀티모듈을 도입하지 않았다. `UX_CONNECTION_RECOVERY.md`와 `OFFICIAL_RESOURCE_APP_VALIDATION.md` 참조.

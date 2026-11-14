@@ -17,7 +17,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -87,13 +86,16 @@ fun CarCueApp(vm: CarCueViewModel) {
                                                 "AI_UNAVAILABLE" -> get("ui_ai_unavailable")
                                                 "SESSION_EXPIRED" -> get("ui_ai_session_expired")
                                                 "GUIDE_UNAVAILABLE" -> get("ui_guides_withdrawn")
+                                                "RESOURCE_UNAVAILABLE" -> get("ui_resource_unavailable")
                                                 else -> get("ui_91a49aa8ca0f")
                                             }, error = true)
                                         }
                                         if (gated) {
                                             Heading(get("ui_a8af1bdc6df6"), get("ui_50afa257b1c5"))
                                             Action(get("ui_6b02921768d6")) { if (state.sessionStarted) vm.go(Page.STATUS) else vm.openReadOnlyStatus() }
-                                        } else when (state.page) {
+                                        } else {
+                                            if (!restricted) state.externalResource?.let { ExternalResourceFeedback(it, ko) }
+                                            when (state.page) {
                                             Page.PROFILE -> ProfileScreen(vm, state, ko)
                                             Page.LANGUAGE -> LanguageScreen(vm, state, ko)
                                             Page.HOME -> HomeScreen(vm, state, ko)
@@ -103,6 +105,7 @@ fun CarCueApp(vm: CarCueViewModel) {
                                             Page.GUIDE -> GuideScreen(vm, state, ko)
                                             Page.ASK, Page.TRANSLATE -> AssistantScreen(vm, state, ko)
                                             Page.SETTINGS -> SettingsScreen(vm, state, ko)
+                                            }
                                         }
                                         Spacer(Modifier.height(12.dp))
                                     }
@@ -270,6 +273,7 @@ private fun Reading.description(ko: UiCopy): String = when {
     Action(ko.get("ui_3b6510d9d5ee"), s.reading.status != ReadStatus.LOADING, Modifier.testTag("refresh_door_status")) { vm.refresh() }
     OutlinedButton(onClick = { vm.go(Page.GUIDES) }, modifier = Modifier.fillMaxWidth().heightIn(min = 60.dp)) { Text(ko.get("ui_96918379aa24")) }
     OutlinedButton(onClick = vm::openAssistant, modifier = Modifier.fillMaxWidth().heightIn(min = 60.dp)) { Text(ko.get("ui_d6b8c2700dd3")) }
+    if (!s.ux.restricted && s.ux.known) OfficialSupport(vm, s, ko)
     if (s.profile?.verified != true) Text(ko.get("ui_fc613175a649"), color = Muted)
 }
 @Composable private fun GuidesScreen(vm: CarCueViewModel, s: UiState, ko: UiCopy) {
@@ -332,9 +336,14 @@ private fun Reading.description(ko: UiCopy): String = when {
     }
     Column(Modifier.fillMaxWidth().testTag("guide_manual_sources"), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         guide.sourceVersion?.let { Text(ko.get("ui_manual_version").replace("{version}", it), color = Muted, fontSize = 13.sp) }
-        Sources(guide.sources, ko, showUrls = guide.publicationVerified)
+        val scope = vm.officialActionScope(s)
+        guide.officialSources.firstOrNull()?.let { Text(ko.get("ui_official_scope").replace("{market}", s.profile?.market.orEmpty()).replace("{locale}", it.sourceLocale), color = Muted, fontSize = 14.sp) }
+        Sources(guide.sources, ko, showUrls = guide.publicationVerified, tag = "manual_source") { index ->
+            guide.officialSources.getOrNull(index)?.let { vm.openGuideSource(scope, guide.id, it.id) }
+        }
     }
     if (!guide.id.startsWith("__")) OutlinedButton(onClick = { vm.openTranslation(guide.body, "GUIDE", guide.locale) }) { Text(ko.get("ui_translate_guide")) }
+    OfficialSupport(vm, s, ko)
     Action(ko.get("ui_af7d9b9636de")) { vm.openAssistant() }
 }
 @Composable private fun GuideOriginLabel(guide: Guide, ko: UiCopy) {
@@ -351,12 +360,39 @@ private fun Reading.description(ko: UiCopy): String = when {
         Notice(ko.get("ui_guides_offline"))
     }
 }
-@Composable private fun Sources(sources: List<Pair<String, String>>, ko: UiCopy, showUrls: Boolean = false) {
-    val handler = LocalUriHandler.current
+@Composable private fun Sources(sources: List<Pair<String, String>>, ko: UiCopy, showUrls: Boolean = false,
+    tag: String, onOpen: (Int) -> Unit) {
     if (sources.isNotEmpty()) Text(ko.get("ui_f483cda99083"), fontWeight = FontWeight.SemiBold, fontSize = 19.sp)
-    sources.forEach { (title, url) ->
-        TextButton(onClick = { if (url.startsWith("https://")) handler.openUri(url) }) { Text(title) }
+    sources.forEachIndexed { index, (title, url) ->
+        TextButton(onClick = { onOpen(index) }, modifier = Modifier.testTag("${tag}_$index")) { Text(title) }
         if (showUrls) Text(url, color = Muted, fontSize = 12.sp, lineHeight = 18.sp)
+    }
+}
+@Composable private fun OfficialSupport(vm: CarCueViewModel, s: UiState, ko: UiCopy) {
+    val scope = vm.officialActionScope(s)
+    val contacts = s.profile?.supportContacts.orEmpty().filter { vm.content.officialResources.support(s, scope, it.id) != null }
+    if (contacts.isEmpty()) {
+        Text(ko.get("ui_support_unavailable"), color = Muted, fontSize = 14.sp)
+    } else contacts.forEach { contact ->
+        OutlinedButton(onClick = { vm.openSupport(scope, contact.id) }, modifier = Modifier.testTag("official_support")) {
+            Text(ko.get("ui_official_support"))
+        }
+        Text(ko.get("ui_official_scope").replace("{market}", contact.market).replace("{locale}", contact.sourceLocale), color = Muted, fontSize = 14.sp)
+    }
+}
+@Composable private fun ExternalResourceFeedback(notice: ExternalResourceNotice, ko: UiCopy) {
+    val key = when (notice.result) {
+        ExternalOpenResult.INTENT_DISPATCHED -> "ui_external_dispatched"
+        ExternalOpenResult.NO_HANDLER -> "ui_external_no_handler"
+        ExternalOpenResult.REJECTED -> "ui_external_rejected"
+    }
+    Column(Modifier.fillMaxWidth().testTag("external_result_${notice.result}"), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Notice(ko.get(key))
+        Text(notice.resource.title, fontWeight = FontWeight.SemiBold)
+        Text(ko.get("ui_official_scope").replace("{market}", notice.resource.market).replace("{locale}", notice.resource.sourceLocale), color = Muted, fontSize = 14.sp)
+        androidx.compose.foundation.text.selection.SelectionContainer {
+            Text(notice.resource.url, fontSize = 13.sp, modifier = Modifier.testTag("external_resource_url"))
+        }
     }
 }
 @Composable private fun AssistantScreen(vm: CarCueViewModel, s: UiState, ko: UiCopy) {
@@ -401,7 +437,10 @@ private fun Reading.description(ko: UiCopy): String = when {
         Text((ko.get("ui_e17400f68f7b")) + s.answerMode + ko.get("ui_203cc8718a2b"), color = Muted, fontSize = 14.sp)
         AiProcessing(s.answerMode, s.answerProvider, s.answerModel, ko)
         if (s.followUpQuestion.isNotBlank()) Panel(ko.get("ui_ai_follow_up"), s.followUpQuestion, modifier = Modifier.testTag("ai_follow_up"))
-        Sources(s.citations, ko)
+        val scope = vm.officialActionScope(s)
+        Sources(s.citations, ko, tag = "answer_source") { index ->
+            s.officialCitations.getOrNull(index)?.let { vm.openAnswerSource(scope, s.answerRequestId, it.sourceId) }
+        }
         if (input.isNotBlank()) OutlinedButton(onClick = { vm.openTranslation(input, "QUESTION", "auto") },
             enabled = !s.busy, modifier = Modifier.testTag("translate_question")) { Text(ko.get("ui_translate_question")) }
         if (s.answer.isNotEmpty()) OutlinedButton(onClick = { vm.openTranslation(s.answer, "ANSWER", s.answerLocale) }) { Text(ko.get("ui_translate_answer")) }
@@ -409,10 +448,16 @@ private fun Reading.description(ko: UiCopy): String = when {
             when (kind) {
                 "REFRESH_STATUS" -> if (id == "door.position") TextButton(onClick = vm::refresh) { Text(ko.get("ui_3b6510d9d5ee")) }
                 "SELECT_PROFILE" -> TextButton(onClick = { vm.go(Page.PROFILE) }) { Text(ko.get("ui_confirm_profile")) }
+                "OPEN_MANUAL", "OPEN_SUPPORT" -> if (id != null) TextButton(onClick = {
+                    vm.openAssistantResource(scope, s.answerRequestId, kind, id)
+                }, modifier = Modifier.testTag("assistant_action_$kind")) {
+                    Text(ko.get(if (kind == "OPEN_MANUAL") "ui_open_original" else "ui_official_support"))
+                }
                 "OPEN_GUIDE" -> s.guides.find { it.id == id }?.let { guide -> TextButton(onClick = { vm.openGuide(guide) }) { Text(ko.get("ui_open_guide")) } }
             }
         }
     }
+    if (!translate) OfficialSupport(vm, s, ko)
     TextButton(onClick = vm::back) { Text(ko.get("ui_7812fd4be3f4")) }
 }
 @Composable private fun AiProcessing(mode: String, provider: AiProvider, model: String?, ko: UiCopy) {

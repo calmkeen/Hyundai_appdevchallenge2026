@@ -38,3 +38,8 @@ Android 14 AOSP 원문도 확인했다.
 검증 결과: JVM **94개 통과**(신규 gate 10개 포함, 실패·오류·건너뜀 0), Pleos Debug APK 빌드 통과(54초). 이후 attempt 번호 진단 로그까지 반영한 최종 증분 APK 빌드도 통과했다(3초). 로그는 `output/qa/ux-service-recovery-20261114/android-validation-02.log`, `android-validation-03.log`, 테스트 합계와 APK SHA는 `build-result-01.json`이다. 초기 sandbox의 Gradle 캐시 lock 접근 실패도 `android-validation-01.log`에 보존했다. 지정 JDK17/SDK35·Vehicle SDK2.3.2·offline·max-workers2, 서버 주소8001로 빌드했으며 실제 서버를 호출하지 않았다.
 
 실제 서비스 강제 종료·AVD 조작·실차 시험은 이 작업에서 수행하지 않았다. 재연결 뒤 실제 UX GET과 기존 제한/해제 흐름의 기기 검증은 root의 통합 APK에서 별도로 확인한다.
+
+
+## 통합 뒤 실제 앱 확인
+
+공식 원문 앱 통합 APK `9d947d11386fcd7fbf70056b46c18ca32d1293a304904c8ba37db711b0ac191a`의 Native run06은 76.488초/8회 외부 왕복에서 UX 허용·GET1→9·동일 가이드 단계를 확인했다. 같은 설치본 SDK9단계20.564초는 실제 Drive 제한과 원문/지원의 stale 버튼 거절, Park복귀와 해제를 통과했다. 통합 JVM110은 정책10개를 포함한다. 이는 실제 연결 수명주기 검증이며 모든 ServiceConnection 실패를 강제 주입한 자동 복구 시험은 아니다. `OFFICIAL_RESOURCE_APP_VALIDATION.md`의 원기록·실패 run05와 구분한다.

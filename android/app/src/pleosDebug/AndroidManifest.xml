@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Visibility for the official AVD's existing Browser2 only; no new permissions. -->
+    <queries>
+        <package android:name="org.chromium.webview_shell" />
+    </queries>
+</manifest>

@@ -883,5 +883,45 @@
     "ko-KR": "삭제 상태 다시 확인",
     "en": "Check deletion status again",
     "ja-JP": "削除状況を再確認"
+  },
+  "ui_official_support": {
+    "ko-KR": "공식 고객 지원 열기",
+    "en": "Open official customer support",
+    "ja-JP": "公式カスタマーサポートを開く"
+  },
+  "ui_support_unavailable": {
+    "ko-KR": "이 차량 판매지역에 검수·등록된 공식 지원 정보가 없습니다.",
+    "en": "No reviewed official support is registered for this vehicle market.",
+    "ja-JP": "この車両の販売地域に対応する確認済みの公式サポート情報は未登録です。"
+  },
+  "ui_official_scope": {
+    "ko-KR": "차량 판매지역: {market} · 원문 언어: {locale}",
+    "en": "Vehicle market: {market} · Original language: {locale}",
+    "ja-JP": "車両販売地域: {market} · 原文言語: {locale}"
+  },
+  "ui_open_original": {
+    "ko-KR": "공식 매뉴얼 원문 열기",
+    "en": "Open original official manual",
+    "ja-JP": "公式マニュアルの原文を開く"
+  },
+  "ui_external_dispatched": {
+    "ko-KR": "공식 링크를 외부 앱으로 전달했습니다. 돌아오면 차량 상태를 새로 확인합니다.",
+    "en": "The official link was sent to an external app. Vehicle status refreshes when you return.",
+    "ja-JP": "公式リンクを外部アプリに渡しました。戻ると車両状態を再取得します。"
+  },
+  "ui_external_no_handler": {
+    "ko-KR": "링크를 열 앱이 없습니다. 아래 공식 주소를 길게 눌러 복사할 수 있습니다.",
+    "en": "No app can open this link. Long press the official address below to copy it.",
+    "ja-JP": "リンクを開くアプリがありません。下の公式アドレスを長押ししてコピーできます。"
+  },
+  "ui_external_rejected": {
+    "ko-KR": "현재 환경에서 외부 링크를 열 수 없습니다. 아래 공식 주소를 길게 눌러 복사할 수 있습니다.",
+    "en": "This environment cannot open the external link. Long press the official address below to copy it.",
+    "ja-JP": "現在の環境では外部リンクを開けません。下の公式アドレスを長押ししてコピーできます。"
+  },
+  "ui_resource_unavailable": {
+    "ko-KR": "현재 세션에서 사용할 수 있는 등록된 공식 링크가 아닙니다. 차량과 가이드를 다시 확인해주세요.",
+    "en": "This official link is unavailable in the current session. Check the vehicle and guide again.",
+    "ja-JP": "現在のセッションでは利用できない公式リンクです。車両とガイドを再確認してください。"
   }
 }

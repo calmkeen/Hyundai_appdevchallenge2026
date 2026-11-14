@@ -36,14 +36,17 @@ data class Reading(
 data class UxState(val known: Boolean = false, val restricted: Boolean = true, val flags: Int = 0)
 enum class Page { PROFILE, LANGUAGE, HOME, STATUS, DETAIL, GUIDES, GUIDE, ASK, TRANSLATE, SETTINGS }
 data class Profile(val id: String, val name: String, val year: Int, val market: String, val verified: Boolean,
-    val manualSetId: String? = null, val manualVersion: String? = null)
+    val manualSetId: String? = null, val manualVersion: String? = null,
+    val supportContacts: List<SupportContact> = emptyList())
 data class Language(val tag: String, val native: String, val korean: String, val rtl: Boolean, val uiStatus: String)
 data class Guide(val id: String, val title: String, val body: String, val steps: List<Pair<String, String>>, val sources: List<Pair<String, String>>,
     val locale: String = "ko-KR", val stepIds: List<String> = emptyList(), val cautions: List<List<String>> = emptyList(),
     val manualSetId: String? = null, val sourceVersion: String? = null, val profileIds: List<String> = emptyList(),
-    val publicationVerified: Boolean = false, val origin: GuideOrigin = GuideOrigin.NONE)
+    val publicationVerified: Boolean = false, val origin: GuideOrigin = GuideOrigin.NONE,
+    val officialSources: List<OfficialSource> = emptyList())
 data class UiState(
     val page: Page = Page.PROFILE,
+    val sessionEpoch: Int = 0,
     val profile: Profile? = null,
     val locale: String = "ko-KR",
     val sessionStarted: Boolean = false,
@@ -58,6 +61,7 @@ data class UiState(
     val answerMode: String = "",
     val answerLocale: String = "",
     val answerStatus: String = "",
+    val answerRequestId: String = "",
     val followUpQuestion: String = "",
     val answerProvider: AiProvider = AiProvider.UNKNOWN,
     val answerModel: String? = null,
@@ -65,6 +69,8 @@ data class UiState(
     val lastAiRequestId: String = "",
     val actions: List<Pair<String, String?>> = emptyList(),
     val citations: List<Pair<String, String>> = emptyList(),
+    val officialCitations: List<OfficialCitation> = emptyList(),
+    val externalResource: ExternalResourceNotice? = null,
     val busy: Boolean = false,
     val selectedGuide: Guide? = null,
     val guideStep: Int = 0,
