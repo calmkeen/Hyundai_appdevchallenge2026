@@ -118,14 +118,20 @@ def main():
     parser.add_argument("--model", default="qwen3:4b")
     parser.add_argument("--audit-file", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True, help="New directory beneath output/qa")
+    parser.add_argument("--allow-question-rejection", action="store_true",
+                        help="Verify guarded QUESTION rejection and continue stored-manual checks; never claim translation quality passed")
     args = parser.parse_args()
     backend, ollama = loopback(args.backend_url), loopback(args.ollama_url)
     out = args.output_dir.resolve()
     require(out.is_relative_to((ROOT / "output/qa").resolve()), "NEW_OUTPUT_QA_DIRECTORY_REQUIRED")
     out.mkdir(parents=True, exist_ok=False)
     report = {"passed": False, "started_at": datetime.now(timezone.utc).isoformat(),
-              "validation_scope": "FUNCTIONAL_ONLY", "semantic_review_status": "PENDING_INDEPENDENT_REVIEW",
-              "scope": "Real loopback HTTP; dynamic question translation only; stored manual answers; no SDK assertion",
+              "validation_scope": "GUARDED_QUESTION_AND_REVIEWED_MANUAL" if args.allow_question_rejection else "FUNCTIONAL_ONLY",
+              "semantic_review_status": "PENDING_INDEPENDENT_REVIEW",
+              "scope": "GUARDED_QUESTION_AND_REVIEWED_MANUAL" if args.allow_question_rejection else "Real loopback HTTP; dynamic question translation only; stored manual answers; no SDK assertion",
+              "allow_question_rejection": args.allow_question_rejection,
+              "translations_completed": 0, "translations_rejected": 0,
+              "generated_translation_quality_passed": None,
               "backend_url": backend, "ollama_url": ollama, "model": args.model,
               "asks": [], "translations": [], "stored_answers": [], "unmatched_answers": [],
               "stored_guides": [], "unsupported": [], "cleanup": []}
@@ -203,14 +209,23 @@ def main():
             report["translations"].append({"content_kind": "QUESTION", "source": source, "target": target,
                                            "expected_glossary_version": expected_version, "result": retained(result)})
             local_result(result)
-            require(result.get("status") == "TRANSLATED" and result.get("review_status") == "UNREVIEWED"
-                    and result.get("source_locale") == source and result.get("target_locale") == target
+            require(result.get("review_status") == "UNREVIEWED" and result.get("target_locale") == target
                     and result.get("glossary_version") == expected_version
-                    and result.get("original_text") == QUESTIONS[source] and bool(result.get("translated_text"))
-                    and numbers(QUESTIONS[source]) == numbers(result["translated_text"]), "DYNAMIC_QUESTION_TRANSLATION_INVALID")
+                    and result.get("original_text") == QUESTIONS[source], "DYNAMIC_QUESTION_TRANSLATION_INVALID")
             expect_call(data["request_id"], before, "ModelTranslation")
             report["translations"][-1]["request_id_hash"] = expected_hashes[-1]
-            print("PASS actual UNREVIEWED question translation: " + source + " -> " + target, flush=True)
+            if result.get("status") == "TRANSLATED":
+                require(result.get("source_locale") == source and bool(result.get("translated_text"))
+                        and numbers(QUESTIONS[source]) == numbers(result["translated_text"]), "DYNAMIC_QUESTION_TRANSLATION_INVALID")
+                report["translations_completed"] += 1
+                print("PASS actual UNREVIEWED question translation: " + source + " -> " + target, flush=True)
+            else:
+                require(result.get("status") == "TEMPORARILY_UNAVAILABLE" and "translated_text" in result
+                        and result["translated_text"] is None, "UNSAFE_QUESTION_REJECTION_RESPONSE")
+                report["translations_rejected"] += 1
+                report["generated_translation_quality_passed"] = False
+                require(args.allow_question_rejection, "QUESTION_TRANSLATION_REJECTED_STRICT_MODE")
+                print("GUARDED QUESTION REJECTION; generation quality failed: " + source + " -> " + target, flush=True)
 
             expected = target_unit(selected_units[source], guides[source], guides[target])
             before = len(audit.events())
@@ -291,7 +306,8 @@ def main():
                                 and len(report["cleanup"]) == 3 and all(item["deleted"] for item in report["cleanup"]))
         report["finished_at"] = datetime.now(timezone.utc).isoformat()
         (out / "validation.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n")
-    print(("PASS functional checks; semantic review pending: " if report["passed"] else "FAIL functional checks: ")
+    label = "PASS guarded question/manual paths; generated translation quality not approved: " if args.allow_question_rejection else "PASS functional checks; semantic review pending: "
+    print((label if report["passed"] else "FAIL functional checks: ")
           + str(out / "validation.json"), flush=True)
     return 0 if report["passed"] else 1
 

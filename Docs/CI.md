@@ -34,3 +34,9 @@ develop `4b8b65b`를 실제 push한 뒤 [첫 실행](https://github.com/calmkeen
 공식 콘텐츠 develop `25bb1c7`의 [원격 실행](https://github.com/calmkeen/Hyundai_appdevchallenge2026/actions/runs/43569403093)도 성공했다. SDK 전용 AVD 시험은 이 GitHub runner에서 수행하지 않았으며 별도 기기 증거로 관리한다.
 
 SDK 연결 develop `547da78`의 [원격 실행](https://github.com/calmkeen/Hyundai_appdevchallenge2026/actions/runs/43574314346)은 성공했다. 후속 Console 수정부터 백엔드 회귀에 로컬 HTTP 서버를 이용한 독립 heartbeat/준비 대기/종료 시험7개가 포함된다. 실제 Console503 재현과 최신 APK의 전체 SDK run05는 로컬 전용 AVD 증거이며 CI의 HTTP 대역 시험과 구분한다.
+
+## 무료 로컬 AI 단계 · 2026-11-14
+
+현재 CI는 같은 계약/카탈로그/백엔드 명령을 사용하며, 실제 Ollama 실행·Android 빌드·전용 AVD 시험은 포함하지 않는다. 로컬 전체 backend370개, UI168 문구·가이드4레코드·상태규칙1개, Android JVM52개를 확인했다. 실제 모델/앱/SDK 증거는 `LOCAL_AI_INTEGRATION.md`, `LOCAL_AI_APP_VALIDATION.md`에 분리했다. 기본 환경은 MOCK/DISABLED이고 유료 API 자동전환은 없다.
+
+최신 기능의 원격 CI는 해당 develop push 후 별도 확인한다. 이전 develop `eac1986` 실행43576062421의 성공을 이번 코드의 실행으로 확대하지 않는다.

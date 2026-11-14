@@ -2,6 +2,18 @@
 
 2026-11-14. 실차, 공식 전용 AVD의 실제 SDK, 일반 AVD의 Mock, 외부 AI 대역을 구분한다.
 
+## 무료 로컬 AI와 최종 Pleos 앱 · 2026-11-14
+
+사용자 요청으로 유료 OpenAI 연결은 보류했다. Mac의 공식 Ollama 0.40.16/qwen3:4b를 실제 실행하며 API 비용·키·유료 자동 전환은 없다. 모델은 APK에 포함하지 않는다. 실제 API/앱의 성공·실패 원기록과 사례별 의미 검토는 `LOCAL_AI_INTEGRATION.md`, `LOCAL_AI_APP_VALIDATION.md`를 따른다. 기존 영상·음악은 변경하지 않았다.
+
+- 전체 backend **370 passed, 1 warning, 9.65초**: `output/qa/live-ai-20261114/backend-question-deferral-tests-20261114T100213Z.log`. 앞선 용어 검증 단계는364개였다. 앞선 sandbox 실행의 임시 HTTP bind 9오류는 별도 실패 로그에 보존했고 localhost 서버 사용 권한으로 재실행했다. 기존 AnyIO deprecation warning은 남는다. 테스트 대역과 실제 모델 호출은 구분한다.
+- Android JVM **52개 통과**, Pleos 앱/계측 APK 빌드. 계약·3언어 UI168 문구·가이드 레코드4개(게시3·초안1)·SDK 상태 규칙1개 검사 통과.
+- 기본 서버의 실제 앱 run08 **66.646초/5단계 PASS**: 3언어 ask와 저장 ANSWER/GUIDE 2건, 실제모델3회·저장번역 추가호출0·출처·제목·세션삭제. 서버 sessions/results/history 모두0, Console복구·lease종료·AVD정상종료까지 확인했다. 자유질문번역 기본보류도 실제3언어 요청/모델0회로 확인했다.
+- 최종 앱 SHA `ddbca88ce3f522872ee35c90a0a5b7875fcc1664d411a28e983e0b89dc960a1f`: 실제 SDK 전체 회귀 **23.192초** 통과. 문 개폐/차량 시각화/공식 안내/재조회/주행 제한/복귀/리스너해제/Console복구. 실행 `official-guide-local-ai-final-20261114-02`는 AI 호출이 없다.
+- `ask`는 완전한 검수 단위 ID 선택, ANSWER/GUIDE는 같은 판본의 저장 검수 번역이다. 동적 안내 번역의 금지문 역전 실패 후 이 경계를 적용했다. 생성 QUESTION 번역은 수식어 생략을 실제 확인했고 엄격 시험 API04/05가 실패했다. 누락 출력은 본문 없이 거절하며 품질 완료로 보고하지 않는다. 명시적 guarded 시험 성공도 자유 번역의 의미 정확성 통과를 뜻하지 않는다.
+- 전용 AVD가 제공한 실제 SDK 값이며 실차·안전벨트 센서·차종/VIN 자동 식별·OEM/인간 전문가 인증은 포함하지 않는다.
+
+
 ## 검증 상태
 
 | 구분 | 명령/환경 | 결과 |

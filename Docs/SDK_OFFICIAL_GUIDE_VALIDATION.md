@@ -4,6 +4,12 @@
 
 **최신 결과:** `feature/pleos-console-readiness`에서 Console heartbeat/준비 확인을 보완한 뒤 최신 앱 `e9ab702d…`의 전체 SDK 시험 run05가 **19.188초 통과**했다. 문 개폐·차량 표시·공식 안내·재조회·주행 제한/복귀·해제와 최종 Console 복구까지 확인했다. 아래 run04 미완료 기록은 당시 이력이며 현재는 해소됐다. 상세 원인·재현·증거는 `PLEOS_CONSOLE_RECOVERY.md`를 따른다.
 
+## 로컬 AI 최종 APK의 SDK 회귀 · 2026-11-14
+
+`output/apk/carcue-pleos-local-ai-final-debug.apk`(SHA-256 `ddbca88ce3f522872ee35c90a0a5b7875fcc1664d411a28e983e0b89dc960a1f`)로 전체 SDK 시험을 다시 수행했다. 테스트 APK `1d7d5d9b6723eadbfbcba046f6f0f16484a536552c24d066d635387153b38986`와 설치본 해시가 일치했고 **23.192초 OK(1 test)**였다. 증거는 `output/qa/pleos-official-guide/official-guide-local-ai-final-20261114-02/`다.
+
+별도 `CarCue_Pleos21_LocalAI`/API34/user10에서 실제 Capability·GET CLOSED→OPEN/CLOSED callback·차량 프레임 변경과 원본복귀·정확한 공식 가이드/두 출처·재조회·주행 차단·Park복귀·이용종료/unregister/release를 확인했다. Console도 Park/속도0/CLOSED로 복구했다. 기존 AVD userdata를 보존했고, `car_service` 부재를 우회하거나 UX 조건을 완화하지 않았다. 이 SDK 시험은 로컬 AI 호출 0회이며 AI 앱 시험과 구분한다. 이후 guarded AI 시험용 test-only APK는 별도 해시/실행으로 기록한다. 앱 APK는 동일하다. 앱 Window 캡처이지 실차/물리 디스플레이 녹화 검증은 아니다.
+
 ## 구현한 데이터 흐름
 
 1. 사용자가 `ioniq5-ne1-2024-kr`(2024 한국시장 아이오닉 5)을 선택한다. 이 선택은 매뉴얼 적용 범위를 정하며 SDK의 차종/VIN 인증이 아니다.
