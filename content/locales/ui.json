@@ -838,5 +838,10 @@
     "ko-KR": "원문 안내",
     "en": "Original guide",
     "ja-JP": "原文の案内"
+  },
+  "ui_deletion_retry": {
+    "ko-KR": "삭제 상태 다시 확인",
+    "en": "Check deletion status again",
+    "ja-JP": "削除状況を再確認"
   }
 }

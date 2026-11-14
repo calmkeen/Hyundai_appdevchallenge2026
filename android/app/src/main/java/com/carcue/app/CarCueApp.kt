@@ -166,7 +166,11 @@ fun CarCueApp(vm: CarCueViewModel) {
             "\n" + ko.get(if (p.verified) "ui_profile_select_reviewed" else "ui_cc624e1afe01"),
             modifier = Modifier.testTag("profile_${p.id}"), onClick = { vm.chooseProfile(p) })
     }
-    if (s.deletionPending) Notice(ko.get("ui_74c30739d02d"))
+    if (s.deletionPending) {
+        Notice(ko.get("ui_74c30739d02d"))
+        OutlinedButton(onClick = vm::retryPendingDeletions,
+            modifier = Modifier.fillMaxWidth().heightIn(min = 60.dp).testTag("deletion_retry")) { Text(ko.get("ui_deletion_retry")) }
+    }
     Text(ko.get("ui_ce0d787f948e"), color = Muted, fontSize = 14.sp)
 }
 @Composable private fun LanguageScreen(vm: CarCueViewModel, s: UiState, ko: UiCopy) {
