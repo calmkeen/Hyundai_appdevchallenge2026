@@ -168,7 +168,7 @@ LIVE provider 시험은 **메서드/HTTP transport 대역**이다. 실제 OpenAI
 - 초기 일반 API 37 AVD 부팅 미완료: 별도 API 35 AVD를 설치해 3개 기기 회귀 통과.
 - Pleos 이미지의 표준 android.car 공유 라이브러리 필수 선언으로 설치 거부: 선택 선언과 클래스 존재 확인으로 수정, 설치·앱 실행·SDK 시험 통과. 런타임 제한 값은 SDK 조사 보고서에 별도로 기록한다.
 - 서로 다른 사용자 저장소: Pleos 실행 사용자 10의 캡처를 `run-as --user 10`으로 분리해 수집.
-- 실제 매뉴얼 검수, OpenAI 실호출, 실차, 다른 지역별 UX 정책, 전체 언어·폰 QR 카메라·로터리·접근성은 미검증.
+- 이번 공식 매뉴얼 두 절의 AI 보조 원문 대조를 넘어선 차종/주제·인간 전문가 검수, OpenAI 실호출, 실차, 다른 지역별 UX 정책, 전체 언어·폰 QR 카메라·로터리·접근성은 미검증.
 - 의존 라이브러리의 비치명 경고: Starlette/AnyIO alias deprecation, 표준 Car.createCar/connect deprecation. 빌드/테스트 실패는 아님.
 
 ## 결과 파일

@@ -11,7 +11,7 @@
 5. 버튼을 누를 때도 정책을 다시 검사한다. CLOSED·미수신·오류·오래된 값·다른 영역·MOCK·UX 불명/제한은 해당 추천을 만들지 않는다.
 6. 실제 가이드 화면에는 현재 SDK 수신 상태·시각·재조회, 원문 판본과 공식 두 URL을 표시한다. 문 닫힘으로 잠금·다른 문/후드/테일게이트·운행 안전을 추정하지 않는다.
 
-SDK 앱에서는 과거의 `__layout_preview__` 메뉴를 표시하지 않는다. 이전 demo flavor와 소스는 보존한다. 한국어·영어·일본어 UI 및 문 안내를 제공하며 선택 언어가 한국 판매사양을 바꾸지 않는다. 초기 전문 검토 범위와 한계는 `MANUAL_REVIEW_IONIQ5_2024_KR.md`를 따른다.
+SDK 앱에서는 과거의 `__layout_preview__` 메뉴를 표시하지 않는다. 이전 demo flavor와 소스는 보존한다. 한국어·영어·일본어 UI 및 문 안내를 제공하며 선택 언어가 한국 판매사양을 바꾸지 않는다. 공식 원문 대조·AI 보조 검토 범위와 한계는 `MANUAL_REVIEW_IONIQ5_2024_KR.md`를 따른다.
 
 ## 검증 환경과 재현
 
@@ -78,4 +78,4 @@ Compose 1.6.6은 drawing이 꺼져 있을 때 캡처 동안만 켰다가 복원�
 
 최신 앱의 정상 런처 증거는 `output/qa/pleos-official-guide/normal-launch-20261114-01/`의 `installed-app.json`, `normal-launch-smoke.json`, `physical-normal-launch.png`다. 추가 실패·렌더링 후보는 각각 실행 폴더에 보존한다. 작업 전 정지 상태였던 전용 AVD는 종료 명령 성공·프로세스 종료·ADB 목록 제거를 확인해 다시 정지했다. 사용자 데이터/스냅샷 파일과 검증 설정은 유지했다. 최종 warmup의 SDK 해제 호출은 미확인이며 VM 종료에 따른 리소스 정리로만 기록했다(`normal-session-preflight-20261114-01/vm-cleanup.json`).
 
-시험 증거는 `output/qa/pleos-official-guide/<run-id>/`와 앱의 실행별 QA 폴더에 새로 기록한다. 이전 영상·APK·QA 파일과 사용자 데이터를 덮어쓰지 않으며 `pm clear`, `logcat clear`, wipe-data를 사용하지 않는다. 수집 로그는 문·UX·수명주기의 허용된 이벤트로 제한해 VIN 등 원시 차량정보를 저장하지 않는다.
+시험 증거는 `output/qa/pleos-official-guide/<run-id>/`와 앱의 실행별 QA 폴더에 새로 기록한다. 실행별 QA 보존 경로와 원본 영상·사용자 데이터는 유지하며 `pm clear`, `logcat clear`, wipe-data를 사용하지 않는다. Gradle 빌드 출력 APK는 후속 빌드에서 교체되므로 별도 보존 여부와 설치 해시를 위와 같이 구분한다. 수집 로그는 문·UX·수명주기의 허용된 이벤트로 제한해 VIN 등 원시 차량정보를 저장하지 않는다.
