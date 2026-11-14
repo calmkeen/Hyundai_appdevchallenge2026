@@ -1,0 +1,72 @@
+{
+  "manual_set_id": "hyundai-ioniq5-ne1-2024-kr",
+  "manual_version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+  "publisher": "Hyundai Motor Company",
+  "official_model_id": "NE1",
+  "model_name": "아이오닉 5",
+  "model_year": 2024,
+  "market_code": "KR",
+  "source_locale": "ko-KR",
+  "portal_manual_metadata_url": "https://ownersmanual.hyundai.com/api/v2/hmc/model/owners-manuals?projectCode=NE1&year=2024&langCode=ko_KR&countryCode=A99",
+  "portal_model_catalog_url": "https://ownersmanual.hyundai.com/api/v2/hmc/models?countryCode=A99&langCode=ko_KR&year=2024",
+  "webhelp_document_id": "D202406100040",
+  "webhelp_first_published": "2024-06-10",
+  "webhelp_last_published": "2024-07-22",
+  "html_dita_rev_attribute": "1.1",
+  "dita_rev_is_publication_edition": false,
+  "pdf": {
+    "url": "https://ownersmanual.hyundai.com/full_pdf/NE1/2024/ko_KR",
+    "document_id": "D202406100039",
+    "portal_publication_date": "2024-06-10",
+    "file_metadata_creation_date": "2024-01-11T15:44:06+09:00",
+    "page_count": 601,
+    "sha256": "fd7e08cf0f3ed06a8e47ddee38fcaa463f32fa375b5a7d76c0aee4e0025a6248"
+  },
+  "reviewed_sections": [
+    {
+      "url": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/idff13cd5359c.html",
+      "title": "도어, 후드, 테일게이트 열림",
+      "printed_page": "4-21",
+      "pdf_page_one_based": 167,
+      "sha256": "a8f0617f4a5e1bc4be591eea4bfee4ccee7ae02bd86c61c34d5da944b60b9e84",
+      "fetched_at": "2026-11-14T06:31:35.258840Z"
+    },
+    {
+      "url": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/id0d6d99a8d21.html",
+      "title": "도어/테일게이트/유리창을 열고 닫을 때 조심",
+      "printed_page": "2-7",
+      "pdf_page_one_based": 85,
+      "sha256": "0f6b2ab447cfe7829cb53fd1842d4619c82c1d678d7d99d84ec50068efb8f06d",
+      "fetched_at": "2026-11-14T06:31:35.344288Z"
+    }
+  ],
+  "review_method": "AI-assisted source comparison and independent second-agent semantic review; HTML and rendered PDF pages",
+  "human_certified_review": false,
+  "oem_approved": false,
+  "translation_scope": "CarCue en/ja summaries of Korean-market Korean source; not US/Japan specifications",
+  "sdk_vehicle_identity_verified": false,
+  "original_documents_redistributed": false,
+  "reviewed_guides": [
+    {
+      "guide_id": "ioniq5-door-open-check",
+      "locale": "ja-JP",
+      "reviewed_draft_sha256": "22026c50361e779d3617e600a8242b2752398e9d99590ba6274aba74a8c6c859",
+      "published_record_sha256": "8f4de8fce67d909bc45b3d2375962c649420980b5d99859ba67bba75222f98f5",
+      "record_path": "content/guides/guide-5e92a19590f8d4c1b6efb4e4b7c58967995ea14fd663326cf8ae6deaafa673e5.json"
+    },
+    {
+      "guide_id": "ioniq5-door-open-check",
+      "locale": "en",
+      "reviewed_draft_sha256": "eb785974cad99689b55604792e5d0682b17bfd3b93aabd4c9dc4b7a94748557b",
+      "published_record_sha256": "69af24a1c83a8166597a3731cbc88ee96b03a77bc5340ba938089b06e94b9d0f",
+      "record_path": "content/guides/guide-80a98b3bd384e2a6eb09468c74f235fe65e2e03933584160f7987411213fdcc4.json"
+    },
+    {
+      "guide_id": "ioniq5-door-open-check",
+      "locale": "ko-KR",
+      "reviewed_draft_sha256": "8a65cfc956277fa12e1c19f0bbb14c5d01aa33d3b0c46b3a050732175af22730",
+      "published_record_sha256": "328d40db77e78db69fa5fab26ca21d7a2977609b6f01ba37fc2c58ca7796531f",
+      "record_path": "content/guides/guide-db9aec19fc6c91a72c94edddaf8f4ec57e724dc785a3a008428ecbb30bc2475f.json"
+    }
+  ]
+}

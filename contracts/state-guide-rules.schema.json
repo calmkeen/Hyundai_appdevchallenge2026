@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://carcue.invalid/contracts/state-guide-rules.schema.json",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "rule_id": {"type": "string", "minLength": 1},
+      "profile_id": {"type": "string", "minLength": 1},
+      "manual_set_id": {"type": "string", "minLength": 1},
+      "source_version": {"type": "string", "minLength": 1},
+      "property_id": {"const": "door.position"},
+      "area_id": {"const": "ROW_1_LEFT"},
+      "value": {"const": "OPEN"},
+      "guide_id": {"type": "string", "minLength": 1},
+      "verification_status": {"const": "VERIFIED"}
+    },
+    "required": ["rule_id", "profile_id", "manual_set_id", "source_version", "property_id", "area_id", "value", "guide_id", "verification_status"]
+  }
+}

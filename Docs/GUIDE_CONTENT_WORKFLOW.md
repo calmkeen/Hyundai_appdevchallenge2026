@@ -1,6 +1,6 @@
 # 검수 가이드 등록과 조회
 
-2026-11-14. `feature/reviewed-guide-import`에서 추가한 도구다. 실제 차량 매뉴얼을 확보하거나 내용 검수를 완료한 작업은 아니다. 현재 기본 프로필은 UNVERIFIED이며 기본 가이드는 DRAFT다.
+2026-11-14. `feature/reviewed-guide-import`에서 등록 도구를 추가했고, `feature/ioniq5-official-door-content`에서 공식 2024 한국시장 아이오닉 5 문 안내를 등록했다. 현재는 문 안내 1개·3언어의 PUBLISHED 레코드와 기존 DRAFT 템플릿이 있다. 기존 두 개발 프로필은 UNVERIFIED로 보존한다. 실제 자료 검토 범위와 AI 보조 검토의 한계는 `MANUAL_REVIEW_IONIQ5_2024_KR.md`를 따른다.
 
 ## 검사와 등록
 
@@ -50,6 +50,6 @@ Android에서도 게시 메타데이터를 재검사하고, malformed 항목도 
 
 ## 검증 자료와 실제 자료 구분
 
-테스트의 VERIFIED 프로필·`example.test` 출처·본문은 임시 디렉터리와 테스트 메모리에만 존재한다. 실차 매뉴얼·공식 출처의 진위를 보증하지 않으며 기본 `content/`에 등록하지 않는다. 기본 카탈로그 검사 통과는 미검수 DRAFT 구조가 맞다는 뜻이며 게시 가능한 가이드가 있다는 뜻은 아니다.
+정책/등록 테스트의 `example.test` 출처와 합성 본문은 임시 디렉터리와 테스트 메모리에만 존재하며 기본 `content/`에 등록하지 않는다. 공식 콘텐츠의 회귀는 별도 `test_official_door_content.py`에서 실제 등록 자료와 LIVE HTTP API를 검사한다. 그 시험을 SDK 기기 수신 시험으로 취급하지 않는다. PUBLISHED도 VERIFIED 표기만으로 사실성을 보증하지 않으므로 원문 근거·검토 기록을 함께 관리한다.
 
-후속 순서는 `ARCHITECTURE.md`와 `DEVELOPMENT_ORDER.md`를 따른다. 실제 문 상태에 맞춘 안내 규칙은 검수된 해당 차량 자료가 들어온 후 연결한다.
+후속 순서는 `ARCHITECTURE.md`와 `DEVELOPMENT_ORDER.md`를 따른다. `content/state-guide-rules.json`은 `contracts/state-guide-rules.schema.json`과 게시 카탈로그를 함께 검사해 정확한 프로필/판본/관련 property에만 연결한다. SDK/UX 조건과 실제 기기 검증은 앱 feature의 책임이다.

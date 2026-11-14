@@ -74,7 +74,7 @@ def test_existing_unpublished_handoff_template_is_not_rejected():
     catalog = Catalog()
     assert catalog.publication_issues == {}
     assert catalog.published("demo-ioniq5-2024-kr", "ko-KR") == []
-    assert all(profile["verification_status"] == "UNVERIFIED" for profile in catalog.profiles)
+    assert all(profile["verification_status"] == "UNVERIFIED" for profile in catalog.profiles if profile.get("is_demo"))
 
 
 @pytest.mark.parametrize("url", [

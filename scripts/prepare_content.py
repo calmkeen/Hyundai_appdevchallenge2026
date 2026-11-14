@@ -3,6 +3,14 @@ import json
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
+# Bootstrap data must never replace the real, reviewed catalog added later.
+existing_profiles = ROOT / "content/profiles/catalog.json"
+if (existing_profiles.exists() and any(profile.get("verification_status") == "VERIFIED"
+        for profile in json.loads(existing_profiles.read_text()))) or any(
+        json.loads(path.read_text()).get("lifecycle") == "PUBLISHED"
+        for path in (ROOT / "content/guides").glob("*.json")):
+    raise SystemExit("Refusing to overwrite reviewed content. prepare_content.py is only a development bootstrap.")
+
 
 def write(path, value):
     p = ROOT / "content" / path
