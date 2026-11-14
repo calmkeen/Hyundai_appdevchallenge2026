@@ -11,15 +11,18 @@
 | 공식 매뉴얼 자료 | 포털 연식/시장/DocID 대조, HTML 및 PDF 인쇄 2-7/4-21 시각 대조, ko/en/ja 독립 의미 검토 | 한국시장 NE1/2024 범위 확인. AI 보조 검토이며 OEM/인간 전문가 검수 아님 |
 | 상태-가이드 규칙 | `scripts/check_contracts.py` | 1개 OPEN/ROW_1_LEFT 규칙의 스키마·프로필/판본·언어별 게시 가이드/관련 property 통과 |
 | GitHub Actions | develop `bfb548b`, run `43566021842` | 실제 원격 success. 계약/UI 자원·가이드 카탈로그·백엔드 회귀 단계 모두 성공. 최초 runner context 오류 수정 후 확인 |
-| Android 단위 | `:app:testDemoDebugUnitTest` | 최신 31개 통과 (기존 상태 6 + 게시 정책 14 + 파일 캐시 7 + 요청 순서 4), 실패/오류/건너뜀 0 |
+| Android 단위 | `:app:testDemoDebugUnitTest` | 최신 42개 통과 (이전31 + 실제SDK 상태별 가이드 정책11), 실패/오류/건너뜀0 |
+| SDK 공식 가이드 core | `PleosOfficialGuideTest`, run03 / 앱118b9c86… / 테스트2cc2ef14… | 1개·43.685초 성공. GET0→OPEN/CLOSED callback→공식 안내/재조회→실제 UX→해제·최종Park0CLOSED복구 |
+| 시각 오프셋 개선 앱 | 앱e9ab702d… / 정상 런처 실제adb screencap | 빌드·설치SHA·물리표시·SDK GET0/callback0 확인. 추가 OPEN 전체재시험은 Console/DDS503 준비 실패로 미완료 |
+| 시험 환경 실패 보존 | run01/02/04 및 추가 renderer 후보 | 설치90초timeout, host lease503은도구보완후run03성공. 이후AVD PackageManager/Integrity timeout/DDS inactive503은성공으로보고하지않음 |
 | Mock 기기 회귀 | API 35 / 1280×800 / `CarCueFlowTest` | 5개 통과, 원본 개폐 프레임 픽셀 차이·안전벨트 미연결·세 언어·기존 흐름 |
 | 실제 APK 연속 촬영 | API 35 / `NativeShowcaseTest` | 1개 통과, 20개 실제 화면·개폐·세 언어 전환 |
 | SDK 앱 전체 촬영 | `PleosShowcaseTest`, 전용 AVD/사용자 10 | 1개 통과, 79.742초, 같은 APK/프로세스 20개 장면·4회 실제 변경 콜백 |
 | 실제 SDK 기기 회귀 | Pleos 2.1 / API 34 / SDK 2.3.2 / Service 2.3.22 / `PleosSdkTest` | 최신 1개 통과, 16.747초. 실제 callback 0→1→0과 차량 이미지 픽셀 변경·복귀 |
 | SDK 전체 검증 도구 | `.venv/bin/python scripts/validate_pleos.py` | 최신 Capability·GET·양방향 콜백·차량 픽셀·영상·unregister·release 통과 |
-| 앱 빌드 | `assembleDemoDebug`, `assemblePleosDebug` | 이전 APK 2종 성공. 최신 가이드 캐시 보완의 Pleos Debug APK 빌드 성공 (JDK17/offline/max-workers2) |
+| 앱 빌드 | `assembleDemoDebug`, `assemblePleosDebug` | 이전 APK 2종 성공. 최신 공식 가이드/시각 개선 Pleos Debug APK e9ab702d… 빌드 성공 (JDK17/offline/max-workers2). 전체 기기 통과본과 해시 구분 |
 | 기기 테스트 빌드 | `assembleDemoDebugAndroidTest`, `assemblePleosDebugAndroidTest` | 성공 |
-| 계약 | `scripts/check_contracts.py` | Schema 3종과 제공 예제 3개, UI 문자열 키 검사 통과 |
+| 계약 | `scripts/check_contracts.py` | 기존 Schema/예제·공식 상태-가이드 규칙 1개·155개 세 언어 UI 문자열 키/치환 변수 검사 통과 |
 | 앱 소개 영상 | 실제 APK 녹화 기반 편집·AAC 디코딩 | 34초·1920×1080·30fps, 전체 기능/세 언어를 한 SDK 앱으로 통일, 기존 음악 PCM 일치 |
 | 인계 패키지 | SHA256SUMS 전체 대조 | 일치 |
 
@@ -35,7 +38,11 @@
 
 앱 내 시각 요소를 추가한 뒤 demo·pleos·기기 테스트 APK를 빌드했다. Mock 회귀 3개에는 3D 열림·닫힘·미수신·오래된 값과 가이드 사진 검사도 추가해 통과했다. 3D 가림을 다듬은 최종 APK로 `NativeShowcaseTest`의 19개 실제 UI 동작을 통과하고 연속 녹화했다. SDK 수신과 서버 코드는 이번 UI 변경에서 수정하지 않았다. UI 문구 129개의 세 언어 누락·치환 변수를 검사했다.
 
-## 최신: 전체 기능을 같은 SDK 앱에서 촬영 · 2026-11-14
+## 최신: 공식 SDK 문 안내 연결 · 2026-11-14
+
+실제 SDK core 전체 흐름은 `9639181`/앱118b9c86…/테스트2cc2ef14…에서 43.685초 통과했다. 시각 오프셋 추가본 e9ab702d…는 정상 런처 물리 표시와 SDK GET0까지 확인했으며 OPEN 전체 재시험은 AVD Console503으로 미완료다. 정확한 해시·이전 APK 파일의 부재·물리 캡처와 Window 캡처·실패 범위는 `SDK_OFFICIAL_GUIDE_VALIDATION.md`를 따른다. 기존 소개 영상은 아래 이전 APK의 기록으로 보존한다.
+
+## 이전: 전체 기능을 같은 SDK 앱에서 촬영 · 2026-11-14
 
 SDK `pleos` 앱에서 차량·언어 선택부터 문 상태, 가이드 목록/단계, 질문, 영어·일본어 전환, 이용 종료까지 20개 장면을 연속 촬영했다. `PleosShowcaseTest` 1개가 79.742초에 통과했다. 설치 APK SHA256과 전달 APK의 일치, 녹화 시작/종료 직전 PID 27585의 일치, 모든 장면의 `source=PLEOS`를 확인했다. 실제 GET 0 → 한국어 callback 1→0 → 영어 callback 1 → 일본어 callback 0 → unregister → release의 순서를 검사했다. 차량의 닫힘 복귀 PNG는 최초와 정확히 일치한다. KR 프로필·가이드 단계 복귀·종료 후 프로필/값 삭제도 확인했다.
 
