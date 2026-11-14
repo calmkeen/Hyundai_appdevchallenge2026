@@ -355,9 +355,9 @@
     "ja-JP": "質問を入力してください"
   },
   "ui_e2c47f0a9a27": {
-    "ko-KR": "질문·선택 언어·차량 프로필·필요한 상태를 CarCue 서버로 보내며, LIVE 모드에서는 OpenAI가 처리할 수 있음을 확인했어요.",
-    "en": "I understand that text, language, profile and selected readings are sent to CarCue and may be processed by OpenAI in LIVE mode.",
-    "ja-JP": "入力文・選択言語・車両プロフィール・必要な状態情報がCarCueサーバーに送信され、LIVEモードではOpenAIで処理される場合があることを確認しました。"
+    "ko-KR": "질문·선택 언어·차량 프로필·필요한 상태를 CarCue 서버로 보내며, LIVE 모드에서는 서버에 설정된 로컬 AI 또는 외부 AI가 처리할 수 있음을 확인했어요.",
+    "en": "I understand that text, language, profile and selected readings are sent to CarCue. In LIVE mode, the server may process them with its configured local or external AI.",
+    "ja-JP": "入力文・選択言語・車両プロフィール・必要な状態情報がCarCueサーバーに送信され、LIVEモードでは設定されたローカルAIまたは外部AIで処理される場合があることを確認しました。"
   },
   "ui_62d6724cd18d": {
     "ko-KR": "확인하고 있어요…",
@@ -525,9 +525,9 @@
     "ja-JP": "駐車後にご利用ください。"
   },
   "ui_f21529f8757a": {
-    "ko-KR": "질문을 보내기 전에 외부 처리 안내를 확인해 주세요.",
-    "en": "Review the processing notice before sending.",
-    "ja-JP": "質問を送信する前に、外部処理に関する説明をご確認ください。"
+    "ko-KR": "질문을 보내기 전에 AI 처리 안내를 확인해 주세요.",
+    "en": "Review the AI processing notice before sending.",
+    "ja-JP": "質問を送信する前に、AI処理に関する説明をご確認ください。"
   },
   "ui_241983579b6f": {
     "ko-KR": "지금 번역할 수 없어요. 원문은 그대로 보관했어요.",
@@ -565,9 +565,9 @@
     "ja-JP": "インターネット：{internet}\nCarCueサーバー：{server}\n車両API：{vehicle}"
   },
   "ui_translate_answer": {
-    "ko-KR": "이 답변 번역하기",
-    "en": "Translate this answer",
-    "ja-JP": "この回答を翻訳する"
+    "ko-KR": "이 답변의 저장된 번역 확인",
+    "en": "Find a saved translation of this answer",
+    "ja-JP": "この回答の保存済み翻訳を確認"
   },
   "ui_translate_guide": {
     "ko-KR": "이 안내의 저장된 번역 확인",
@@ -773,5 +773,70 @@
     "ko-KR": "매뉴얼 · {version}",
     "en": "Manual · {version}",
     "ja-JP": "マニュアル · {version}"
+  },
+  "ui_ai_local": {
+    "ko-KR": "로컬 AI · Ollama 응답",
+    "en": "Local AI · Ollama response",
+    "ja-JP": "ローカルAI · Ollamaの応答"
+  },
+  "ui_ai_openai": {
+    "ko-KR": "외부 AI · OpenAI 응답",
+    "en": "External AI · OpenAI response",
+    "ja-JP": "外部AI · OpenAIの応答"
+  },
+  "ui_ai_not_called": {
+    "ko-KR": "AI 호출 없이 서버에서 안내했어요",
+    "en": "Server guidance · AI was not called",
+    "ja-JP": "サーバーの案内 · AI呼び出しなし"
+  },
+  "ui_ai_stored_guide": {
+    "ko-KR": "저장된 가이드 번역 · AI 새 생성 없음",
+    "en": "Saved guide translation · no new AI generation",
+    "ja-JP": "保存済みガイドの翻訳 · AIによる新規生成なし"
+  },
+  "ui_ai_unknown": {
+    "ko-KR": "AI 처리 출처를 확인하지 못했어요",
+    "en": "AI processing source is unconfirmed",
+    "ja-JP": "AI処理の出典を確認できませんでした"
+  },
+  "ui_ai_mock": {
+    "ko-KR": "MOCK · 실제 AI 호출 없음",
+    "en": "MOCK · no real AI call",
+    "ja-JP": "MOCK · 実際のAI呼び出しなし"
+  },
+  "ui_ai_follow_up": {
+    "ko-KR": "추가로 확인해 주세요",
+    "en": "One more detail",
+    "ja-JP": "追加で確認してください"
+  },
+  "ui_ai_unavailable": {
+    "ko-KR": "지금 AI가 답하지 못했어요. 새 요청으로 다시 시도할 수 있어요.",
+    "en": "AI could not answer now. You can try again with a new request.",
+    "ja-JP": "現在AIが回答できません。新しいリクエストで再試行できます。"
+  },
+  "ui_ai_session_expired": {
+    "ko-KR": "서버 세션이 만료됐어요. 다시 보내면 새 세션으로 요청해요.",
+    "en": "The server session expired. Send again to start a new session.",
+    "ja-JP": "サーバーのセッションが期限切れです。再送信すると新しいセッションで処理します。"
+  },
+  "ui_ai_retry_new": {
+    "ko-KR": "새 요청으로 다시 시도",
+    "en": "Try as a new request",
+    "ja-JP": "新しいリクエストで再試行"
+  },
+  "ui_translate_question": {
+    "ko-KR": "입력한 질문 번역",
+    "en": "Translate the entered question",
+    "ja-JP": "入力した質問を翻訳"
+  },
+  "ui_translation_reviewed": {
+    "ko-KR": "저장된 검토 번역",
+    "en": "Reviewed saved translation",
+    "ja-JP": "確認済みの保存翻訳"
+  },
+  "ui_translation_original": {
+    "ko-KR": "원문 안내",
+    "en": "Original guide",
+    "ja-JP": "原文の案内"
   }
 }
