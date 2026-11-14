@@ -134,7 +134,13 @@ class PleosLocalAiFlowTest {
         runFlow(allowUnavailableQuestion = true)
     }
 
-    private fun runFlow(allowUnavailableQuestion: Boolean) {
+    /** Default coverage: actual local Q&A and reviewed saved translations, with no QUESTION translation calls. */
+    @Test fun actualLocalAskAndStoredTranslationsInThreeLanguages() {
+        assumeTrue(arguments.getString("validateReviewedLocalAi") == "true")
+        runFlow(allowUnavailableQuestion = false, requestQuestions = false)
+    }
+
+    private fun runFlow(allowUnavailableQuestion: Boolean, requestQuestions: Boolean = true) {
         assertFalse(BuildConfig.IS_MOCK)
         assertEquals("http://10.0.2.2:8001", BuildConfig.SERVER_URL.trimEnd('/'))
         val runId = requireNotNull(arguments.getString("runId"))
@@ -175,38 +181,40 @@ class PleosLocalAiFlowTest {
                     assertTrue(s.citations.all { it.second.startsWith("https://ownersmanual.hyundai.com/") })
                 }
                 capture("ask-$source", askMs)
-                clickTag("translate_question")
-                locale(target)
-                val translateMs = send(true, allowUnavailableQuestion)
-                val unavailable = vm.state.value.error == "TRANSLATION_UNAVAILABLE"
-                rule.runOnIdle {
-                    val s = vm.state.value
-                    assertEquals("LIVE", s.translationMode)
-                    assertEquals(AiProvider.OLLAMA_LOCAL, s.translationProvider)
-                    assertEquals(expectedModel, s.translationModel)
-                    assertEquals("QUESTION", s.translationKind)
-                    assertEquals(question, s.translationOriginal)
-                    assertEquals("UNREVIEWED", s.translationReview)
-                    if (unavailable) {
-                        assertTrue("Strict scenario still requires TRANSLATED", allowUnavailableQuestion)
-                        assertEquals("", s.translation)
-                        assertEquals("auto", s.translationSourceLocale)
-                        assertEquals(AssistantRetry.NEW_REQUEST, s.assistantRetry)
-                    } else {
-                        assertNull(s.error)
-                        assertEquals(source, s.translationSourceLocale)
-                        assertTrue(s.translation.isNotBlank())
+                if (requestQuestions) {
+                    clickTag("translate_question")
+                    locale(target)
+                    val translateMs = send(true, allowUnavailableQuestion)
+                    val unavailable = vm.state.value.error == "TRANSLATION_UNAVAILABLE"
+                    rule.runOnIdle {
+                        val s = vm.state.value
+                        assertEquals("LIVE", s.translationMode)
+                        assertEquals(AiProvider.OLLAMA_LOCAL, s.translationProvider)
+                        assertEquals(expectedModel, s.translationModel)
+                        assertEquals("QUESTION", s.translationKind)
+                        assertEquals(question, s.translationOriginal)
+                        assertEquals("UNREVIEWED", s.translationReview)
+                        if (unavailable) {
+                            assertTrue("Strict scenario still requires TRANSLATED", allowUnavailableQuestion)
+                            assertEquals("", s.translation)
+                            assertEquals("auto", s.translationSourceLocale)
+                            assertEquals(AssistantRetry.NEW_REQUEST, s.assistantRetry)
+                        } else {
+                            assertNull(s.error)
+                            assertEquals(source, s.translationSourceLocale)
+                            assertTrue(s.translation.isNotBlank())
+                        }
                     }
+                    if (unavailable) {
+                        rule.onNodeWithTag("translation_result_UNREVIEWED").assertDoesNotExist()
+                        rule.onNodeWithText(vm.content.copy(target).get("ui_241983579b6f")).performScrollTo().assertIsDisplayed()
+                        rule.onNodeWithTag("ai_retry").performScrollTo().assertIsDisplayed().assertIsEnabled()
+                    } else {
+                        rule.onNodeWithTag("translation_result_UNREVIEWED").performScrollTo().assertIsDisplayed()
+                        rule.onNodeWithText(vm.content.copy(target).get("ui_372ae2e0ffb4")).assertIsDisplayed()
+                    }
+                    capture("question-translation-$source-to-$target", translateMs)
                 }
-                if (unavailable) {
-                    rule.onNodeWithTag("translation_result_UNREVIEWED").assertDoesNotExist()
-                    rule.onNodeWithText(vm.content.copy(target).get("ui_241983579b6f")).performScrollTo().assertIsDisplayed()
-                    rule.onNodeWithTag("ai_retry").performScrollTo().assertIsDisplayed().assertIsEnabled()
-                } else {
-                    rule.onNodeWithTag("translation_result_UNREVIEWED").performScrollTo().assertIsDisplayed()
-                    rule.onNodeWithText(vm.content.copy(target).get("ui_372ae2e0ffb4")).assertIsDisplayed()
-                }
-                capture("question-translation-$source-to-$target", translateMs)
             }
 
             // Safety instructions use canonical reviewed units, never model-generated translations.
@@ -217,8 +225,13 @@ class PleosLocalAiFlowTest {
             for (key in listOf("guide_id", "manual_set_id", "source_version")) assertEquals(sourceGuide.getString(key), targetGuide.getString(key))
             val unitKey = answerUnits(sourceGuide).entries.single { it.value == originalAnswer }.key
             val expectedAnswer = answerUnits(targetGuide).getValue(unitKey)
-            rule.runOnIdle { vm.back() }
-            clickText(vm.content.copy("ko-KR").get("ui_translate_answer"))
+            if (requestQuestions) {
+                rule.runOnIdle { vm.back() }
+                clickText(vm.content.copy("ko-KR").get("ui_translate_answer"))
+            } else {
+                clickText(vm.content.copy("ja-JP").get("ui_translate_answer"))
+                locale("ko-KR")
+            }
             val storedAnswerMs = send(true)
             rule.runOnIdle {
                 val s = vm.state.value
