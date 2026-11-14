@@ -4,7 +4,6 @@ import android.content.Context
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
-import java.security.MessageDigest
 
 class UiCopy(private val locale: String, private val strings: JSONObject) {
     fun get(key: String): String {
@@ -22,47 +21,56 @@ class ContentRepository(private val context: Context) {
             Profile(p.getString("profile_id"), p.getString("display_name"), p.getInt("model_year"), p.getString("market_code"), p.getString("verification_status") == "VERIFIED",
                 p.optString("manual_set_id").takeUnless { s -> s == "null" || s.isBlank() }, p.optString("manual_version").takeUnless { s -> s == "null" || s.isBlank() }) } }
     }
-    val languages: List<Language> = array("locales/catalog.json").let { data ->
+    private val localeCatalog = array("locales/catalog.json")
+    val languages: List<Language> = localeCatalog.let { data ->
         (0 until data.length()).map { data.getJSONObject(it) }
             .filter { !BuildConfig.IS_MOCK || it.optBoolean("mock_visible", false) }
             .map { l ->
             Language(l.getString("locale"), l.getString("native_name"), l.getString("display_name"), l.getBoolean("rtl"), l.getString("ui_status")) } }
-    // DRAFT handoff templates are intentionally not exposed. Reviewed guides arrive via the API.
-    fun parseGuides(data: JSONArray, profile: Profile, locale: String): List<Guide> {
-        if (!profile.verified || profile.manualVersion == null || profile.manualSetId == null) return emptyList()
-        return (0 until data.length()).mapNotNull { i ->
-            val g = data.getJSONObject(i)
-            val profiles = g.getJSONArray("profile_ids")
-            if (g.getString("lifecycle") != "PUBLISHED" || g.getString("locale") != locale ||
-                g.getString("manual_set_id") != profile.manualSetId || g.getString("source_version") != profile.manualVersion ||
-                (0 until profiles.length()).none { profiles.getString(it) == profile.id }) return@mapNotNull null
-            val sources = g.getJSONArray("sources")
-            if (sources.length() == 0 || (0 until sources.length()).any { sources.getJSONObject(it).getString("verification_status") != "VERIFIED" }) return@mapNotNull null
-            val steps = g.getJSONArray("steps")
-            Guide(g.getString("guide_id"), g.getString("title"), g.getString("body"),
-                (0 until steps.length()).map { steps.getJSONObject(it).let { step -> step.getString("title") to step.getString("body") } },
-                (0 until sources.length()).map { sources.getJSONObject(it).let { s -> s.getString("title") + " · " + s.getString("section") to s.getString("url") } },
-                locale, (0 until steps.length()).map { steps.getJSONObject(it).getString("step_id") },
-                (0 until steps.length()).map { index -> steps.getJSONObject(index).getJSONArray("official_cautions").let { warnings ->
-                    (0 until warnings.length()).map { warnings.getString(it) }
-                } })
-        }
-    }
-    private fun cacheFile(profile: Profile, locale: String): File {
-        val key = "${profile.id}:${profile.manualSetId}:${profile.manualVersion}:$locale"
-        val hash = MessageDigest.getInstance("SHA-256").digest(key.toByteArray()).joinToString("") { "%02x".format(it) }
-        return File(context.filesDir, "public_guides/$hash.json").also { it.parentFile?.mkdirs() }
-    }
-    fun cachedGuides(profile: Profile, locale: String): List<Guide> = try {
-        parseGuides(JSONArray(cacheFile(profile, locale).readText()), profile, locale)
-    } catch (_: Exception) { emptyList() }
-    fun saveGuides(profile: Profile, locale: String, data: JSONArray): List<Guide> {
-        val parsed = parseGuides(data, profile, locale)
-        if (parsed.isNotEmpty()) {
-            val target = cacheFile(profile, locale)
-            val temp = File(target.path + ".tmp")
-            temp.writeText(data.toString()); temp.renameTo(target)
-        }
-        return parsed
-    }
+    private val guidePolicy by lazy { GuidePublicationPolicy(profiles,
+        (0 until localeCatalog.length()).map { localeCatalog.getJSONObject(it).getString("locale") }.toSet()) }
+    private val guideCache by lazy { PublishedGuideCache(File(context.filesDir, "public_guides"), guidePolicy) { decodeGuides(JSONArray(it)) } }
+
+    // The same publication gate applies to both API results and offline cached results.
+    fun parseGuides(data: JSONArray, profile: Profile, locale: String): List<Guide> =
+        guidePolicy.published(decodeGuides(data), profile, locale).map { it.toGuide() }
+    fun cachedGuides(profile: Profile, locale: String): List<Guide> = guideCache.read(profile, locale).map { it.toGuide() }
+    fun saveGuides(profile: Profile, locale: String, data: JSONArray): List<Guide> =
+        guideCache.replace(profile, locale, data.toString()).map { it.toGuide() }
+
+    private fun decodeGuides(data: JSONArray): List<PublishedGuideRecord> = decodeUnambiguousPublishedGuides(
+        (0 until data.length()).map { data.optJSONObject(it) },
+        identity = { it?.publicationIdentity() },
+        decode = { raw -> raw?.let { decodeGuide(it) } })
+
+    private fun decodeGuide(g: JSONObject): PublishedGuideRecord? = try {
+        val sources = g.getJSONArray("sources")
+        val steps = g.getJSONArray("steps")
+        PublishedGuideRecord(g.text("guide_id"), g.getJSONArray("profile_ids").texts(), g.nullableText("manual_set_id"),
+            g.nullableText("source_version"), g.text("topic"), g.text("title"), g.text("body"), g.text("locale"),
+            g.text("source_locale"), g.text("lifecycle"), g.text("translation_review_status"), g.nullableText("glossary_version"),
+            (0 until sources.length()).map { sources.getJSONObject(it).let { source ->
+                PublishedGuideSource(source.text("source_id"), source.text("title"), source.text("url"),
+                    source.nullableText("version"), source.nullableText("section"), source.text("verification_status")) } },
+            (0 until steps.length()).map { steps.getJSONObject(it).let { step ->
+                val order = step.get("order") as? Number ?: error("Step order must be an integer")
+                require(order.toDouble() == order.toInt().toDouble())
+                PublishedGuideStep(step.text("step_id"), order.toInt(), step.text("title"), step.text("body"),
+                    step.getJSONArray("official_cautions").texts(), step.getJSONArray("source_ids").texts()) } })
+    } catch (_: Exception) { null } // An unrelated malformed record must not hide valid records.
 }
+
+private fun JSONObject.publicationIdentity(): PublishedGuideIdentity? {
+    if (opt("lifecycle") != "PUBLISHED") return null
+    val id = opt("guide_id") as? String ?: return null
+    val locale = opt("locale") as? String ?: return null
+    val manualSetId = opt("manual_set_id") as? String ?: return null
+    val version = opt("source_version") as? String ?: return null
+    return PublishedGuideIdentity(id, locale, manualSetId, version)
+}
+
+private fun JSONObject.text(key: String): String = get(key) as? String ?: error("Expected string: $key")
+private fun JSONObject.nullableText(key: String): String? = get(key).let { value ->
+    if (value == JSONObject.NULL) null else value as? String ?: error("Expected nullable string: $key")
+}
+private fun JSONArray.texts(): List<String> = (0 until length()).map { get(it) as? String ?: error("Expected string array") }
