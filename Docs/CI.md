@@ -25,4 +25,6 @@ GitHub의 브랜치 보호나 필수 상태 검사는 이 YAML만으로 설정�
 
 develop `4b8b65b`를 실제 push한 뒤 [첫 실행](https://github.com/calmkeen/Hyundai_appdevchallenge2026/actions/runs/43565452391)은 job 생성 전 실패했다(jobs 0개). 로컬 YAML 파싱은 통과했지만 GitHub context 사용 가능 범위까지 검사하지 못했다. `jobs.<job_id>.env`에 쓴 `runner.temp`는 해당 위치에서 지원되지 않는 설정이었다.
 
-`feature/ci-runner-context`에서 `CARCUE_DB`를 백엔드 테스트 **step의 env**로 옮겼다. [GitHub 공식 context 표](https://docs.github.com/en/actions/reference/workflows-and-actions/contexts#context-availability)에 따르면 step env에서는 runner를 사용할 수 있다. 읽기 전용 권한과 MOCK/비어 있는 AI 키 설정은 유지한다. 원격 수정 실행 결과는 작업 기록/검증 보고서에서 로컬 검사와 구분한다.
+`feature/ci-runner-context`에서 `CARCUE_DB`를 백엔드 테스트 **step의 env**로 옮겼다. [GitHub 공식 context 표](https://docs.github.com/en/actions/reference/workflows-and-actions/contexts#context-availability)에 따르면 step env에서는 runner를 사용할 수 있다. 읽기 전용 권한과 MOCK/비어 있는 AI 키 설정은 유지한다.
+
+수정 통합본 develop `bfb548b`의 [실제 원격 실행](https://github.com/calmkeen/Hyundai_appdevchallenge2026/actions/runs/43566021842)은 성공했다. 계약/UI 자원, 가이드 카탈로그, 백엔드 회귀의 세 단계가 모두 success임을 Jobs API에서도 확인했다. 첫 실행의 실패 이력은 보존한다. 이 결과는 Android/SDK/AI 실제 기기·외부 서비스 시험을 포함하지 않는다.

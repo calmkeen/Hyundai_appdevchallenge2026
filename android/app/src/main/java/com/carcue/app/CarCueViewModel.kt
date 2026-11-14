@@ -23,6 +23,7 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
     private val uxMonitor: UxMonitor = createUxMonitor(application)
     private val api = CarCueApi()
     private val deletion = DeletionQueue(application)
+    private val guideRequests = GuideRequestGate()
     private val mutable = MutableStateFlow(UiState(reading = Reading(source = source), deletionPending = deletion.pending()))
     val state = mutable.asStateFlow()
     private var remote: RemoteSession? = null
@@ -148,13 +149,18 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
         val p = mutable.value.profile ?: return
         val locale = mutable.value.locale
         val ticket = generation
+        val request = guideRequests.begin(p, locale)
         viewModelScope.launch {
             val cached = withContext(Dispatchers.IO) { content.cachedGuides(p, locale) }
-            if (ticket == generation && locale == mutable.value.locale) mutable.update { it.copy(guides = cached) }
+            if (ticket == generation && locale == mutable.value.locale && guideRequests.isCurrent(request)) mutable.update { it.copy(guides = cached) }
             try {
-                val guides = withContext(Dispatchers.IO) { content.saveGuides(p, locale, api.guides(p.id, locale)) }
-                if (ticket == generation && locale == mutable.value.locale) mutable.update { it.copy(guides = guides, serverConnection = "CONNECTED") }
-            } catch (e: Exception) { if (ticket == generation && locale == mutable.value.locale) mutable.update { it.copy(serverConnection = if (e is ApiFailure) "HTTP_${e.status}" else "UNAVAILABLE") } }
+                val data = withContext(Dispatchers.IO) { api.guides(p.id, locale) }
+                val guides = withContext(Dispatchers.IO) {
+                    guideRequests.commitIfCurrent(request) { content.saveGuides(p, locale, data) }
+                } ?: return@launch
+                if (ticket == generation && locale == mutable.value.locale && guideRequests.isCurrent(request)) mutable.update { it.copy(guides = guides, serverConnection = "CONNECTED") }
+            } catch (_: CancellationException) { /* no late response */ }
+            catch (e: Exception) { if (ticket == generation && locale == mutable.value.locale && guideRequests.isCurrent(request)) mutable.update { it.copy(serverConnection = if (e is ApiFailure) "HTTP_${e.status}" else "UNAVAILABLE") } }
         }
     }
     fun send(input: String, translate: Boolean = false, retry: Boolean = false, consent: Boolean = false) {
@@ -212,7 +218,7 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
     }
     fun cancelRequest() { operation++; requestJob?.cancel(); requestJob = null; mutable.update { it.copy(busy = false) } }
     private fun clearSession() {
-        generation++; cancelRequest(); stopVehicle()
+        generation++; guideRequests.invalidate(); cancelRequest(); stopVehicle()
         remote = null
         deletion.finishActive()
         requestId = null; retryInput = null
@@ -220,5 +226,5 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
         viewModelScope.launch { withContext(Dispatchers.IO) { deletion.retry(api) }; mutable.update { it.copy(deletionPending = deletion.pending()) } }
     }
     fun endSession() { clearSession() }
-    override fun onCleared() { stopVehicle(); uxMonitor.stop(); connectivity.unregisterNetworkCallback(networkCallback); super.onCleared() }
+    override fun onCleared() { guideRequests.invalidate(); stopVehicle(); uxMonitor.stop(); connectivity.unregisterNetworkCallback(networkCallback); super.onCleared() }
 }

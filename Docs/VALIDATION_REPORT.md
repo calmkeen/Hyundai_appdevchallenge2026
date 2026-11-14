@@ -8,13 +8,14 @@
 | --- | --- | --- |
 | 서버 회귀 | `.venv/bin/python -m pytest backend/tests -q` | 최신 117개 통과. 기존 26개 + 게시 정책/API 73개 + 등록 CLI 18개. AnyIO deprecation warning 1개 |
 | 가이드 카탈로그 | `.venv/bin/python scripts/import_guides.py check --json` | VALID, 1개 DRAFT 구조 검사. 실제 게시 자료 없음 |
-| Android 단위 | `:app:testDemoDebugUnitTest` | 이전 6개 통과, 실패/건너뜀 0 |
+| GitHub Actions | develop `bfb548b`, run `43566021842` | 실제 원격 success. 계약/UI 자원·가이드 카탈로그·백엔드 회귀 단계 모두 성공. 최초 runner context 오류 수정 후 확인 |
+| Android 단위 | `:app:testDemoDebugUnitTest` | 최신 31개 통과 (기존 상태 6 + 게시 정책 14 + 파일 캐시 7 + 요청 순서 4), 실패/오류/건너뜀 0 |
 | Mock 기기 회귀 | API 35 / 1280×800 / `CarCueFlowTest` | 5개 통과, 원본 개폐 프레임 픽셀 차이·안전벨트 미연결·세 언어·기존 흐름 |
 | 실제 APK 연속 촬영 | API 35 / `NativeShowcaseTest` | 1개 통과, 20개 실제 화면·개폐·세 언어 전환 |
 | SDK 앱 전체 촬영 | `PleosShowcaseTest`, 전용 AVD/사용자 10 | 1개 통과, 79.742초, 같은 APK/프로세스 20개 장면·4회 실제 변경 콜백 |
 | 실제 SDK 기기 회귀 | Pleos 2.1 / API 34 / SDK 2.3.2 / Service 2.3.22 / `PleosSdkTest` | 최신 1개 통과, 16.747초. 실제 callback 0→1→0과 차량 이미지 픽셀 변경·복귀 |
 | SDK 전체 검증 도구 | `.venv/bin/python scripts/validate_pleos.py` | 최신 Capability·GET·양방향 콜백·차량 픽셀·영상·unregister·release 통과 |
-| 앱 빌드 | `assembleDemoDebug`, `assemblePleosDebug` | 이전 APK 2종 성공. 이번 SDK 전체 촬영용 pleos APK 재빌드 성공 |
+| 앱 빌드 | `assembleDemoDebug`, `assemblePleosDebug` | 이전 APK 2종 성공. 최신 가이드 캐시 보완의 Pleos Debug APK 빌드 성공 (JDK17/offline/max-workers2) |
 | 기기 테스트 빌드 | `assembleDemoDebugAndroidTest`, `assemblePleosDebugAndroidTest` | 성공 |
 | 계약 | `scripts/check_contracts.py` | Schema 3종과 제공 예제 3개, UI 문자열 키 검사 통과 |
 | 앱 소개 영상 | 실제 APK 녹화 기반 편집·AAC 디코딩 | 34초·1920×1080·30fps, 전체 기능/세 언어를 한 SDK 앱으로 통일, 기존 음악 PCM 일치 |
@@ -23,6 +24,10 @@
 최종 기준 JDK는 Temurin 17.0.21+9 ARM64, Gradle 8.10.2, AGP 8.8.2, Kotlin 2.0.0이다. compile/target SDK 35, min SDK 28이다.
 
 검수 가이드 등록 feature는 API에서 불일치·미검수·중복 레코드 차단, CLI의 반복 등록·충돌·번역 분리·경로 이탈 방지·입출력 실패 시 보존을 검증했다. 테스트의 VERIFIED 프로필과 example.test 자료는 합성 fixture이며 기본 content에 반영하지 않았다. 계약 3종·148개 세 언어 UI 자원 검사 및 CI YAML 파싱도 통과했다. 이번 서버 변경으로 SDK/AI 실제 외부 연결을 재시험하거나 성공 판정하지 않는다. 기존 SDK 촬영·회귀 결과는 아래 이력과 구분한다.
+
+앱 가이드 캐시 feature는 순수 Kotlin 게시 정책, 실제 File 캐시, coroutine API 대역으로 검증했다. 정상 레코드와 malformed 중복 레코드가 섞인 경우 모두 차단하고, 새 빈 응답 뒤 늦은 응답이 도착하거나 이미 쓰기 중인 이전 요청이 있어도 최종 캐시를 복원하지 않음을 확인했다. `org.json` 플랫폼 변환의 기기 시험 및 새 APK의 SDK 수신 재시험은 하지 않았다.
+
+새 APK는 `output/apk/carcue-pleos-guide-cache-debug.apk`, SHA-256 `0f340dc97a8bab0094869db8828b6ce7bd27051312ba5186bf698f4724d4f4ec`다. Android 소스 커밋은 `b42bfb9`이며 빌드/시험 요약은 `output/qa/git-flow/guide-cache-build.json`에 남겼다. 기존 영상·촬영 APK 별칭은 보존했다. 캐시 키가 바뀌므로 첫 온라인 갱신 전 이전 오프라인 가이드는 사용하지 않는다. 디스크 자체가 삭제/쓰기를 거부하면 같은 프로세스에서는 예전 캐시를 차단하지만 재시작 후 철회까지 보장할 수 없다.
 
 세 언어로 Mock 범위를 조정한 뒤 서버 26개·Mock 기기 3개·계약 검사를 다시 통과했고 두 APK를 재빌드했다. 일본어 홈과 세 언어 선택 캡처를 육안으로 확인했다. SDK·CarUx 수신과 Android 단위 시험은 같은 날 언어 변경 전에 확보한 결과이며, 이번 변경에서 재실행하지 않았다.
 
