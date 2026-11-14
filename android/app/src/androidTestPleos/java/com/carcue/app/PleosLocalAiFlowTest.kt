@@ -68,6 +68,9 @@ class PleosLocalAiFlowTest {
             .put("phase", phase).put("elapsed_ms", elapsed).put("locale", s.locale).put("profile_id", s.profile?.id)
             .put("request_id", s.lastAiRequestId).put("vehicle_source", s.reading.source.name)
             .put("status", if (s.page == Page.ASK) s.answerStatus else if (s.translation.isNotBlank()) "TRANSLATED" else "UNAVAILABLE")
+            .put("translation_status", if (s.page == Page.ASK) JSONObject.NULL else if (s.translation.isNotBlank()) "TRANSLATED"
+                else if (s.error == "TRANSLATION_UNAVAILABLE") "TEMPORARILY_UNAVAILABLE" else "UNKNOWN")
+            .put("translation_empty", s.translation.isEmpty()).put("retry_new_request", s.assistantRetry == AssistantRetry.NEW_REQUEST)
             .put("mode", if (s.page == Page.ASK) s.answerMode else s.translationMode)
             .put("ai_provider", if (s.page == Page.ASK) s.answerProvider.name else s.translationProvider.name)
             .put("ai_model", (if (s.page == Page.ASK) s.answerModel else s.translationModel) ?: JSONObject.NULL)
@@ -80,7 +83,11 @@ class PleosLocalAiFlowTest {
             rule.onRoot().captureToImage().asAndroidBitmap().compress(Bitmap.CompressFormat.PNG, 100, out)
         }
     }
-    private fun send(translation: Boolean): Long {
+    private fun send(translation: Boolean, allowUnavailableQuestion: Boolean = false): Long {
+        if (allowUnavailableQuestion) {
+            assertTrue(translation)
+            assertEquals("QUESTION", vm.state.value.translationKind)
+        }
         rule.onNodeWithTag("ai_send").performScrollTo().assertIsNotEnabled()
         clickTag("ai_consent")
         val previous = vm.state.value.lastAiRequestId
@@ -91,7 +98,9 @@ class PleosLocalAiFlowTest {
                 if (translation) it.translationOriginal.isNotBlank() else it.answerStatus.isNotBlank()) }
         }
         rule.runOnIdle {
-            assertNull("Actual local AI request failed", vm.state.value.error)
+            if (allowUnavailableQuestion && vm.state.value.error == "TRANSLATION_UNAVAILABLE") {
+                assertEquals("QUESTION", vm.state.value.translationKind)
+            } else assertNull("Actual local AI request failed", vm.state.value.error)
             assertNotEquals(previous, vm.state.value.lastAiRequestId)
             assertEquals(Source.PLEOS, vm.state.value.reading.source)
         }
@@ -116,6 +125,16 @@ class PleosLocalAiFlowTest {
 
     @Test fun actualLocalAskAndQuestionTranslationInThreeLanguages() {
         assumeTrue(arguments.getString("validateLocalAi") == "true")
+        runFlow(allowUnavailableQuestion = false)
+    }
+
+    /** Separate coverage of safe rejection; this does not establish generated-translation quality. */
+    @Test fun actualLocalAskAndGuardedQuestionTranslationInThreeLanguages() {
+        assumeTrue(arguments.getString("validateGuardedLocalAi") == "true")
+        runFlow(allowUnavailableQuestion = true)
+    }
+
+    private fun runFlow(allowUnavailableQuestion: Boolean) {
         assertFalse(BuildConfig.IS_MOCK)
         assertEquals("http://10.0.2.2:8001", BuildConfig.SERVER_URL.trimEnd('/'))
         val runId = requireNotNull(arguments.getString("runId"))
@@ -158,20 +177,35 @@ class PleosLocalAiFlowTest {
                 capture("ask-$source", askMs)
                 clickTag("translate_question")
                 locale(target)
-                val translateMs = send(true)
+                val translateMs = send(true, allowUnavailableQuestion)
+                val unavailable = vm.state.value.error == "TRANSLATION_UNAVAILABLE"
                 rule.runOnIdle {
                     val s = vm.state.value
                     assertEquals("LIVE", s.translationMode)
                     assertEquals(AiProvider.OLLAMA_LOCAL, s.translationProvider)
                     assertEquals(expectedModel, s.translationModel)
                     assertEquals("QUESTION", s.translationKind)
-                    assertEquals(source, s.translationSourceLocale)
                     assertEquals(question, s.translationOriginal)
-                    assertTrue(s.translation.isNotBlank())
                     assertEquals("UNREVIEWED", s.translationReview)
+                    if (unavailable) {
+                        assertTrue("Strict scenario still requires TRANSLATED", allowUnavailableQuestion)
+                        assertEquals("", s.translation)
+                        assertEquals("auto", s.translationSourceLocale)
+                        assertEquals(AssistantRetry.NEW_REQUEST, s.assistantRetry)
+                    } else {
+                        assertNull(s.error)
+                        assertEquals(source, s.translationSourceLocale)
+                        assertTrue(s.translation.isNotBlank())
+                    }
                 }
-                rule.onNodeWithTag("translation_result_UNREVIEWED").performScrollTo().assertIsDisplayed()
-                rule.onNodeWithText(vm.content.copy(target).get("ui_372ae2e0ffb4")).assertIsDisplayed()
+                if (unavailable) {
+                    rule.onNodeWithTag("translation_result_UNREVIEWED").assertDoesNotExist()
+                    rule.onNodeWithText(vm.content.copy(target).get("ui_241983579b6f")).performScrollTo().assertIsDisplayed()
+                    rule.onNodeWithTag("ai_retry").performScrollTo().assertIsDisplayed().assertIsEnabled()
+                } else {
+                    rule.onNodeWithTag("translation_result_UNREVIEWED").performScrollTo().assertIsDisplayed()
+                    rule.onNodeWithText(vm.content.copy(target).get("ui_372ae2e0ffb4")).assertIsDisplayed()
+                }
                 capture("question-translation-$source-to-$target", translateMs)
             }
 
