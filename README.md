@@ -20,6 +20,7 @@ CarCue는 낯선 차량의 상태와 사용법을 자신의 언어로 확인하�
 - [2024 한국 아이오닉 5 공식 매뉴얼 검토](Docs/MANUAL_REVIEW_IONIQ5_2024_KR.md)
 - [실제 SDK 문 상태와 공식 가이드 연결·검증](Docs/SDK_OFFICIAL_GUIDE_VALIDATION.md)
 - [Console 503 복구·최신 APK 전체 재시험](Docs/PLEOS_CONSOLE_RECOVERY.md)
+- [오프라인 검수 안내·종료 복구 검증](Docs/OFFLINE_SESSION_VALIDATION.md)
 - [무료 로컬 AI 구성·실제 호출](Docs/LOCAL_AI_INTEGRATION.md) · [Pleos 앱 AI 연결 검증](Docs/LOCAL_AI_APP_VALIDATION.md)
 - [화면 명세](Docs/SCREEN_SPEC.md) · [API 계약](Docs/DATA_API_SPEC.md) · [완료 기준](Docs/ACCEPTANCE.md)
 
