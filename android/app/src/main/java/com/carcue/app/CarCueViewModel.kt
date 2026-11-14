@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
 import org.json.JSONArray
 import org.json.JSONObject
@@ -21,9 +22,9 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
     private val repository: VehicleRepository = PlatformVehicleRepository(application)
     private val uxMonitor: UxMonitor = createUxMonitor(application)
     private val api = CarCueApi()
-    private val deletion = DeletionQueue(application)
+    private val deletion = AppDeletionRecovery.get(application)
     private val guideRequests = GuideRequestGate()
-    private val mutable = MutableStateFlow(UiState(reading = Reading(source = source), deletionPending = deletion.pending()))
+    private val mutable = MutableStateFlow(UiState(reading = Reading(source = source), deletionPending = deletion.pending.value))
     val state = mutable.asStateFlow()
     private var remote: RemoteSession? = null
     @Volatile private var generation = 0
@@ -38,13 +39,16 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
     private val connectivity = application.getSystemService(ConnectivityManager::class.java)
     private val networkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onCapabilitiesChanged(network: Network, capabilities: NetworkCapabilities) {
-            mutable.update { it.copy(internetAvailable = capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)) }
+            val validated = capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+            val wasValidated = mutable.value.internetAvailable == true
+            mutable.update { it.copy(internetAvailable = validated) }
+            if (validated && !wasValidated) deletion.retry()
         }
         override fun onLost(network: Network) { mutable.update { it.copy(internetAvailable = false) } }
     }
 
     init {
-        deletion.recoverAbandonedSession()
+        viewModelScope.launch { deletion.pending.collect { pending -> mutable.update { it.copy(deletionPending = pending) } } }
         connectivity.registerDefaultNetworkCallback(networkCallback)
         viewModelScope.launch {
             while (isActive) {
@@ -71,7 +75,7 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
             if (!ux.known || ux.restricted) cancelRequest()
         }
         if (mutable.value.sessionStarted) startVehicle()
-        viewModelScope.launch { withContext(Dispatchers.IO) { deletion.retry(api) }; mutable.update { it.copy(deletionPending = deletion.pending()) } }
+        deletion.retry()
     }
     fun background() {
         active = false; stopVehicle(); uxMonitor.stop()
@@ -284,7 +288,7 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
         remote = null
         assistantRequests.clear()
         deletion.finishActive()
-        mutable.update { it.copy(deletionPending = deletion.pending()) }
+        mutable.update { it.copy(deletionPending = deletion.pending.value) }
     }
     fun cancelRequest() { operation++; requestJob?.cancel(); requestJob = null; mutable.update { it.copy(busy = false) } }
     private fun clearSession() {
@@ -292,9 +296,9 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
         remote = null
         deletion.finishActive()
         assistantRequests.clear(); assistantGuideContext = null
-        mutable.value = UiState(reading = Reading(source = source), ux = mutable.value.ux, internetAvailable = mutable.value.internetAvailable, deletionPending = deletion.pending())
-        viewModelScope.launch { withContext(Dispatchers.IO) { deletion.retry(api) }; mutable.update { it.copy(deletionPending = deletion.pending()) } }
+        mutable.value = UiState(reading = Reading(source = source), ux = mutable.value.ux, internetAvailable = mutable.value.internetAvailable, deletionPending = deletion.pending.value)
     }
     fun endSession() { clearSession() }
-    override fun onCleared() { guideRequests.invalidate(); stopVehicle(); uxMonitor.stop(); connectivity.unregisterNetworkCallback(networkCallback); super.onCleared() }
+    fun retryPendingDeletions() { deletion.retry() }
+    override fun onCleared() { clearSession(); uxMonitor.stop(); connectivity.unregisterNetworkCallback(networkCallback); super.onCleared() }
 }
