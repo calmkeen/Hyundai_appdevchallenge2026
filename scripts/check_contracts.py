@@ -30,6 +30,13 @@ print(f"PASS {len(keys)} referenced UI keys; {len(ui)} resources in all 3 mock l
 sys.path.insert(0, str(root / "backend"))
 from app.content import Catalog
 from app.guide_rules import validate_state_guide_rules
+from app.official_links import validate_support_contacts
+Draft202012Validator.check_schema(json.loads((root / "contracts/support-contact.schema.json").read_text()))
+catalog = Catalog()
+for profile in catalog.profiles:
+    support_issues = validate_support_contacts(profile, catalog.locales)
+    assert not support_issues, (profile["profile_id"], support_issues)
+print(f"PASS {sum(len(profile.get('support_contacts', [])) for profile in catalog.profiles)} registered official WEBSITE support reference(s), exact profile market")
 Draft202012Validator.check_schema(json.loads((root / "contracts/state-guide-rules.schema.json").read_text()))
 rules = json.loads((root / "content/state-guide-rules.json").read_text())
 issues = validate_state_guide_rules(rules, Catalog())

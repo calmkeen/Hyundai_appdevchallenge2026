@@ -136,7 +136,9 @@ def test_official_questions_return_complete_reviewed_units_and_exact_citations(l
             "section": source_index[source_id]["section"],
         } for source_id in unit["source_ids"]]
         assert result["actions"] == [{"kind": "OPEN_GUIDE", "target_id": GUIDE},
-                                      {"kind": "REFRESH_STATUS", "target_id": "door.position"}]
+            {"kind": "REFRESH_STATUS", "target_id": "door.position"},
+            *[{"kind": "OPEN_MANUAL", "target_id": source_id} for source_id in unit["source_ids"]],
+            {"kind": "OPEN_SUPPORT", "target_id": "hyundai-kr-customer-support"}]
         assert result["mode"] == "LIVE"
         assert result["ai_provider"] == "UNKNOWN"
         assert result["ai_model"] == provider.model
@@ -310,7 +312,8 @@ def test_non_answered_japanese_model_prose_citations_and_followup_are_replaced(s
         result = response.json()
         assert provider.ask_calls == 1
         assert result["status"] == status and result["answer"] == NO_SOURCE_MESSAGES["ja-JP"]
-        assert result["citations"] == [] and result["actions"] == []
+        assert result["citations"] == []
+        assert result["actions"] == [{"kind": "OPEN_SUPPORT", "target_id": "hyundai-kr-customer-support"}]
         assert result["follow_up_question"] == (FOLLOW_UP_MESSAGES["ja-JP"] if status == "NEED_MORE_INFO" else None)
         assert result["ai_provider"] == provider.kind
         wire = json.dumps(result, ensure_ascii=False)

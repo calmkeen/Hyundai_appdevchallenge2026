@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://carcue.invalid/contracts/support-contact.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {"type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"},
+    "kind": {"const": "WEBSITE"},
+    "title": {"type": "string", "minLength": 1},
+    "url": {"type": "string", "format": "uri"},
+    "market_code": {"type": "string", "pattern": "^[A-Z]{2}$"},
+    "source_locale": {"type": "string", "minLength": 2, "maxLength": 35},
+    "verification_status": {"enum": ["UNVERIFIED", "VERIFIED"]},
+    "evidence_url": {"type": "string", "format": "uri"},
+    "reviewed_at": {"type": "string", "format": "date-time"}
+  },
+  "required": ["id", "kind", "title", "url", "market_code", "source_locale", "verification_status", "evidence_url", "reviewed_at"]
+}
