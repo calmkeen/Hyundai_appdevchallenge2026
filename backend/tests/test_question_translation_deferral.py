@@ -61,12 +61,16 @@ def test_default_still_calls_local_ask_and_reuses_reviewed_answer_and_guide(sour
         answer = client.post("/v1/ask", headers=headers, json={**base, "request_id": "default-ask",
             "locale": source, "question": question}).json()
         assert answer["status"] == "ANSWERED" and answer["ai_provider"] == "OLLAMA_LOCAL"
+        source_guide, = Catalog().published(PROFILE, source)
         target_guide, = Catalog().published(PROFILE, target)
         for kind in ("ANSWER", "GUIDE"):
             result = client.post("/v1/translate", headers=headers, json={**base, "request_id": "stored-" + kind,
-                "source_locale": source, "target_locale": target, "text": answer["answer"],
+                "source_locale": source, "target_locale": target,
+                "text": answer["answer"] if kind == "ANSWER" else source_guide["body"],
                 "content_kind": kind, "guide_id": GUIDE}).json()
             assert result["status"] == "TRANSLATED" and result["ai_provider"] == "STORED_GUIDE"
-            assert result["translated_text"] == target_guide["body"] and result["ai_model"] is None
+            expected = target_guide["body"] if kind == "GUIDE" else "\n".join([target_guide["body"],
+                *[part for step in target_guide["steps"] for part in [step["body"], *step["official_cautions"]]]])
+            assert result["translated_text"] == expected and result["ai_model"] is None
         assert client.delete("/v1/sessions/" + session["session_id"], headers=headers).json()["status"] == "DELETED"
     assert len(calls) == len(provider.events) == 1

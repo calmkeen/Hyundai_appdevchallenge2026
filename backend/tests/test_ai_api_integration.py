@@ -111,23 +111,24 @@ def saved_result(app, session, request_id):
 
 
 @pytest.mark.parametrize("locale", LOCALES)
-@pytest.mark.parametrize("unit_index", [0, 1, 2], ids=["whole-body", "pinch-step", "closure-step"])
-def test_official_questions_return_complete_reviewed_units_and_exact_citations(locale, unit_index):
-    provider = DeterministicLocalFixture(unit_index=unit_index)
+@pytest.mark.parametrize("step_context", [None, "check-pinch-area", "check-closure-display"])
+def test_official_questions_return_complete_bundle_regardless_of_selected_step(locale, step_context):
+    provider = DeterministicLocalFixture()
     with session_for(provider, locale) as (_, client, catalog, session, headers):
         guides = catalog.published(PROFILE, locale)
         assert len(guides) == 1 and guides[0]["guide_id"] == GUIDE
-        unit = answer_units(guides)[unit_index]
-        response = client.post("/v1/ask", json=ask_payload(session, locale), headers=headers)
+        unit = answer_units(guides)[0]
+        payload = ask_payload(session, locale)
+        payload["guide_context"] = {"guide_id": GUIDE, "step_id": step_context}
+        response = client.post("/v1/ask", json=payload, headers=headers)
         assert response.status_code == 200
         result = response.json()
         assert provider.ask_calls == 1 and provider.translation_calls == 0
         assert provider.received_guides == [guides]
         assert result["status"] == "ANSWERED" and result["locale"] == locale
         assert result["answer"] == unit["text"]
-        if unit_index:
-            step = guides[0]["steps"][unit_index - 1]
-            assert result["answer"] == "\n".join([step["body"], *step["official_cautions"]])
+        assert unit["unit_id"].endswith(":closing-bundle:v1")
+        assert all(part in result["answer"] for step in guides[0]["steps"] for part in [step["body"], *step["official_cautions"]])
         source_index = {source["source_id"]: source for source in guides[0]["sources"]}
         assert result["citations"] == [{
             "source_id": source_id, "guide_id": GUIDE, "profile_id": PROFILE,
@@ -170,22 +171,17 @@ def test_all_stored_guide_language_pairs_use_reviewed_target_without_provider(so
 
 
 @pytest.mark.parametrize("source_locale,target_locale", list(itertools.product(LOCALES, repeat=2)))
-@pytest.mark.parametrize("unit_index", [0, 1, 2], ids=["whole-body", "pinch-step-with-caution", "closure-step-with-caution"])
 @pytest.mark.parametrize("detect_source", [True, False], ids=["auto-source", "explicit-source"])
 def test_answer_translations_use_exact_reviewed_units_in_every_language_direction(
-        source_locale, target_locale, unit_index, detect_source):
+        source_locale, target_locale, detect_source):
     provider = DeterministicLocalFixture()
     with session_for(provider, target_locale) as (_, client, catalog, session, headers):
         original = catalog.published(PROFILE, source_locale)[0]
         target = catalog.published(PROFILE, target_locale)[0]
-        original_unit = answer_units([original])[unit_index]
-        target_unit = answer_units([target])[unit_index]
-        if unit_index:
-            original_step = original["steps"][unit_index - 1]
-            target_step = target["steps"][unit_index - 1]
-            assert original_step["step_id"] == target_step["step_id"]
-            assert original_step["official_cautions"] and target_step["official_cautions"]
-            assert target_unit["text"] == "\n".join([target_step["body"], *target_step["official_cautions"]])
+        original_unit = answer_units([original])[0]
+        target_unit = answer_units([target])[0]
+        assert original_unit["unit_id"].endswith(":closing-bundle:v1")
+        assert target_unit["text"] == "\n".join([target["body"], *[part for step in target["steps"] for part in [step["body"], *step["official_cautions"]]]])
         payload = {"request_id": "reviewed-answer-unit", "session_id": session["session_id"],
                    "profile_id": PROFILE, "source_locale": "auto" if detect_source else source_locale,
                    "target_locale": target_locale, "text": original_unit["text"], "content_kind": "ANSWER"}
@@ -230,7 +226,8 @@ def test_unmatched_or_incomplete_answers_never_fall_back_to_model_translation(lo
         elif invalid_kind.startswith("wrong-source"):
             source_locale = next(candidate for candidate in LOCALES if candidate != locale)
             if invalid_kind.endswith("step"):
-                text = answer_units([original])[1]["text"]
+                step = original["steps"][0]
+                text = "\n".join([step["body"], *step["official_cautions"]])
         payload = {"request_id": "unreviewed-answer", "session_id": session["session_id"],
                    "profile_id": PROFILE, "source_locale": source_locale, "target_locale": "ko-KR",
                    "text": text, "content_kind": "ANSWER"}

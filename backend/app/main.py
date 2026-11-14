@@ -131,6 +131,66 @@ def create_app(db_path=None, catalog=None, provider=None, mode=None):
                 db.execute("INSERT INTO history(session,question,answer) VALUES(?,?,?)", (session, question, result["answer"]))
                 db.execute("DELETE FROM history WHERE session=? AND position NOT IN (SELECT position FROM history WHERE session=? ORDER BY position DESC LIMIT 3)", (session, session))
 
+    def stored_translation(request):
+        published = catalog.published(request.profile_id)
+        if request.content_kind == "GUIDE":
+            # A static guide's raw body remains distinct from a complete AI answer.
+            originals = [(g, None) for g in published if g["guide_id"] == request.guide_id
+                         and request.source_locale in {"auto", g["locale"]} and g["body"] == request.text]
+        else:
+            originals = [(g, unit) for g in published if request.source_locale in {"auto", g["locale"]}
+                         for unit in answer_units([g]) if unit["text"] == request.text]
+        if len(originals) != 1:
+            return None
+        original, unit = originals[0]
+        suffix = unit["unit_id"][len(":".join((original["guide_id"], original["locale"], original["source_version"]))):] if unit else None
+        matches = []
+        for target in catalog.published(request.profile_id, request.target_locale):
+            if (target["guide_id"] != original["guide_id"] or target["manual_set_id"] != original["manual_set_id"]
+                    or target["source_version"] != original["source_version"]):
+                continue
+            if unit is None:
+                matches.append((target, target["body"]))
+            else:
+                identity = ":".join((target["guide_id"], target["locale"], target["source_version"]))
+                matches.extend((target, candidate["text"]) for candidate in answer_units([target])
+                               if candidate["unit_id"] == identity + suffix
+                               and set(candidate["source_ids"]) == set(unit["source_ids"]))
+        if len(matches) != 1:
+            return None
+        target, text = matches[0]
+        return {"source_locale": original["locale"], "translated_text": text,
+                "review_status": target["translation_review_status"], "glossary_version": target["glossary_version"],
+                "ai_provider": "STORED_GUIDE", "ai_model": None}
+
+    def current_cached_answer(value, request):
+        try:
+            if value["request_id"] != request.request_id or value["locale"] != request.locale or value["mode"] != mode:
+                return False
+            guides = catalog.retrieve(request)
+            ids = [citation["source_id"] for citation in value["citations"]]
+            validate_answer({"status": "ANSWERED", "answer": value["answer"], "source_ids": ids}, guides)
+            index = {source["source_id"]: (guide, source) for guide in guides for source in guide["sources"]}
+            expected = []
+            for sid in ids:
+                guide, source = index[sid]
+                expected.append({"source_id": sid, "guide_id": guide["guide_id"], "profile_id": request.profile_id,
+                    "manual_set_id": guide["manual_set_id"], "source_version": guide["source_version"],
+                    "title": source["title"], "url": source["url"], "section": source["section"]})
+            actions = [{"kind": "OPEN_GUIDE", "target_id": expected[0]["guide_id"]},
+                       {"kind": "REFRESH_STATUS", "target_id": "door.position"}]
+            actions += manual_actions(expected, guides, catalog.profile(request.profile_id))
+            actions += support_actions(catalog.support_contacts(request.profile_id))
+            return value["citations"] == expected and value["actions"] == actions
+        except (KeyError, TypeError, ValueError, IndexError):
+            return False
+
+    def unavailable_translation(request):
+        return {"request_id": request.request_id, "original_text": request.text,
+            "source_locale": request.source_locale, "target_locale": request.target_locale,
+            "translated_text": None, "glossary_version": None, "review_status": "UNREVIEWED",
+            "status": "TEMPORARILY_UNAVAILABLE", "mode": mode, "ai_provider": "NOT_CALLED", "ai_model": None}
+
     @app.get("/health")
     def health():
         return {"status": "ok", "mode": mode}
@@ -189,6 +249,17 @@ def create_app(db_path=None, catalog=None, provider=None, mode=None):
             authorize(request.session_id, authorization, request.profile_id)
             old = cached(request.session_id, request.request_id, fingerprint)
             if old:
+                if old.get("status") == "ANSWERED" and not current_cached_answer(old, request):
+                    # A deployment may find old partial-unit results in the same DB.
+                    # Keep its fingerprint; never replay text, history, or make a
+                    # hidden provider call to repair a previously confirmed result.
+                    old = {"request_id": request.request_id, "status": "NO_RELIABLE_SOURCE", "locale": request.locale,
+                        "answer": NO_SOURCE_MESSAGES.get(request.locale, NO_SOURCE_MESSAGES["en"]),
+                        "citations": [], "follow_up_question": None,
+                        "actions": [{"kind": "SELECT_PROFILE", "target_id": None}], "mode": mode,
+                        "ai_provider": "NOT_CALLED", "ai_model": None}
+                    old["actions"] += support_actions(catalog.support_contacts(request.profile_id)) if mode == "LIVE" else []
+                    save(request.session_id, request.request_id, fingerprint, old)
                 return old
             reserve(request.session_id)
             sources = catalog.retrieve(request)
@@ -198,7 +269,7 @@ def create_app(db_path=None, catalog=None, provider=None, mode=None):
                 "actions": [{"kind": "SELECT_PROFILE", "target_id": None}], "mode": mode,
                 "ai_provider": "NOT_CALLED", "ai_model": None}
             # MOCK never calls OpenAI and never synthesizes a supposedly sourced answer.
-            if sources and mode == "LIVE":
+            if sources and answer_units(sources) and mode == "LIVE":
                 try:
                     output = await provider.ask(request, sources, store.context(request.session_id))
                     index = {s["source_id"]: (g, s) for g in sources for s in g["sources"]}
@@ -248,37 +319,22 @@ def create_app(db_path=None, catalog=None, provider=None, mode=None):
             authorize(request.session_id, authorization, request.profile_id)
             old = cached(request.session_id, request.request_id, fingerprint)
             if old:
+                if request.content_kind in {"GUIDE", "ANSWER"} and old.get("status") == "TRANSLATED":
+                    current = stored_translation(request)
+                    expected = {**unavailable_translation(request), **(current or {}), "status": "TRANSLATED"}
+                    if current is None or old != expected:
+                        old = unavailable_translation(request)
+                        save(request.session_id, request.request_id, fingerprint, old)
                 return old
             reserve(request.session_id)
-            result = {"request_id": request.request_id, "original_text": request.text,
-                "source_locale": request.source_locale, "target_locale": request.target_locale,
-                "translated_text": None, "glossary_version": None, "review_status": "UNREVIEWED",
-                "status": "TEMPORARILY_UNAVAILABLE", "mode": mode, "ai_provider": "NOT_CALLED", "ai_model": None}
+            result = unavailable_translation(request)
             if request.content_kind in {"GUIDE", "ANSWER"}:
                 # Local small-model evaluation inverted a prohibition. Manual
                 # answers are complete reviewed units, so reuse the corresponding
                 # reviewed translation rather than regenerate an instruction.
-                originals = [(g, u) for g in catalog.published(request.profile_id)
-                             if (request.source_locale == "auto" or request.source_locale == g["locale"])
-                             and (request.content_kind != "GUIDE" or g["guide_id"] == request.guide_id)
-                             for u in answer_units([g])
-                             if u["text"] == request.text and (request.content_kind != "GUIDE" or u["unit_id"].endswith(":body"))]
-                if len(originals) == 1:
-                    original, unit = originals[0]
-                    prefix = ":".join((original["guide_id"], original["locale"], original["source_version"]))
-                    suffix = unit["unit_id"][len(prefix):]
-                    translated = [(g, u) for g in catalog.published(request.profile_id, request.target_locale)
-                                  if g["guide_id"] == original["guide_id"] and g["manual_set_id"] == original["manual_set_id"]
-                                  and g["source_version"] == original["source_version"]
-                                  and (g["locale"] == g["source_locale"] or
-                                       (g["translation_review_status"] == "REVIEWED" and g["glossary_version"]))
-                                  for u in answer_units([g])
-                                  if u["unit_id"] == ":".join((g["guide_id"], g["locale"], g["source_version"])) + suffix]
-                    if len(translated) == 1:
-                        match, target_unit = translated[0]
-                        result.update(status="TRANSLATED", source_locale=original["locale"], translated_text=target_unit["text"],
-                                      review_status=match["translation_review_status"], glossary_version=match["glossary_version"],
-                                      ai_provider="STORED_GUIDE")
+                match = stored_translation(request)
+                if match is not None:
+                    result.update(status="TRANSLATED", **match)
             elif mode == "LIVE" and getattr(provider, "enable_draft_question_translation", True):
                 try:
                     match = lookup_terms(request.profile_id, request.source_locale, request.target_locale, request.text)

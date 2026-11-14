@@ -42,20 +42,21 @@ def test_natural_door_question_retrieves_only_the_selected_manual_and_language(l
 def test_every_complete_reviewed_unit_has_exact_passage_citations(locale):
     guides = Catalog().published(PROFILE, locale)
     units = answer_units(guides)
-    assert len(units) == 3 and len({unit["unit_id"] for unit in units}) == 3
+    assert len(units) == 1 and units[0]["unit_id"].endswith(":closing-bundle:v1")
     for unit in units:
         assert validate_answer(ModelAnswer(**output(unit)), guides) == unit
     assert set(units[0]["source_ids"]) == {source["source_id"] for source in guides[0]["sources"]}
-    for step, unit in zip(guides[0]["steps"], units[1:]):
-        assert unit["text"] == "\n".join([step["body"], *step["official_cautions"]])
-        assert unit["source_ids"] == step["source_ids"]
+    expected = [guides[0]["body"]]
+    for step in guides[0]["steps"]:
+        expected.extend([step["body"], *step["official_cautions"]])
+    assert units[0]["text"] == "\n".join(expected)
 
 
 @pytest.mark.parametrize("locale", ["ko-KR", "en", "ja-JP"])
 def test_caution_or_negation_cannot_be_removed_from_a_step(locale):
     guides = Catalog().published(PROFILE, locale)
     step = guides[0]["steps"][0]
-    unit = answer_units(guides)[1]
+    unit = answer_units(guides)[0]
     with pytest.raises(ValueError, match="COMPLETE_UNIT"):
         validate_answer(output(unit, answer=step["body"]), guides)
     with pytest.raises(ValueError, match="COMPLETE_UNIT"):
@@ -64,13 +65,14 @@ def test_caution_or_negation_cannot_be_removed_from_a_step(locale):
 
 def test_citations_cannot_be_borrowed_from_another_step_or_incomplete_for_body():
     guides = Catalog().published(PROFILE, "en")
-    body, pinch, closure = answer_units(guides)
+    bundle = answer_units(guides)[0]
+    pinch, closure = guides[0]["steps"]
     for invalid in (
-        output(pinch, source_ids=closure["source_ids"]),
-        output(closure, source_ids=pinch["source_ids"]),
-        output(body, source_ids=pinch["source_ids"]),
-        output(pinch, source_ids=body["source_ids"]),
-        output(pinch, answer="close the door"),
+        output(bundle, source_ids=closure["source_ids"]),
+        output(bundle, source_ids=pinch["source_ids"]),
+        output(bundle, answer="\n".join([closure["body"], *closure["official_cautions"]])),
+        output(bundle, answer=guides[0]["body"]),
+        output(bundle, answer="close the door"),
     ):
         with pytest.raises(ValueError, match="COMPLETE_UNIT"):
             validate_answer(invalid, guides)
@@ -121,10 +123,11 @@ def test_selected_door_context_cannot_ground_another_topic_or_prefixed_question(
     assert Catalog().retrieve(request(locale, question, guide_id=GUIDE)) == []
 
 
-def test_published_body_only_door_guide_remains_retrievable():
+def test_unrelated_published_body_only_door_guide_remains_retrievable():
     catalog = Catalog()
     for guide in catalog.guides:
         if guide.get("guide_id") == GUIDE:
+            guide["guide_id"] = "synthetic-body-only-guide"
             guide["steps"] = []
     guides = catalog.retrieve(request())
     assert len(guides) == 1 and len(answer_units(guides)) == 1
@@ -161,6 +164,5 @@ def test_non_answer_status_is_not_treated_as_a_grounded_passage():
 def test_ambiguous_complete_units_are_rejected_without_guessing_a_guide():
     guides = Catalog().published(PROFILE, "en")
     duplicated = copy.deepcopy(guides[0])
-    duplicated["guide_id"] = "a-different-guide"
     with pytest.raises(ValueError, match="AMBIGUOUS"):
         validate_answer(output(answer_units(guides)[0]), guides + [duplicated])

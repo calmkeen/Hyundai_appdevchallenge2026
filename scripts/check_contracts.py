@@ -31,8 +31,14 @@ sys.path.insert(0, str(root / "backend"))
 from app.content import Catalog
 from app.guide_rules import validate_state_guide_rules
 from app.official_links import validate_support_contacts
+from app.answer_policy import validate_bundle_registry
 Draft202012Validator.check_schema(json.loads((root / "contracts/support-contact.schema.json").read_text()))
 catalog = Catalog()
+Draft202012Validator.check_schema(json.loads((root / "contracts/answer-bundles.schema.json").read_text()))
+bundles = json.loads((root / "content/answer-bundles.json").read_text())
+bundle_issues = validate_bundle_registry(bundles, catalog.guides)
+assert not bundle_issues, bundle_issues
+print(f"PASS {len(bundles['bundles'])} complete answer bundle policy, exact publication payload and multilingual text pins")
 for profile in catalog.profiles:
     support_issues = validate_support_contacts(profile, catalog.locales)
     assert not support_issues, (profile["profile_id"], support_issues)
