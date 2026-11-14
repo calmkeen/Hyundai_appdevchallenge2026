@@ -231,7 +231,7 @@ private fun Reading.description(ko: UiCopy): String = when {
 @Composable private fun DoorReadingPanel(vm: CarCueViewModel, s: UiState, ko: UiCopy) {
     Panel(ko.get("ui_5f00d4793151"), s.reading.description(ko), highlight = s.reading.status == ReadStatus.VALUE && s.reading.value == "OPEN", onClick = { vm.go(Page.DETAIL) })
     Text("${s.reading.source} · ${s.reading.capability} · ${s.reading.status}", color = Muted, fontSize = 14.sp)
-    s.reading.receivedAt?.let { Text((ko.get("ui_cc088cb58015")) + DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault()).format(it), fontSize = 14.sp, color = Muted) }
+    s.reading.receivedAt?.let { Text((ko.get("ui_cc088cb58015")) + DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss XXX").withZone(ZoneId.systemDefault()).format(it), fontSize = 14.sp, color = Muted) }
     s.reading.previousValue?.let { Notice((ko.get("ui_467deb9ffd72")) + it + ko.get("ui_4a8f8d4b04bf")) }
     RelatedDoorGuide(vm, s, ko)
 }
@@ -290,7 +290,7 @@ private fun Reading.description(ko: UiCopy): String = when {
         Text(ko.get("ui_guide_live_status").replace("{status}", s.reading.description(ko)), fontWeight = FontWeight.SemiBold,
             modifier = Modifier.testTag("guide_live_door_status"))
         Text("${s.reading.source} · ${s.reading.capability} · ${s.reading.status}", color = Muted, fontSize = 14.sp)
-        s.reading.receivedAt?.let { Text(ko.get("ui_cc088cb58015") + DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault()).format(it), color = Muted, fontSize = 14.sp) }
+        s.reading.receivedAt?.let { Text(ko.get("ui_cc088cb58015") + DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss XXX").withZone(ZoneId.systemDefault()).format(it), color = Muted, fontSize = 14.sp) }
         Notice(ko.get("ui_door_reading_limit"))
         Action(ko.get("ui_3b6510d9d5ee"), s.reading.status != ReadStatus.LOADING, Modifier.testTag("refresh_door_status")) { vm.refresh() }
     }
