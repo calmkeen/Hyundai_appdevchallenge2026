@@ -75,6 +75,7 @@ def main():
     parser.add_argument("--run-id", default=datetime.now(timezone.utc).strftime("official-guide-%Y%m%dT%H%M%SZ-") + secrets.token_hex(3))
     parser.add_argument("--output-dir", default="output/qa/pleos-official-guide", help="Parent directory; run ID is appended")
     parser.add_argument("--record", action="store_true", help="Optional unedited AVD screen recording, unique filename")
+    parser.add_argument("--normal-launch-evidence", help="Previously verified normal-launch-smoke.json from this installed app build")
     args = parser.parse_args()
     require(90 <= args.install_timeout <= 600, "Install timeout must be between 90 and 600 seconds")
     require(bool(re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{0,63}", args.run_id)), "Invalid run ID")
@@ -123,6 +124,16 @@ def main():
     require(user.isdigit() and user != "0", "Wait for the foreground automotive user")
     require(not adb("shell", "pidof", "screenrecord", check=False), "An existing recorder is active")
     require(apk.is_file() and test_apk.is_file(), "Build the current Pleos APKs first")
+    normal_launch = None
+    if args.normal_launch_evidence:
+        smoke_path = Path(args.normal_launch_evidence).resolve()
+        smoke = json.loads(smoke_path.read_text())
+        installed = json.loads(smoke_path.with_name("installed-app.json").read_text())
+        require(smoke.get("physical_app_visible") is True and installed["installed_app_sha256"] == sha(apk),
+                "Normal launch physical smoke must match the current app APK")
+        normal_launch = {"evidence": str(smoke_path), "evidence_sha256": sha(smoke_path),
+                         "physical_app_visible": True, "app_sha256": installed["installed_app_sha256"],
+                         "capture_method": smoke["capture_method"]}
     health = request(backend + "/health")
     require(health == {"status": "ok", "mode": "LIVE"}, "Dedicated backend must be LIVE")
     profile = request(backend + "/v1/vehicle-profiles/" + PROFILE_ID)
@@ -166,12 +177,16 @@ def main():
     service = adb("shell", "dumpsys", "package", "ai.pleos.playground.service.vehicle")
     service_version = [line.strip() for line in service.splitlines()
                        if "versionName=" in line or "versionCode=" in line][:2]
+    device_timezone = adb("shell", "getprop", "persist.sys.timezone")
     # Directory creation is exclusive in the instrumentation as well; never remove previous evidence.
     adb("forward", "tcp:8088", "tcp:8088")
     heartbeat = "/browser/session?client=carcue-" + args.run_id
     fixtures, handled = [], set()
     process = recorder = record_log = None
     recorder_pid = None
+    recording_started = False
+    recording_error = None
+    video_file = None
     success = False
     sdk_events = []
     error = None
@@ -217,8 +232,18 @@ def main():
                 if pid.isdigit() and remote_video in adb("shell", "cat", "/proc/" + pid + "/cmdline", check=False):
                     recorder_pid = pid
                     break
+                if recorder.poll() is not None:
+                    break
                 time.sleep(.1)
-            require(recorder_pid is not None, "Could not identify this run's recorder")
+            if recorder_pid is not None:
+                recording_started = True
+            elif recorder.poll() is not None:
+                recording_error = {"phase": "STARTUP", "exit_code": recorder.returncode}
+                record_log.close()
+                recorder = None
+                print("OPTIONAL RECORDING FAILED: recorder exited before startup; SDK/UI assertions will still run", flush=True)
+            else:
+                require(False, "Could not identify this run's recorder")
         with (out / "instrumentation.txt").open("x") as log:
             process = subprocess.Popen(command, stdout=log, stderr=subprocess.STDOUT)
             print("INSTRUMENTATION STARTED: " + args.run_id, flush=True)
@@ -329,14 +354,21 @@ def main():
     require(visual["initial_closed_sha256"] == visual["restored_closed_sha256"] != visual["callback_open_sha256"],
             "Door visualization was not changed/restored")
     require(handled == {"request-open", "request-close", "request-drive", "request-park"}, "Missing external fixture phase")
-    if args.record:
-        adb("pull", remote_video, str(out / "screenrecord.mp4"), timeout=60)
+    if args.record and recording_started:
+        try:
+            adb("pull", remote_video, str(out / "screenrecord.mp4"), timeout=60)
+            require((out / "screenrecord.mp4").stat().st_size > 0, "Empty optional recording")
+            video_file = "screenrecord.mp4"
+        except Exception as exc:
+            recording_error = {"phase": "COLLECT", "error_type": type(exc).__name__}
+            print("OPTIONAL RECORDING FAILED: collection did not produce a usable file", flush=True)
     artifacts = [path for path in out.iterdir() if path.is_file()]
     metadata = {
         "type": "REAL_PLEOS_AVD_OFFICIAL_GUIDE_VALIDATION", "validated_at": datetime.now(timezone.utc).isoformat(),
         "run_id": args.run_id, "serial": args.serial, "avd": avd, "android_api": int(android_api), "android_user": int(user),
         "backend_mode": health["mode"], "app_server_url": "http://10.0.2.2:8001", "declared_sdk_version": "2.3.2",
         "vehicle_service": service_version,
+        "device_timezone": device_timezone, "normal_launch_smoke": normal_launch,
         "apk_sha256": sha(apk), "test_apk_sha256": sha(test_apk), "installed_apk_sha256": installed_hashes,
         "profile_id": PROFILE_ID, "manual_set_id": MANUAL_SET_ID, "source_version": args.source_version,
         "guide_id": GUIDE_ID, "source_urls": sorted(SOURCE_URLS), "visual_result": visual,
@@ -344,7 +376,8 @@ def main():
         "cleanup_attempts": cleanup_attempts,
         "physical_vehicle_tested": False, "profile_selected_by_user": True, "sdk_identified_vehicle_model": False,
         "app_sdk_set_called": False, "external_ai_called": False, "seatbelt_status_connected": False,
-        "screen_recording": {"requested": args.record, "file": "screenrecord.mp4" if args.record else None,
+        "screen_recording": {"requested": args.record, "started": recording_started, "file": video_file,
+                             "capture_error": recording_error,
                              "app_screen_visibility_verified": False,
                              "review_required": "Optional physical-display recording needs separate visual QA; instrumentation screenshots/assertions prove app behavior"},
         "vehicle_log_policy": "allowlisted door.position ROW_1_LEFT/UX/lifecycle events only; no VIN or raw vehicle payloads",
