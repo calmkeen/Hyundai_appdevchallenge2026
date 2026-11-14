@@ -84,6 +84,8 @@ fun CarCueApp(vm: CarCueViewModel) {
                                                 "PARK_REQUIRED" -> get("ui_5bf44155337d")
                                                 "CONSENT_REQUIRED" -> get("ui_f21529f8757a")
                                                 "TRANSLATION_UNAVAILABLE" -> get("ui_241983579b6f")
+                                                "AI_UNAVAILABLE" -> get("ui_ai_unavailable")
+                                                "SESSION_EXPIRED" -> get("ui_ai_session_expired")
                                                 else -> get("ui_91a49aa8ca0f")
                                             }, error = true)
                                         }
@@ -114,6 +116,9 @@ fun CarCueApp(vm: CarCueViewModel) {
 }
 
 @Composable private fun Sidebar(s: UiState, vm: CarCueViewModel, ko: UiCopy, restricted: Boolean) {
+    fun navigate(page: Page) {
+        if (page == Page.ASK && s.page !in listOf(Page.ASK, Page.TRANSLATE)) vm.openAssistant() else vm.go(page)
+    }
     Column(Modifier.width(228.dp).fillMaxHeight().background(Pale).padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(if (s.profile == null) "CarCue" else "Hyundai", color = Muted, fontSize = 15.sp)
         Text(s.profile?.name ?: "—", fontSize = 25.sp, fontWeight = FontWeight.Bold)
@@ -123,8 +128,8 @@ fun CarCueApp(vm: CarCueViewModel) {
         listOf(Page.HOME to ko.get("ui_034999faab05"), Page.STATUS to ko.get("ui_fc73f9507b0a"),
             Page.GUIDES to ko.get("ui_96918379aa24"), Page.ASK to ko.get("ui_7a087ed8150b")).forEach { (page, title) ->
             val selected = s.page == page || page == Page.STATUS && s.page == Page.DETAIL || page == Page.GUIDES && s.page == Page.GUIDE || page == Page.ASK && s.page == Page.TRANSLATE
-            if (selected) Button(onClick = { vm.go(page) }, modifier = Modifier.fillMaxWidth().heightIn(min = 60.dp), shape = RoundedCornerShape(10.dp)) { Text(title, fontSize = 17.sp) }
-            else TextButton(onClick = { vm.go(page) }, enabled = !restricted || page in listOf(Page.HOME,Page.STATUS), modifier = Modifier.fillMaxWidth().heightIn(min = 60.dp)) { Text(title, fontSize = 17.sp, color = if (restricted && page !in listOf(Page.HOME,Page.STATUS)) Muted else Ink) }
+            if (selected) Button(onClick = { navigate(page) }, modifier = Modifier.fillMaxWidth().heightIn(min = 60.dp), shape = RoundedCornerShape(10.dp)) { Text(title, fontSize = 17.sp) }
+            else TextButton(onClick = { navigate(page) }, enabled = !restricted || page in listOf(Page.HOME,Page.STATUS), modifier = Modifier.fillMaxWidth().heightIn(min = 60.dp)) { Text(title, fontSize = 17.sp, color = if (restricted && page !in listOf(Page.HOME,Page.STATUS)) Muted else Ink) }
         }
         Spacer(Modifier.weight(1f))
         TextButton(onClick = { vm.go(Page.SETTINGS) }, modifier = Modifier.fillMaxWidth()) { Text(ko.get("ui_8b1858a51ec7")) }
@@ -339,21 +344,35 @@ private fun Reading.description(ko: UiCopy): String = when {
     }
     OutlinedTextField(input, { input = it.take(if (translate) 3000 else 2000) }, label = { Text(if (translate) ko.get("ui_7ff647e2d1c8") else ko.get("ui_252ee2182be5")) }, modifier = Modifier.fillMaxWidth().testTag("question_input"), minLines = 3, enabled = !s.busy)
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Checkbox(consent, { consent = it }, enabled = !s.busy)
+        Checkbox(consent, { consent = it }, enabled = !s.busy, modifier = Modifier.testTag("ai_consent"))
         Text(ko.get("ui_e2c47f0a9a27"), fontSize = 14.sp, lineHeight = 22.sp)
     }
-    Action(if (s.busy) ko.get("ui_62d6724cd18d") else if (translate) ko.get("ui_e592e2e100ab") else ko.get("ui_12d7bd98bbd6"), input.isNotBlank() && !s.busy && consent) { vm.send(input, translate, consent = consent) }
+    Action(if (s.busy) ko.get("ui_62d6724cd18d") else if (translate) ko.get("ui_e592e2e100ab") else ko.get("ui_12d7bd98bbd6"), input.isNotBlank() && !s.busy && consent, Modifier.testTag("ai_send")) { vm.send(input, translate, consent = consent) }
     if (s.busy) { LinearProgressIndicator(Modifier.fillMaxWidth()); TextButton(onClick = vm::cancelRequest) { Text(ko.get("ui_25fa53c0d70d")) } }
-    if (s.error?.startsWith("SERVER") == true || s.error?.startsWith("HTTP_") == true) OutlinedButton(onClick = { vm.send(input, translate, retry = true, consent = consent) }, enabled = !s.busy && consent) { Text(ko.get("ui_16c72fd12cf2")) }
+    if (s.assistantRetry != AssistantRetry.NONE) OutlinedButton(onClick = { vm.send(input, translate, retry = true, consent = consent) }, enabled = !s.busy && consent && input.isNotBlank(), modifier = Modifier.testTag("ai_retry")) {
+        Text(ko.get(if (s.assistantRetry == AssistantRetry.RESEND) "ui_16c72fd12cf2" else "ui_ai_retry_new"))
+    }
     if (translate && s.translationOriginal.isNotEmpty()) {
         Panel(ko.get("ui_0201f36241b8"), s.translationOriginal)
-        if (s.translation.isNotEmpty()) Panel(ko.get("ui_372ae2e0ffb4"), s.translation)
-        Text("${s.answerMode} · ${s.translationReview}", color = Muted)
-    } else if (!translate && s.answer.isNotEmpty()) {
-        Panel(ko.get("ui_2b2ab898a3e7"), s.answer)
+        if (s.translation.isNotEmpty()) {
+            val review = s.translationReview.takeIf { it in listOf("REVIEWED", "NOT_APPLICABLE") } ?: "UNREVIEWED"
+            val title = when (review) {
+                "REVIEWED" -> "ui_translation_reviewed"
+                "NOT_APPLICABLE" -> "ui_translation_original"
+                else -> "ui_372ae2e0ffb4"
+            }
+            Panel(ko.get(title), s.translation, modifier = Modifier.testTag("translation_result_$review"))
+        }
+        AiProcessing(s.translationMode, s.translationProvider, s.translationModel, ko)
+    } else if (!translate && (s.answer.isNotEmpty() || s.followUpQuestion.isNotBlank())) {
+        if (s.answer.isNotEmpty()) Panel(ko.get("ui_2b2ab898a3e7"), s.answer)
         Text((ko.get("ui_e17400f68f7b")) + s.answerMode + ko.get("ui_203cc8718a2b"), color = Muted, fontSize = 14.sp)
+        AiProcessing(s.answerMode, s.answerProvider, s.answerModel, ko)
+        if (s.followUpQuestion.isNotBlank()) Panel(ko.get("ui_ai_follow_up"), s.followUpQuestion, modifier = Modifier.testTag("ai_follow_up"))
         Sources(s.citations, ko)
-        OutlinedButton(onClick = { vm.openTranslation(s.answer, "ANSWER", s.answerLocale) }) { Text(ko.get("ui_translate_answer")) }
+        if (input.isNotBlank()) OutlinedButton(onClick = { vm.openTranslation(input, "QUESTION", "auto") },
+            enabled = !s.busy, modifier = Modifier.testTag("translate_question")) { Text(ko.get("ui_translate_question")) }
+        if (s.answer.isNotEmpty()) OutlinedButton(onClick = { vm.openTranslation(s.answer, "ANSWER", s.answerLocale) }) { Text(ko.get("ui_translate_answer")) }
         s.actions.forEach { (kind, id) ->
             when (kind) {
                 "REFRESH_STATUS" -> if (id == "door.position") TextButton(onClick = vm::refresh) { Text(ko.get("ui_3b6510d9d5ee")) }
@@ -363,6 +382,17 @@ private fun Reading.description(ko: UiCopy): String = when {
         }
     }
     TextButton(onClick = vm::back) { Text(ko.get("ui_7812fd4be3f4")) }
+}
+@Composable private fun AiProcessing(mode: String, provider: AiProvider, model: String?, ko: UiCopy) {
+    val key = if (mode == "MOCK") "ui_ai_mock" else when (provider) {
+        AiProvider.OLLAMA_LOCAL -> "ui_ai_local"
+        AiProvider.OPENAI -> "ui_ai_openai"
+        AiProvider.STORED_GUIDE -> "ui_ai_stored_guide"
+        AiProvider.NOT_CALLED -> "ui_ai_not_called"
+        AiProvider.UNKNOWN -> "ui_ai_unknown"
+    }
+    Text(ko.get(key) + if (model != null && provider in listOf(AiProvider.OLLAMA_LOCAL, AiProvider.OPENAI)) " · $model" else "",
+        color = Muted, fontSize = 14.sp, modifier = Modifier.testTag("ai_processing"))
 }
 @Composable private fun SettingsScreen(vm: CarCueViewModel, s: UiState, ko: UiCopy) {
     var confirm by remember { mutableStateOf(false) }

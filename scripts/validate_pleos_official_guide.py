@@ -120,12 +120,14 @@ def main():
 
     require(adb("shell", "getprop", "ro.kernel.qemu") == "1", "Refusing a physical vehicle/device")
     avd = adb("shell", "getprop", "ro.boot.qemu.avd_name")
-    require(avd == args.avd == "CarCue_Pleos21", "Use only the dedicated CarCue Pleos AVD")
+    require(avd == args.avd and avd in {"CarCue_Pleos21", "CarCue_Pleos21_LocalAI"}, "Use only the dedicated CarCue Pleos AVD")
     android_api = adb("shell", "getprop", "ro.build.version.sdk")
     require(android_api == "34", "Expected the official API34 Pleos AVD")
     require(adb("shell", "getprop", "sys.boot_completed") == "1", "AVD not booted")
     user = adb("shell", "am", "get-current-user")
     require(user.isdigit() and user != "0", "Wait for the foreground automotive user")
+    require(adb("shell", "service", "check", "car_service") == "Service car_service: found",
+            "Car UX service is not registered; restore the isolated AVD before testing")
     require(not adb("shell", "pidof", "screenrecord", check=False), "An existing recorder is active")
     require(apk.is_file() and test_apk.is_file(), "Build the current Pleos APKs first")
     normal_launch = None

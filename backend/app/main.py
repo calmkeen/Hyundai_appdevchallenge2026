@@ -274,11 +274,14 @@ def create_app(db_path=None, catalog=None, provider=None, mode=None):
                         result.update(status="TRANSLATED", source_locale=original["locale"], translated_text=target_unit["text"],
                                       review_status=match["translation_review_status"], glossary_version=match["glossary_version"],
                                       ai_provider="STORED_GUIDE")
-            elif mode == "LIVE":
+            elif mode == "LIVE" and getattr(provider, "enable_draft_question_translation", True):
                 try:
                     match = lookup_terms(request.profile_id, request.source_locale, request.target_locale, request.text)
                     result["glossary_version"] = match["version"] if match else None
                     output = await provider.translate(request)
+                    # A downstream locale/number/term rejection does not undo an
+                    # actual structured provider response. Keep its provenance.
+                    result.update(ai_provider=getattr(provider, "kind", "UNKNOWN"), ai_model=getattr(provider, "model", None))
                     processing_locale(output.source_locale)
                     if request.source_locale != "auto" and output.source_locale != request.source_locale:
                         raise ValueError("TRANSLATION_SOURCE_LOCALE_CHANGED")

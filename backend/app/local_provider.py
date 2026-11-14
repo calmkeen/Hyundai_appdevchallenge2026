@@ -65,7 +65,8 @@ def _count(value):
 class OllamaProvider(Provider):
     kind = "OLLAMA_LOCAL"
 
-    def __init__(self, key=None, model=None, transport=None, audit=None, *, base_url=None):
+    def __init__(self, key=None, model=None, transport=None, audit=None, *, base_url=None,
+                 enable_draft_question_translation=False):
         model = model if model is not None else os.getenv("CARCUE_LOCAL_MODEL", "qwen3:4b")
         base_url = base_url if base_url is not None else os.getenv("CARCUE_LOCAL_URL", "http://127.0.0.1:11434")
         parsed = urlsplit(base_url)
@@ -83,6 +84,7 @@ class OllamaProvider(Provider):
         # Explicit empty key prevents the base adapter from reading a paid key.
         super().__init__(key="", model=model, transport=transport, audit=audit)
         self.base_url = base_url.rstrip("/")
+        self.enable_draft_question_translation = enable_draft_question_translation
 
     async def structured(self, payload, schema_model, instructions, *, request_id=None, max_output_tokens=1500):
         started = time.monotonic()

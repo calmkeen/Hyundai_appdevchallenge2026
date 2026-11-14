@@ -12,7 +12,7 @@
 
 ```bash
 mkdir -p output/qa
-CARCUE_MODE=LIVE OPENAI_API_KEY= OPENAI_MODEL= \
+CARCUE_MODE=LIVE CARCUE_AI_PROVIDER=DISABLED \
 CARCUE_DB=output/qa/official-guide-live.sqlite3 \
 .venv/bin/python -m uvicorn app.main:app --app-dir backend \
   --host 127.0.0.1 --port 8001 --no-access-log
@@ -34,6 +34,12 @@ android/gradlew -p android :app:assemblePleosDebug \
 프로필은 사용자가 선택한 매뉴얼 범위이며 SDK의 자동 차종 인증이 아니다. 실제 자동차의 문을 조작한 검증과도 구분한다. 별도 Mock 흐름은 기존 회귀용으로 아래에 보존한다.
 
 Console503 재시험은 `PLEOS_CONSOLE_RECOVERY.md`를 따른다. 공식 설정대로 Cold boot한 전용 AVD의 부팅과 사용자10을 확인한다. 호스트 검증 도구는 독립 heartbeat를 유지하고 문/속도/페달/기어의 실제 DDS 준비를 확인한 뒤 fixture를 조작한다. 단일 heartbeat200을 준비 완료로 간주하지 않는다. 최신 e9 APK의 전체 SDK 시험은 run05에서 완료했다.
+
+## 무료 로컬 AI
+
+유료 AI 연결은 보류했다. Ollama/Qwen3를 Mac에서 실행하는 명령, 모델 digest·라이선스, 실제 API 검증은 `LOCAL_AI_INTEGRATION.md`를 따른다. 해당 전용 백엔드를 8001에서 실행하면 같은 Pleos APK가 연결한다. 모델은 APK에 포함하지 않으며 무료 API 계정·API 키가 필요 없다. 기본 provider는 DISABLED이고 유료 자동 전환은 없다. 로컬 모델을 켜도 자유 질문 번역은 기본 보류하며 ask와 저장 안내 번역은 동작한다. `--enable-draft-question-translation`은 별도 개발 실험 옵션이다.
+
+최종 앱 검증 명령은 `LOCAL_AI_APP_VALIDATION.md`를 따른다. 지정 전용 AVD에서 user 10·API 34·`service check car_service`의 found 상태와 Console DDS/bridge 준비를 확인한다. 이 작업의 별도 AVD는 `CarCue_Pleos21_LocalAI`이며 기존 `CarCue_Pleos21` 데이터는 보존했다. 서비스 부재를 UX 허용으로 처리하지 않는다.
 
 ## Android
 
@@ -75,9 +81,9 @@ CARCUE_MODE=MOCK .venv/bin/python -m uvicorn app.main:app --app-dir backend --ho
 
 기본 모드는 MOCK이며 외부 AI를 호출하지 않는다. `/health`, `/docs`로 API를 확인할 수 있다. 세션은 `POST /v1/sessions`에서 발급하며 질문·번역·삭제에 `Authorization: Bearer <token>`이 필요하다. 프로필 ID만으로 대화에 접근할 수 없다.
 
-공식 가이드 API는 `CARCUE_MODE=LIVE`에서 AI 키 없이도 동작한다. 실제 AI 연결은 별도로 서버 환경의 `OPENAI_API_KEY`, `OPENAI_MODEL`을 설정하고 호출 결과를 검증해야 한다. `backend/.env.example`은 빈 설정 예시이며 실제 비밀값은 Git과 채팅에 남기지 않는다. 모델은 운영자가 Structured Outputs 호환 모델로 선택한다. `.env` 파일은 자동으로 읽지 않으므로 프로세스 환경으로 주입한다.
+공식 가이드 API는 `CARCUE_MODE=LIVE`에서 AI 키 없이 동작한다. 기본 `CARCUE_AI_PROVIDER=DISABLED`이며 로컬 실행은 `OLLAMA_LOCAL` 또는 전용 launcher로 명시한다. 기존 OpenAI 어댑터는 보존했지만 현재 factory의 실행 대상이 아니다. `.env` 파일은 자동으로 읽지 않는다.
 
-LIVE에서 공개 가능한 VERIFIED 프로필과 PUBLISHED 가이드를 등록하기 전에는 세션을 시작할 수 없다. 검수 자료가 없으면 OpenAI를 호출하지 않는다. 초기 LIVE 답변은 검수된 같은 언어 원문의 추출 방식이며, 출처 메타데이터와 허용 action은 서버에서 조립한다. 외부 API 요청은 25초 timeout, 자동 재시도 0회, 1,500 output token 상한이다.
+공개 가능한 VERIFIED 프로필과 PUBLISHED 가이드가 필요하다. 자료가 없으면 모델을 호출하지 않는다. 실제 로컬 ask는 완전한 검수 단위 ID를 선택하고 서버가 주의문·출처를 조립한다. ANSWER/GUIDE는 저장 검수 번역이며 QUESTION은 기본 보류하며 개발자가 명시적으로 켠 실험에서만 동적으로 번역한다. 로컬 HTTP는 120초 timeout, 자동 재시도 없음, 답변 선택 1,500·번역 3,000 output token 상한이다. 앱의 해당 HTTP 읽기 제한은 130초다.
 
 기본 세션 만료는 120분, 세션 요청 상한은 30회, 전체 분당 상한은 200회다. `CARCUE_SESSION_MINUTES`, `CARCUE_SESSION_REQUEST_LIMIT`, `CARCUE_GLOBAL_REQUEST_LIMIT`로 변경할 수 있다. 운영 배포 전 HTTPS, 서버 접근 제어와 부하·보관 정책을 별도로 검증한다. 이 세션에서 외부 배포하지 않았다.
 
@@ -86,7 +92,7 @@ LIVE에서 공개 가능한 VERIFIED 프로필과 PUBLISHED 가이드를 등록�
 - `content/profiles/catalog.json`: 언어와 분리된 차량 사양. 기존 두 항목은 개발용 UNVERIFIED로 보존하고 공식 2024 한국시장 아이오닉 5 매뉴얼 선택 프로필을 추가했다.
 - `content/guides/`: Schema를 지키고 정확한 profile/manual/source version과 검수된 출처 절을 등록한다. DRAFT는 검색/답변에 사용하지 않는다.
 - `content/locales/catalog.json`: 48개 언어 후보의 RTL·UI/가이드 지원 상태. Mock 선택 목록은 `mock_visible=true`인 한국어·영어·일본어 3개이며, 다른 후보 데이터는 보존한다.
-- `content/locales/ui.json`: 155개 UI 문구의 한국어·영어·일본어 초안. UI 번역과 개별 가이드의 검토 상태를 구분한다. 공식 문 안내는 한국시장 원문의 3언어 자체 요약이며 다른 후보 언어/주제는 준비 중이다. 언어를 추가할 때 화면 코드를 바꿀 필요가 없다.
+- `content/locales/ui.json`: 168개 UI 문구의 한국어·영어·일본어 초안. UI 번역과 개별 가이드의 검토 상태를 구분한다. 공식 문 안내는 한국시장 원문의 3언어 자체 요약이며 다른 후보 언어/주제는 준비 중이다. 언어를 추가할 때 화면 코드를 바꿀 필요가 없다.
 - `content/locales/country-locales.json`: 50개 지역의 개발 후보 매핑이며 방문 순위나 지원 완료 목록이 아니다.
 - `scripts/prepare_content.py`: 개발 초기 데이터 생성 도구. VERIFIED 프로필이나 PUBLISHED 가이드가 있으면 쓰기 전에 중단한다.
 

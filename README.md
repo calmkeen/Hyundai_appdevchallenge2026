@@ -20,9 +20,10 @@ CarCue는 낯선 차량의 상태와 사용법을 자신의 언어로 확인하�
 - [2024 한국 아이오닉 5 공식 매뉴얼 검토](Docs/MANUAL_REVIEW_IONIQ5_2024_KR.md)
 - [실제 SDK 문 상태와 공식 가이드 연결·검증](Docs/SDK_OFFICIAL_GUIDE_VALIDATION.md)
 - [Console 503 복구·최신 APK 전체 재시험](Docs/PLEOS_CONSOLE_RECOVERY.md)
+- [무료 로컬 AI 구성·실제 호출](Docs/LOCAL_AI_INTEGRATION.md) · [Pleos 앱 AI 연결 검증](Docs/LOCAL_AI_APP_VALIDATION.md)
 - [화면 명세](Docs/SCREEN_SPEC.md) · [API 계약](Docs/DATA_API_SPEC.md) · [완료 기준](Docs/ACCEPTANCE.md)
 
-`android/`는 네이티브 Compose 앱, `backend/`는 서버, `content/`는 프로필·언어·가이드 데이터입니다. 공식 2024 한국시장 아이오닉 5 매뉴얼을 대조한 문 안내 1개를 한국어·영어·일본어로 등록했습니다. 기존 개발 프로필과 `contracts/guide.template.json`은 미검수/비게시로 보존합니다. OpenAI 키는 서버 환경변수에만 설정하며 실제 AI 호출 완료와 구분합니다.
+`android/`는 네이티브 Compose 앱, `backend/`는 서버, `content/`는 프로필·언어·가이드 데이터입니다. 공식 2024 한국시장 아이오닉 5 매뉴얼을 대조한 문 안내 1개를 한국어·영어·일본어로 등록했습니다. 기존 개발 프로필과 `contracts/guide.template.json`은 미검수/비게시로 보존합니다. 유료 AI 연결은 보류하고 Mac의 Ollama/Qwen3 로컬 모델을 사용합니다. 질문 답변은 공식 검수 단위 선택, 안내 번역은 저장된 검수 번역, 자유 질문 번역은 품질 미완료로 기본 보류합니다.
 
 ## 문서
 - [통합 제품 기획안](Docs/07-product-plan.md) · 사용자 시나리오, 기능 경계, 검증 계획

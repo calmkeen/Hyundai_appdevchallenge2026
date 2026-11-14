@@ -18,6 +18,8 @@ def main():
     parser.add_argument("--ollama-url", default="http://127.0.0.1:11434")
     parser.add_argument("--port", type=int, default=8001)
     parser.add_argument("--evidence-dir", required=True, help="New ignored output/qa directory for database and sanitized provider audit")
+    parser.add_argument("--enable-draft-question-translation", action="store_true",
+                        help="Development opt-in only; generated question translation has not passed semantic review")
     args = parser.parse_args()
     out = Path(args.evidence_dir).resolve()
     out.relative_to(ROOT / "output" / "qa")
@@ -28,7 +30,8 @@ def main():
         audit_file.write(json.dumps(event, ensure_ascii=False) + "\n")
         audit_file.flush()
 
-    provider = OllamaProvider(model=args.model, base_url=args.ollama_url, audit=audit)
+    provider = OllamaProvider(model=args.model, base_url=args.ollama_url, audit=audit,
+                              enable_draft_question_translation=args.enable_draft_question_translation)
     app = create_app(mode="LIVE", db_path=str(out / "sessions.sqlite3"), provider=provider)
     # No key loading or paid provider construction; only loopback model HTTP.
     try:

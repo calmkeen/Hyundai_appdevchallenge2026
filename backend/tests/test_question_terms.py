@@ -13,6 +13,7 @@ from app.content import Catalog
 from app.local_provider import OllamaProvider
 from app.main import create_app
 from app.models import ModelTranslation
+from app.provider import DisabledProvider
 from app.translation_terms import DEFAULT_PATH, QuestionTerms, load_question_terms, validate_target_terms
 
 PROFILE = "ioniq5-ne1-2024-kr"
@@ -91,10 +92,13 @@ def test_native_prompt_hints_and_api_term_guard_keep_new_translation_unreviewed(
         assert payload["glossary_version"] == VERSION
         assert "use each provided target phrase exactly" in wire["messages"][0]["content"]
         assert "condition that is absent from the source" in wire["messages"][0]["content"]
+        assert "translated_text MUST contain every phrase above literally" in wire["messages"][0]["content"]
+        assert json.dumps([payload["matching_terms"][0]["target"]], ensure_ascii=False) in wire["messages"][0]["content"]
         return httpx.Response(200, json={"model": "qwen3:4b", "done": True, "done_reason": "stop",
             "prompt_eval_count": 30, "eval_count": 20, "message": {"role": "assistant", "content": json.dumps(
                 {"source_locale": detected, "translated_text": translated}, ensure_ascii=False)}})
-    provider = OllamaProvider(model="qwen3:4b", transport=httpx.MockTransport(handler))
+    provider = OllamaProvider(model="qwen3:4b", transport=httpx.MockTransport(handler),
+                              enable_draft_question_translation=True)
     app = create_app(db_path=":memory:", provider=provider, mode="LIVE")
     with TestClient(app) as client:
         session = client.post("/v1/sessions", json={"profile_id": PROFILE, "locale": target}).json()
@@ -104,7 +108,22 @@ def test_native_prompt_hints_and_api_term_guard_keep_new_translation_unreviewed(
     assert len(wires) == 1 and result["review_status"] == "UNREVIEWED" and result["glossary_version"] == VERSION
     assert result["status"] == ("TRANSLATED" if passed else "TEMPORARILY_UNAVAILABLE")
     assert result["translated_text"] == (translated if passed else None)
-    assert result["ai_provider"] == ("OLLAMA_LOCAL" if passed else "NOT_CALLED")
+    # A rejected translation stays unavailable, but the completed actual-provider
+    # path must not be mislabeled NOT_CALLED. This is still an HTTP test double.
+    assert result["ai_provider"] == "OLLAMA_LOCAL" and result["ai_model"] == "qwen3:4b"
+
+
+@pytest.mark.parametrize("mode", ["MOCK", "LIVE"])
+def test_mock_or_disabled_translation_remains_not_called(mode):
+    provider = DisabledProvider()
+    app = create_app(db_path=":memory:", provider=provider, mode=mode)
+    with TestClient(app) as client:
+        session = client.post("/v1/sessions", json={"profile_id": PROFILE, "locale": "ko-KR"}).json()
+        result = client.post("/v1/translate", headers={"Authorization": "Bearer " + session["token"]}, json={
+            "request_id": "not-called-test", "session_id": session["session_id"], "profile_id": PROFILE,
+            "source_locale": "auto", "target_locale": "ko-KR", "text": JA, "content_kind": "QUESTION"}).json()
+    assert result["status"] == "TEMPORARILY_UNAVAILABLE" and result["translated_text"] is None
+    assert result["ai_provider"] == "NOT_CALLED" and result["ai_model"] is None and not provider.events
 
 
 def test_fake_provider_does_not_receive_new_attributes():

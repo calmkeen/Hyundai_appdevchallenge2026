@@ -14,7 +14,7 @@ Android는 **MVVM + 단방향 상태 흐름(UDF)**으로 화면을 구성하고,
 | 데이터 | Repository 인터페이스와 구현 | Pleos/Mock, 서버, 검증된 로컬 캐시를 공통 모델로 변환 |
 | 서버 진입 | FastAPI / Pydantic | 요청 검증, 인증, 응답 변환 |
 | 서버 업무 | 조회·가이드 게시 정책·답변 출처 검증·세션 정책 | 외부 AI나 저장 방식과 독립된 규칙 |
-| 서버 어댑터 | 파일 Catalog, SQLite Store, OpenAI Provider | 포트에 맞춰 데이터/외부 서비스를 제공. 생성 시 의존성 주입 |
+| 서버 어댑터 | 파일 Catalog, SQLite Store, Ollama/비활성 AI Provider | 포트에 맞춰 데이터/외부 서비스를 제공. 생성 시 의존성 주입 |
 | 공통 계약 | `contracts/` JSON Schema, `content/` 카탈로그 | 프로필·언어·매뉴얼 버전·검수 상태를 명시 |
 
 ```mermaid
@@ -29,7 +29,9 @@ flowchart LR
   API --> APP[업무 규칙 / 포트]
   APP --> CAT[검수 콘텐츠 Catalog]
   APP --> DB[SQLite Store]
-  APP --> AI[OpenAI Provider]
+  APP --> AI[AI Provider 포트]
+  AI --> LOCAL[Ollama 로컬 어댑터]
+  AI --> OFF[기본 비활성 어댑터]
 ```
 
 화면 이벤트는 ViewModel로 들어가고, 데이터 결과는 UiState로 돌아와 Compose가 다시 표시한다. SDK callback도 같은 경로로 처리한다. 도어 값의 source, 수신 시각, 오류·미지원·오래된 값, UX 제한을 잃지 않는다. `LIVE` 서버 모드는 차량값의 `PLEOS/MOCK` 출처와 별개다.
@@ -52,7 +54,10 @@ backend/app/
   main.py                # 현재 API/의존성 조립; 커질 때 api/application 분리
   guide_policy.py        # 이번에 분리한 순수 게시 정책
   content.py             # 파일 Catalog 어댑터
-  provider.py            # 외부 AI 어댑터
+  answer_policy.py       # 완전한 검수 단위·출처 검증
+  translation_terms.py   # 판본별 질문 용어·누락 검증
+  provider.py            # AI 포트·비활성 기본 factory
+  local_provider.py      # 네이티브 Ollama 어댑터
   storage.py             # SQLite 세션 저장 어댑터
 ```
 
@@ -72,4 +77,10 @@ backend/app/
 - 앱 경계: 변경한 flavor를 빌드하고 단위 테스트를 실행한다. SDK 수신/리스너/UX 변경 시에는 전용 AVD에서 실제 GET·callback·화면·해제까지 다시 확인한다.
 - 실제 외부 연결: 합성 자료나 AI HTTP 대역 테스트를 실제 매뉴얼 검수·실차·실제 AI 호출의 증거로 쓰지 않는다.
 
-개발 순서는 **검수 가이드 등록·검증 → 실제 차종/매뉴얼 자료 검수 및 상태별 안내 규칙 연결 → 검수 자료 기반 AI·번역 실제 호출 → 언어·UX·종료 회귀 → 시연 갱신**이다. 공식 자료/키가 없는 단계는 완료로 올리지 않고, 독립적인 구현과 테스트를 계속한다. 각 작업은 `feature/`에서 검증·커밋 후 develop에 통합한다.
+개발 순서는 **검수 가이드 등록·검증 → 실제 차종/매뉴얼 자료 검수 및 상태별 안내 규칙 연결 → 검수 자료 기반 AI·번역 실제 호출 → 언어·UX·종료 회귀 → 시연 갱신**이다. 공식 자료나 실제 호출 증거가 없는 단계는 완료로 올리지 않고, 독립적인 구현과 테스트를 계속한다. 각 작업은 `feature/`에서 검증·커밋 후 develop에 통합한다.
+
+## 무료 로컬 AI 단계
+
+유료 OpenAI 연결은 사용자 요청으로 보류했다. 기존 어댑터를 보존하고 기본 factory는 DISABLED 또는 OLLAMA_LOCAL만 허용한다. 모델은 Mac 서버에서 실행하며 APK에는 포함하지 않는다. ask는 검수 단위 ID 선택, ANSWER/GUIDE 번역은 동일 판본의 저장 번역, 자유 QUESTION 생성 번역은 실제 의미 오류 확인 후 기본 보류했고, 명시적 개발 옵션에서만 UNREVIEWED로 시험한다. 완전한 주의문·출처·프로필 검증을 통과해야 한다. 질문 용어 보존 검사도 전체 의미 정확성을 보증하지 않는다. 실제 호출과 제한은 `LOCAL_AI_INTEGRATION.md`에 기록한다.
+
+앱은 MVVM/UDF를 유지하고 `AssistantRequestPolicy`로 전송 재시도와 새 요청을 구분한다. 네트워크 재전송은 동일 request_id와 직렬화 본문을 보존한다. 서버의 일시 불가 결과에 대한 사용자 재시도는 새 요청이며, 세션 만료·동의 철회·UX 제한·종료 시에는 기존 취소·삭제 정책을 적용한다.
