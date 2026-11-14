@@ -18,7 +18,7 @@
 4. 기능을 구현하고 해당 변경에 필요한 검사만 실행한다. SDK/AI 연동은 빌드나 등록 성공과 실제 수신/응답 증거를 구분한다.
 5. 관련 파일만 stage하고 diff를 확인한 뒤 작은 의미 단위로 커밋한다. `feat:`, `fix:`, `test:`, `docs:`, `ci:`, `chore:` 접두사를 사용한다.
 6. 검증이 끝난 작업은 develop에 `--no-ff`로 병합해 작업 경계를 남긴다. 이번 사용자의 Git Flow 요청에 따라 일상적인 로컬 develop 통합은 이 절차로 진행한다.
-7. 결과 보고에 브랜치·커밋·검증·남은 조건과 원격 반영 여부를 남긴다. 로컬 커밋과 GitHub push/CI 성공을 같은 것으로 보고하지 않는다.
+7. 이번 사용자의 원격 반영 요청에 따라 완료한 feature와 develop을 원격에 push한다. 결과 보고에 브랜치·커밋·검증·남은 조건과 실제 원격 반영 여부를 남긴다. 로컬 커밋과 GitHub push/CI 성공을 같은 것으로 보고하지 않는다.
 
 ```bash
 git status --short
@@ -36,7 +36,7 @@ git merge --no-ff feature/<task> -m "merge: <완료한 작업>"
 
 ## 원격과 출시
 
-원격 반영을 요청한 작업은 feature 브랜치를 push하고 `.github/PULL_REQUEST_TEMPLATE.md`로 develop 대상 PR을 작성한다. CI 결과와 실제 SDK 수신 검증 결과를 각각 기록한다. GitHub의 브랜치 보호는 실제로 설정한 경우에만 적용됐다고 보고한다. 현재 로컬 규칙만으로 GitHub 보호/필수 검사가 활성화된다고 가정하지 않는다.
+2026-11-14 사용자가 develop과 작업 브랜치의 원격 push를 요청했다. 이후 완료 작업도 해당 feature와 develop을 반영한다. PR을 이용하는 검토에는 `.github/PULL_REQUEST_TEMPLATE.md`를 사용한다. 현재 요청의 로컬 develop 통합은 위 `--no-ff` 절차를 따른다. CI 결과와 실제 SDK 수신 검증 결과를 각각 기록한다. GitHub의 브랜치 보호는 실제로 설정한 경우에만 적용됐다고 보고한다. 현재 로컬 규칙만으로 GitHub 보호/필수 검사가 활성화된다고 가정하지 않는다.
 
 main 통합·출시 태그·배포는 출시 작업으로 따로 진행한다. 현재 debug 앱·예시 가이드·AI 미연결 상태를 배포 완료로 취급하지 않는다. 원본 시각화의 외부 사용 범위는 `PLEOS_VISUAL_SOURCE.md`를 따른다.
 

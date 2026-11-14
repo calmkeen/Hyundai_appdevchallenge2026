@@ -6,7 +6,8 @@
 
 | 구분 | 명령/환경 | 결과 |
 | --- | --- | --- |
-| 서버 회귀 | `.venv/bin/python -m pytest backend/tests -q` | 이전 26개 통과 (세 언어의 자료 부족 응답 포함), 서버 코드 변경 없음 |
+| 서버 회귀 | `.venv/bin/python -m pytest backend/tests -q` | 최신 117개 통과. 기존 26개 + 게시 정책/API 73개 + 등록 CLI 18개. AnyIO deprecation warning 1개 |
+| 가이드 카탈로그 | `.venv/bin/python scripts/import_guides.py check --json` | VALID, 1개 DRAFT 구조 검사. 실제 게시 자료 없음 |
 | Android 단위 | `:app:testDemoDebugUnitTest` | 이전 6개 통과, 실패/건너뜀 0 |
 | Mock 기기 회귀 | API 35 / 1280×800 / `CarCueFlowTest` | 5개 통과, 원본 개폐 프레임 픽셀 차이·안전벨트 미연결·세 언어·기존 흐름 |
 | 실제 APK 연속 촬영 | API 35 / `NativeShowcaseTest` | 1개 통과, 20개 실제 화면·개폐·세 언어 전환 |
@@ -20,6 +21,8 @@
 | 인계 패키지 | SHA256SUMS 전체 대조 | 일치 |
 
 최종 기준 JDK는 Temurin 17.0.21+9 ARM64, Gradle 8.10.2, AGP 8.8.2, Kotlin 2.0.0이다. compile/target SDK 35, min SDK 28이다.
+
+검수 가이드 등록 feature는 API에서 불일치·미검수·중복 레코드 차단, CLI의 반복 등록·충돌·번역 분리·경로 이탈 방지·입출력 실패 시 보존을 검증했다. 테스트의 VERIFIED 프로필과 example.test 자료는 합성 fixture이며 기본 content에 반영하지 않았다. 계약 3종·148개 세 언어 UI 자원 검사 및 CI YAML 파싱도 통과했다. 이번 서버 변경으로 SDK/AI 실제 외부 연결을 재시험하거나 성공 판정하지 않는다. 기존 SDK 촬영·회귀 결과는 아래 이력과 구분한다.
 
 세 언어로 Mock 범위를 조정한 뒤 서버 26개·Mock 기기 3개·계약 검사를 다시 통과했고 두 APK를 재빌드했다. 일본어 홈과 세 언어 선택 캡처를 육안으로 확인했다. SDK·CarUx 수신과 Android 단위 시험은 같은 날 언어 변경 전에 확보한 결과이며, 이번 변경에서 재실행하지 않았다.
 

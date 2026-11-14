@@ -1,0 +1,75 @@
+# CarCue 아키텍처 결정
+
+2026-11-14. 현재 구현을 보존하면서 다음 기능부터 적용할 구조다. 제품 요구와 구현 순서는 `DEVELOPMENT_ORDER.md`를 따른다. 예전 `02-mvp-and-architecture.md`는 결정 이력이며 현재 우선순위를 대체하지 않는다.
+
+## 선택한 모델
+
+Android는 **MVVM + 단방향 상태 흐름(UDF)**으로 화면을 구성하고, **Clean Architecture의 의존성 경계**를 점진적으로 적용한다. 서버는 **모듈형 모놀리스 + Ports & Adapters**로 개발한다. 초기에는 Android 단일 Gradle 모듈과 FastAPI 단일 배포를 유지한다.
+
+| 영역 | 기술과 역할 | 의존성 규칙 |
+| --- | --- | --- |
+| 화면 | Kotlin / Compose | UiState 표시와 사용자 이벤트 전달. SDK·HTTP 직접 호출 금지 |
+| 화면 상태 | ViewModel / Coroutines / StateFlow | 상태·로딩·실패·UX 제한 관리. 업무 규칙은 순수 정책/UseCase에 위임 |
+| 업무 규칙 | Kotlin 모델·정책·필요한 UseCase | 차량/매뉴얼 일치, 게시 가능 여부, TTL 등. Compose·SDK·HTTP 구현에 의존하지 않음 |
+| 데이터 | Repository 인터페이스와 구현 | Pleos/Mock, 서버, 검증된 로컬 캐시를 공통 모델로 변환 |
+| 서버 진입 | FastAPI / Pydantic | 요청 검증, 인증, 응답 변환 |
+| 서버 업무 | 조회·가이드 게시 정책·답변 출처 검증·세션 정책 | 외부 AI나 저장 방식과 독립된 규칙 |
+| 서버 어댑터 | 파일 Catalog, SQLite Store, OpenAI Provider | 포트에 맞춰 데이터/외부 서비스를 제공. 생성 시 의존성 주입 |
+| 공통 계약 | `contracts/` JSON Schema, `content/` 카탈로그 | 프로필·언어·매뉴얼 버전·검수 상태를 명시 |
+
+```mermaid
+flowchart LR
+  UI[Compose 화면] --> VM[ViewModel / StateFlow]
+  VM --> RULE[순수 정책 / UseCase]
+  VM --> PORT[Repository 인터페이스]
+  PORT --> SDK[Pleos 또는 Mock 어댑터]
+  PORT --> CACHE[검증된 로컬 캐시]
+  PORT --> HTTP[CarCue API 클라이언트]
+  HTTP --> API[FastAPI]
+  API --> APP[업무 규칙 / 포트]
+  APP --> CAT[검수 콘텐츠 Catalog]
+  APP --> DB[SQLite Store]
+  APP --> AI[OpenAI Provider]
+```
+
+화면 이벤트는 ViewModel로 들어가고, 데이터 결과는 UiState로 돌아와 Compose가 다시 표시한다. SDK callback도 같은 경로로 처리한다. 도어 값의 source, 수신 시각, 오류·미지원·오래된 값, UX 제한을 잃지 않는다. `LIVE` 서버 모드는 차량값의 `PLEOS/MOCK` 출처와 별개다.
+
+## 현재 코드와 점진적 정리
+
+현재 앱에는 이미 ViewModel/StateFlow, VehicleRepository, demo/pleos flavor 어댑터가 있다. 다만 `CarCueViewModel`에 API 생성, JSON 변환, 세션·캐시 조정이 함께 있어 완전한 계층 분리를 마친 상태는 아니다. 기능 변경 시 해당 책임을 작은 단위로 옮긴다. 앱 전체 재작성이나 모든 기능에 형식적인 UseCase 추가는 하지 않는다.
+
+목표 패키지 경계는 아래와 같다. 디렉터리가 모두 이미 존재한다는 의미는 아니다.
+
+```text
+android/app/src/main/.../
+  app/                   # 의존성 조립, 앱 진입
+  feature/               # onboarding, home, status, guide, assistant, session
+  domain/                # 공통 모델, 순수 정책, 필요한 UseCase, Repository 포트
+  data/                  # vehicle, content, ai, session 구현
+  ui/                    # 공통 테마·컴포넌트
+android/app/src/{demo,pleos}/  # 빌드별 차량 어댑터
+backend/app/
+  main.py                # 현재 API/의존성 조립; 커질 때 api/application 분리
+  guide_policy.py        # 이번에 분리한 순수 게시 정책
+  content.py             # 파일 Catalog 어댑터
+  provider.py            # 외부 AI 어댑터
+  storage.py             # SQLite 세션 저장 어댑터
+```
+
+의존성은 생성자/팩토리에서 명시적으로 주입한다. 현재 규모에서는 별도 DI 프레임워크, 멀티모듈 전환, 마이크로서비스를 추가하지 않는다. 기능 간 결합이나 빌드·배포 요구가 실제로 커질 때 별도 결정으로 분리한다.
+
+## 이번 단계에 적용하는 경계
+
+1. 서버의 `validate_guide()`는 부작용 없이 구조·프로필·언어·매뉴얼·출처·번역·단계를 검사한다. 등록 CLI와 실제 조회 Catalog가 같은 규칙을 사용한다.
+2. CLI는 입력과 파일 저장을 맡는다. 검수 상태를 승격하거나 매뉴얼을 생성하지 않는다. 가이드 식별자·언어·매뉴얼 세트·원문 버전의 조합을 불변 레코드로 등록한다.
+3. Android는 서버 JSON과 캐시를 화면 모델로 바꾸기 전에 게시 메타데이터를 다시 검사한다. 서버가 성공적으로 빈 목록을 반환하면 예전 캐시를 비운다. 다른 차량·버전·언어의 안내로 대체하지 않는다.
+4. API 키와 AI 호출은 서버에만 둔다. 검수 자료와 출처 검증을 통과한 결과만 앱으로 전달하며 실제 호출 여부를 따로 기록한다.
+
+## 검증과 다음 구현 순서
+
+- 순수 정책: JVM/Python 단위 테스트로 프로필·버전 불일치, 미검수 번역, 출처/단계 오류, 캐시 철회를 검증한다.
+- 서버 경계: HTTP API 테스트로 게시 불가 문서가 목록·상세에 나오지 않는지 확인한다. CLI는 임시 카탈로그에서 원자적 등록·중복·충돌·실패 시 보존을 검증한다.
+- 앱 경계: 변경한 flavor를 빌드하고 단위 테스트를 실행한다. SDK 수신/리스너/UX 변경 시에는 전용 AVD에서 실제 GET·callback·화면·해제까지 다시 확인한다.
+- 실제 외부 연결: 합성 자료나 AI HTTP 대역 테스트를 실제 매뉴얼 검수·실차·실제 AI 호출의 증거로 쓰지 않는다.
+
+개발 순서는 **검수 가이드 등록·검증 → 실제 차종/매뉴얼 자료 검수 및 상태별 안내 규칙 연결 → 검수 자료 기반 AI·번역 실제 호출 → 언어·UX·종료 회귀 → 시연 갱신**이다. 공식 자료/키가 없는 단계는 완료로 올리지 않고, 독립적인 구현과 테스트를 계속한다. 각 작업은 `feature/`에서 검증·커밋 후 develop에 통합한다.
