@@ -1,0 +1,158 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://carcue.invalid/contracts/ask-response.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "request_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "enum": [
+        "ANSWERED",
+        "NEED_MORE_INFO",
+        "NO_RELIABLE_SOURCE",
+        "TEMPORARILY_UNAVAILABLE"
+      ]
+    },
+    "locale": {
+      "type": "string",
+      "minLength": 2
+    },
+    "answer": {
+      "type": "string",
+      "minLength": 1
+    },
+    "citations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "source_id": {
+            "type": "string"
+          },
+          "guide_id": {
+            "type": "string"
+          },
+          "profile_id": {
+            "type": "string"
+          },
+          "manual_set_id": {
+            "type": "string"
+          },
+          "source_version": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "section": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "source_id",
+          "guide_id",
+          "profile_id",
+          "manual_set_id",
+          "source_version",
+          "title",
+          "url",
+          "section"
+        ]
+      }
+    },
+    "follow_up_question": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "enum": [
+              "OPEN_GUIDE",
+              "OPEN_MANUAL",
+              "REFRESH_STATUS",
+              "OPEN_SUPPORT",
+              "SELECT_PROFILE"
+            ]
+          },
+          "target_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "kind",
+          "target_id"
+        ]
+      }
+    },
+    "mode": {
+      "enum": [
+        "LIVE",
+        "MOCK"
+      ]
+    }
+  },
+  "required": [
+    "request_id",
+    "status",
+    "locale",
+    "answer",
+    "citations",
+    "follow_up_question",
+    "actions",
+    "mode"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "ANSWERED"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "citations": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "NEED_MORE_INFO"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "follow_up_question": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,191 @@
+{
+  "output": "output/qa/carcue-full-sdk-intro.mp4",
+  "audio": ".tooling/media/scott-buckley-a-kind-of-hope.mp3",
+  "segments": [
+    {
+      "kind": "intro",
+      "duration": 3,
+      "title": "언제, 어디서든,\n평소와 같은 경험을.",
+      "subtitle": "차량이 달라도, 익숙한 안내와 사용 경험"
+    },
+    {
+      "kind": "video",
+      "duration": 2,
+      "chapter": "01  시작하기",
+      "title": "내 차량에 맞춰\n시작하세요",
+      "subtitle": "차종과 연식을 확인하고\n편한 언어를 선택해요",
+      "source_scene": "차량 선택",
+      "source": "sdk",
+      "start": 2.01
+    },
+    {
+      "kind": "video",
+      "duration": 2,
+      "chapter": "01  시작하기",
+      "title": "내 차량에 맞춰\n시작하세요",
+      "subtitle": "차종과 연식을 확인하고\n편한 언어를 선택해요",
+      "source_scene": "세 언어 선택",
+      "source": "sdk",
+      "start": 9.14
+    },
+    {
+      "kind": "video",
+      "duration": 2,
+      "chapter": "02  차량 상태",
+      "title": "차량 상태를\n앱 안에서",
+      "subtitle": "Pleos SDK로 받은\n문 상태를 보여줘요",
+      "source_scene": "SDK 최초 닫힘 수신",
+      "source": "sdk",
+      "detail": "SDK 수신 · 전용 AVD",
+      "start": 16.89
+    },
+    {
+      "kind": "video",
+      "duration": 2,
+      "chapter": "02  차량 상태",
+      "title": "문이 열리면\n그림도 함께",
+      "subtitle": "실제 SDK 변경 알림을 받아\n차량 시각화가 바뀌어요",
+      "source_scene": "SDK 열림 콜백",
+      "source": "sdk",
+      "detail": "닫힘 → 열림 · SDK 수신",
+      "lead_in_seconds": 0.25,
+      "start": 19.19
+    },
+    {
+      "kind": "video",
+      "duration": 2,
+      "chapter": "02  차량 상태",
+      "title": "다시 닫히면\n표시도 돌아와요",
+      "subtitle": "닫힘 알림까지 받아\n앱 안 차량이 함께 바뀌어요",
+      "source_scene": "SDK 닫힘 콜백",
+      "source": "sdk",
+      "detail": "열림 → 닫힘 · SDK 수신",
+      "lead_in_seconds": 0.25,
+      "start": 22.3
+    },
+    {
+      "kind": "video",
+      "duration": 2,
+      "chapter": "03  안전벨트 안내",
+      "title": "안전벨트 안내를\n익숙한 그림으로",
+      "subtitle": "Pleos 원본 이미지를\n앱 안에서 확인해요",
+      "detail": "착용 상태 미연결 · 안내 예시",
+      "source_scene": "SDK 앱의 안전벨트 안내",
+      "source": "sdk",
+      "start": 24.92
+    },
+    {
+      "kind": "video",
+      "duration": 2,
+      "chapter": "04  사용 가이드",
+      "title": "사진과 함께\n단계별로",
+      "subtitle": "필요한 안내를 열고\n한 단계씩 살펴봐요",
+      "source_scene": "가이드 목록 · 앱 내 사진",
+      "source": "sdk",
+      "start": 30.27
+    },
+    {
+      "kind": "video",
+      "duration": 2,
+      "chapter": "04  사용 가이드",
+      "title": "사진과 함께\n단계별로",
+      "subtitle": "필요한 안내를 열고\n한 단계씩 살펴봐요",
+      "source_scene": "가이드 2단계 · 앱 내 사진",
+      "source": "sdk",
+      "start": 35.07
+    },
+    {
+      "kind": "video",
+      "duration": 2,
+      "chapter": "05  질문 화면",
+      "title": "궁금한 순간,\n바로 질문",
+      "subtitle": "살펴보던 가이드에서\n질문 화면으로 이어져요",
+      "detail": "AI 답변 연결 준비 중",
+      "source_scene": "AI 질문 화면",
+      "source": "sdk",
+      "start": 38.42
+    },
+    {
+      "kind": "video",
+      "duration": 2,
+      "chapter": "06  언어 선택",
+      "title": "익숙한 언어로\n이어지는 경험",
+      "subtitle": "한국어\nEnglish\n日本語",
+      "source_scene": "언어 변경 · 영어 선택",
+      "source": "sdk",
+      "start": 45.47
+    },
+    {
+      "kind": "video",
+      "duration": 2,
+      "chapter": "06  언어 선택",
+      "title": "익숙한 언어로\n이어지는 경험",
+      "subtitle": "한국어\nEnglish\n日本語",
+      "source_scene": "English · Home",
+      "source": "sdk",
+      "start": 49.25
+    },
+    {
+      "kind": "video",
+      "duration": 2,
+      "chapter": "06  언어 선택",
+      "title": "익숙한 언어로\n이어지는 경험",
+      "subtitle": "한국어\nEnglish\n日本語",
+      "source_scene": "언어 변경 · 일본어 선택",
+      "source": "sdk",
+      "start": 61.12
+    },
+    {
+      "kind": "video",
+      "duration": 2,
+      "chapter": "06  언어 선택",
+      "title": "익숙한 언어로\n이어지는 경험",
+      "subtitle": "한국어\nEnglish\n日本語",
+      "source_scene": "日本語 · ホーム",
+      "source": "sdk",
+      "start": 64.23
+    },
+    {
+      "kind": "video",
+      "duration": 2,
+      "chapter": "07  이용 마치기",
+      "title": "이용이 끝나면\n가볍게 마무리",
+      "subtitle": "이번 이용의 선택과\n임시 기록을 정리해요",
+      "source_scene": "이용 종료 확인",
+      "source": "sdk",
+      "start": 71.12
+    },
+    {
+      "kind": "outro",
+      "duration": 3,
+      "title": "익숙한 경험을,\n어디서나.",
+      "subtitle": "한국어  ·  English  ·  日本語"
+    }
+  ],
+  "audio_start": 12,
+  "audio_volume": 0.32,
+  "music_credit": "'A Kind Of Hope' by Scott Buckley - released under CC-BY 4.0. www.scottbuckley.com.au",
+  "hero_asset": "content/illustrations/pleos-reference/car/frame-020.png",
+  "hero_title": "차량·안전벨트 안내",
+  "hero_caption": "Pleos 앱 안의 차량 시각화",
+  "visual_credit": "Visual reference: user-specified Pleos SDK recording · local development preview",
+  "safety_asset": "content/illustrations/pleos-reference/seatbelt.png",
+  "schema_version": 2,
+  "sources": {
+    "sdk": {
+      "video": "output/qa/pleos-full-showcase/carcue-pleos-native-run.mp4",
+      "evidence": "output/qa/pleos-full-showcase/carcue-pleos-native-run.json",
+      "apk": "output/apk/carcue-pleos-showcase-debug.apk",
+      "vehicle_data": "PLEOS",
+      "crop_xywh": [
+        854,
+        90,
+        1682,
+        1051.25
+      ],
+      "caption": "실제 Pleos SDK 연결 앱 · 전용 AVD"
+    }
+  },
+  "intro_notice": "모든 기능 화면을 같은 Pleos SDK 앱에서 촬영",
+  "outro_notice": "동일한 SDK 연결 앱 · 가이드 예시 · AI 연결 준비 중"
+}

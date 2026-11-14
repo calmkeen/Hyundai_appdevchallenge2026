@@ -1,0 +1,14 @@
+{
+  "sdk": {
+    "EvBattery": "https://document.pleos.ai/docs/pleos-only/connect-sdk-pleos/Vehicle/vehicle/ai.pleos.playground.vehicle.api/ev-battery/entry",
+    "Fuel": "https://document.pleos.ai/docs/pleos-only/connect-sdk-pleos/Vehicle/vehicle/ai.pleos.playground.vehicle.api/fuel/entry",
+    "Door": "https://document.pleos.ai/docs/pleos-only/connect-sdk-pleos/Vehicle/vehicle/ai.pleos.playground.vehicle.api/door/entry",
+    "Tire": "https://document.pleos.ai/docs/pleos-only/connect-sdk-pleos/Vehicle/vehicle/ai.pleos.playground.vehicle.api/tire/entry",
+    "Safety": "https://document.pleos.ai/docs/pleos-only/connect-sdk-pleos/Vehicle/vehicle/ai.pleos.playground.vehicle.api/safety/entry"
+  },
+  "charging_photo": {
+    "credit": "Hyundai Motor America, 2024 IONIQ 5 Welcome Center",
+    "url": "https://www.hyundaiusa.com/us/en/welcome-center/2024/ioniq-5/ioniq-5-se-welcome-center"
+  },
+  "icons": "Lucide, ISC license attached"
+}

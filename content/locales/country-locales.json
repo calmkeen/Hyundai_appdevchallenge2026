@@ -1,0 +1,175 @@
+{
+  "status": "PLANNED",
+  "notes": "50개 지역의 개발용 커버리지 후보. 방문 통계 순위나 번역 지원 완료 목록이 아닙니다. 국가별 모든 언어를 망라하지 않습니다.",
+  "countries": {
+    "KR": [
+      "ko-KR"
+    ],
+    "US": [
+      "en",
+      "es"
+    ],
+    "GB": [
+      "en"
+    ],
+    "CA": [
+      "en",
+      "fr-FR"
+    ],
+    "AU": [
+      "en"
+    ],
+    "NZ": [
+      "en"
+    ],
+    "JP": [
+      "ja-JP"
+    ],
+    "CN": [
+      "zh-Hans"
+    ],
+    "TW": [
+      "zh-Hant"
+    ],
+    "HK": [
+      "zh-Hant",
+      "en"
+    ],
+    "SG": [
+      "en",
+      "zh-Hans",
+      "ms-MY",
+      "ta-IN"
+    ],
+    "MY": [
+      "ms-MY",
+      "en"
+    ],
+    "TH": [
+      "th-TH"
+    ],
+    "VN": [
+      "vi-VN"
+    ],
+    "ID": [
+      "id-ID"
+    ],
+    "PH": [
+      "fil-PH",
+      "en"
+    ],
+    "IN": [
+      "hi-IN",
+      "en",
+      "ta-IN"
+    ],
+    "BD": [
+      "bn-BD"
+    ],
+    "PK": [
+      "ur-PK",
+      "en"
+    ],
+    "LK": [
+      "si-LK",
+      "ta-IN"
+    ],
+    "NP": [
+      "ne-NP"
+    ],
+    "MN": [
+      "mn-MN"
+    ],
+    "KZ": [
+      "kk-KZ",
+      "ru-RU"
+    ],
+    "UZ": [
+      "uz-UZ"
+    ],
+    "KH": [
+      "km-KH"
+    ],
+    "MM": [
+      "my-MM"
+    ],
+    "DE": [
+      "de-DE"
+    ],
+    "FR": [
+      "fr-FR"
+    ],
+    "ES": [
+      "es"
+    ],
+    "IT": [
+      "it-IT"
+    ],
+    "NL": [
+      "nl-NL"
+    ],
+    "BE": [
+      "nl-NL",
+      "fr-FR",
+      "de-DE"
+    ],
+    "CH": [
+      "de-DE",
+      "fr-FR",
+      "it-IT"
+    ],
+    "AT": [
+      "de-DE"
+    ],
+    "PT": [
+      "pt-PT"
+    ],
+    "BR": [
+      "pt-BR"
+    ],
+    "MX": [
+      "es"
+    ],
+    "AR": [
+      "es"
+    ],
+    "RU": [
+      "ru-RU"
+    ],
+    "UA": [
+      "uk-UA"
+    ],
+    "PL": [
+      "pl-PL"
+    ],
+    "CZ": [
+      "cs-CZ"
+    ],
+    "SE": [
+      "sv-SE"
+    ],
+    "NO": [
+      "nb-NO"
+    ],
+    "DK": [
+      "da-DK"
+    ],
+    "FI": [
+      "fi-FI"
+    ],
+    "TR": [
+      "tr-TR"
+    ],
+    "SA": [
+      "ar"
+    ],
+    "AE": [
+      "ar",
+      "en"
+    ],
+    "IL": [
+      "he-IL",
+      "ar"
+    ]
+  }
+}

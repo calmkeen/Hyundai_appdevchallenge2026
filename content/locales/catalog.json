@@ -1,0 +1,434 @@
+[
+  {
+    "locale": "ko-KR",
+    "native_name": "한국어",
+    "display_name": "한국어",
+    "rtl": false,
+    "ui_status": "DRAFT",
+    "guide_status": "PLANNED",
+    "mock_visible": true
+  },
+  {
+    "locale": "en",
+    "native_name": "English",
+    "display_name": "영어",
+    "rtl": false,
+    "ui_status": "DRAFT",
+    "guide_status": "PLANNED",
+    "mock_visible": true
+  },
+  {
+    "locale": "ja-JP",
+    "native_name": "日本語",
+    "display_name": "일본어",
+    "rtl": false,
+    "ui_status": "DRAFT",
+    "guide_status": "PLANNED",
+    "mock_visible": true
+  },
+  {
+    "locale": "zh-Hans",
+    "native_name": "简体中文",
+    "display_name": "중국어 간체",
+    "rtl": false,
+    "ui_status": "PLANNED",
+    "guide_status": "PLANNED",
+    "mock_visible": false
+  },
+  {
+    "locale": "zh-Hant",
+    "native_name": "繁體中文",
+    "display_name": "중국어 번체",
+    "rtl": false,
+    "ui_status": "PLANNED",
+    "guide_status": "PLANNED",
+    "mock_visible": false
+  },
+  {
+    "locale": "de-DE",
+    "native_name": "Deutsch",
+    "display_name": "독일어",
+    "rtl": false,
+    "ui_status": "PLANNED",
+    "guide_status": "PLANNED",
+    "mock_visible": false
+  },
+  {
+    "locale": "fr-FR",
+    "native_name": "Français",
+    "display_name": "프랑스어",
+    "rtl": false,
+    "ui_status": "PLANNED",
+    "guide_status": "PLANNED",
+    "mock_visible": false
+  },
+  {
+    "locale": "es",
+    "native_name": "Español",
+    "display_name": "스페인어",
+    "rtl": false,
+    "ui_status": "PLANNED",
+    "guide_status": "PLANNED",
+    "mock_visible": false
+  },
+  {
+    "locale": "pt-BR",
+    "native_name": "Português (Brasil)",
+    "display_name": "포르투갈어 브라질",
+    "rtl": false,
+    "ui_status": "PLANNED",
+    "guide_status": "PLANNED",
+    "mock_visible": false
+  },
+  {
+    "locale": "pt-PT",
+    "native_name": "Português",
+    "display_name": "포르투갈어",
+    "rtl": false,
+    "ui_status": "PLANNED",
+    "guide_status": "PLANNED",
+    "mock_visible": false
+  },
+  {
+    "locale": "it-IT",
+    "native_name": "Italiano",
+    "display_name": "이탈리아어",
+    "rtl": false,
+    "ui_status": "PLANNED",
+    "guide_status": "PLANNED",
+    "mock_visible": false
+  },
+  {
+    "locale": "nl-NL",
+    "native_name": "Nederlands",
+    "display_name": "네덜란드어",
+    "rtl": false,
+    "ui_status": "PLANNED",
+    "guide_status": "PLANNED",
+    "mock_visible": false
+  },
+  {
+    "locale": "ru-RU",
+    "native_name": "Русский",
+    "display_name": "러시아어",
+    "rtl": false,
+    "ui_status": "PLANNED",
+    "guide_status": "PLANNED",
+    "mock_visible": false
+  },
+  {
+    "locale": "uk-UA",
+    "native_name": "Українська",
+    "display_name": "우크라이나어",
+    "rtl": false,
+    "ui_status": "PLANNED",
+    "guide_status": "PLANNED",
+    "mock_visible": false
+  },
+  {
+    "locale": "pl-PL",
+    "native_name": "Polski",
+    "display_name": "폴란드어",
+    "rtl": false,
+    "ui_status": "PLANNED",
+    "guide_status": "PLANNED",
+    "mock_visible": false
+  },
+  {
+    "locale": "cs-CZ",
+    "native_name": "Čeština",
+    "display_name": "체코어",
+    "rtl": false,
+    "ui_status": "PLANNED",
+    "guide_status": "PLANNED",
+    "mock_visible": false
+  },
+  {
+    "locale": "sv-SE",
+    "native_name": "Svenska",
+    "display_name": "스웨덴어",
+    "rtl": false,
+    "ui_status": "PLANNED",
+    "guide_status": "PLANNED",
+    "mock_visible": false
+  },
+  {
+    "locale": "da-DK",
+    "native_name": "Dansk",
+    "display_name": "덴마크어",
+    "rtl": false,
+    "ui_status": "PLANNED",
+    "guide_status": "PLANNED",
+    "mock_visible": false
+  },
+  {
+    "locale": "nb-NO",
+    "native_name": "Norsk",
+    "display_name": "노르웨이어",
+    "rtl": false,
+    "ui_status": "PLANNED",
+    "guide_status": "PLANNED",
+    "mock_visible": false
+  },
+  {
+    "locale": "fi-FI",
+    "native_name": "Suomi",
+    "display_name": "핀란드어",
+    "rtl": false,
+    "ui_status": "PLANNED",
+    "guide_status": "PLANNED",
+    "mock_visible": false
+  },
+  {
+    "locale": "tr-TR",
+    "native_name": "Türkçe",
+    "display_name": "튀르키예어",
+    "rtl": false,
+    "ui_status": "PLANNED",
+    "guide_status": "PLANNED",
+    "mock_visible": false
+  },
+  {
+    "locale": "ar",
+    "native_name": "العربية",
+    "display_name": "아랍어",
+    "rtl": true,
+    "ui_status": "PLANNED",
+    "guide_status": "PLANNED",
+    "mock_visible": false
+  },
+  {
+    "locale": "he-IL",
+    "native_name": "עברית",
+    "display_name": "히브리어",
+    "rtl": true,
+    "ui_status": "PLANNED",
+    "guide_status": "PLANNED",
+    "mock_visible": false
+  },
+  {
+    "locale": "fa-IR",
+    "native_name": "فارسی",
+    "display_name": "페르시아어",
+    "rtl": true,
+    "ui_status": "PLANNED",
+    "guide_status": "PLANNED",
+    "mock_visible": false
+  },
+  {
+    "locale": "ur-PK",
+    "native_name": "اردو",
+    "display_name": "우르두어",
+    "rtl": true,
+    "ui_status": "PLANNED",
+    "guide_status": "PLANNED",
+    "mock_visible": false
+  },
+  {
+    "locale": "hi-IN",
+    "native_name": "हिन्दी",
+    "display_name": "힌디어",
+    "rtl": false,
+    "ui_status": "PLANNED",
+    "guide_status": "PLANNED",
+    "mock_visible": false
+  },
+  {
+    "locale": "bn-BD",
+    "native_name": "বাংলা",
+    "display_name": "벵골어",
+    "rtl": false,
+    "ui_status": "PLANNED",
+    "guide_status": "PLANNED",
+    "mock_visible": false
+  },
+  {
+    "locale": "ta-IN",
+    "native_name": "தமிழ்",
+    "display_name": "타밀어",
+    "rtl": false,
+    "ui_status": "PLANNED",
+    "guide_status": "PLANNED",
+    "mock_visible": false
+  },
+  {
+    "locale": "th-TH",
+    "native_name": "ไทย",
+    "display_name": "태국어",
+    "rtl": false,
+    "ui_status": "PLANNED",
+    "guide_status": "PLANNED",
+    "mock_visible": false
+  },
+  {
+    "locale": "vi-VN",
+    "native_name": "Tiếng Việt",
+    "display_name": "베트남어",
+    "rtl": false,
+    "ui_status": "PLANNED",
+    "guide_status": "PLANNED",
+    "mock_visible": false
+  },
+  {
+    "locale": "id-ID",
+    "native_name": "Bahasa Indonesia",
+    "display_name": "인도네시아어",
+    "rtl": false,
+    "ui_status": "PLANNED",
+    "guide_status": "PLANNED",
+    "mock_visible": false
+  },
+  {
+    "locale": "ms-MY",
+    "native_name": "Bahasa Melayu",
+    "display_name": "말레이어",
+    "rtl": false,
+    "ui_status": "PLANNED",
+    "guide_status": "PLANNED",
+    "mock_visible": false
+  },
+  {
+    "locale": "fil-PH",
+    "native_name": "Filipino",
+    "display_name": "필리핀어",
+    "rtl": false,
+    "ui_status": "PLANNED",
+    "guide_status": "PLANNED",
+    "mock_visible": false
+  },
+  {
+    "locale": "mn-MN",
+    "native_name": "Монгол",
+    "display_name": "몽골어",
+    "rtl": false,
+    "ui_status": "PLANNED",
+    "guide_status": "PLANNED",
+    "mock_visible": false
+  },
+  {
+    "locale": "kk-KZ",
+    "native_name": "Қазақша",
+    "display_name": "카자흐어",
+    "rtl": false,
+    "ui_status": "PLANNED",
+    "guide_status": "PLANNED",
+    "mock_visible": false
+  },
+  {
+    "locale": "uz-UZ",
+    "native_name": "O‘zbekcha",
+    "display_name": "우즈베크어",
+    "rtl": false,
+    "ui_status": "PLANNED",
+    "guide_status": "PLANNED",
+    "mock_visible": false
+  },
+  {
+    "locale": "km-KH",
+    "native_name": "ខ្មែរ",
+    "display_name": "크메르어",
+    "rtl": false,
+    "ui_status": "PLANNED",
+    "guide_status": "PLANNED",
+    "mock_visible": false
+  },
+  {
+    "locale": "my-MM",
+    "native_name": "မြန်မာ",
+    "display_name": "미얀마어",
+    "rtl": false,
+    "ui_status": "PLANNED",
+    "guide_status": "PLANNED",
+    "mock_visible": false
+  },
+  {
+    "locale": "ne-NP",
+    "native_name": "नेपाली",
+    "display_name": "네팔어",
+    "rtl": false,
+    "ui_status": "PLANNED",
+    "guide_status": "PLANNED",
+    "mock_visible": false
+  },
+  {
+    "locale": "si-LK",
+    "native_name": "සිංහල",
+    "display_name": "싱할라어",
+    "rtl": false,
+    "ui_status": "PLANNED",
+    "guide_status": "PLANNED",
+    "mock_visible": false
+  },
+  {
+    "locale": "el-GR",
+    "native_name": "Ελληνικά",
+    "display_name": "그리스어",
+    "rtl": false,
+    "ui_status": "PLANNED",
+    "guide_status": "PLANNED",
+    "mock_visible": false
+  },
+  {
+    "locale": "hu-HU",
+    "native_name": "Magyar",
+    "display_name": "헝가리어",
+    "rtl": false,
+    "ui_status": "PLANNED",
+    "guide_status": "PLANNED",
+    "mock_visible": false
+  },
+  {
+    "locale": "ro-RO",
+    "native_name": "Română",
+    "display_name": "루마니아어",
+    "rtl": false,
+    "ui_status": "PLANNED",
+    "guide_status": "PLANNED",
+    "mock_visible": false
+  },
+  {
+    "locale": "bg-BG",
+    "native_name": "Български",
+    "display_name": "불가리아어",
+    "rtl": false,
+    "ui_status": "PLANNED",
+    "guide_status": "PLANNED",
+    "mock_visible": false
+  },
+  {
+    "locale": "hr-HR",
+    "native_name": "Hrvatski",
+    "display_name": "크로아티아어",
+    "rtl": false,
+    "ui_status": "PLANNED",
+    "guide_status": "PLANNED",
+    "mock_visible": false
+  },
+  {
+    "locale": "sk-SK",
+    "native_name": "Slovenčina",
+    "display_name": "슬로바키아어",
+    "rtl": false,
+    "ui_status": "PLANNED",
+    "guide_status": "PLANNED",
+    "mock_visible": false
+  },
+  {
+    "locale": "sw-KE",
+    "native_name": "Kiswahili",
+    "display_name": "스와힐리어",
+    "rtl": false,
+    "ui_status": "PLANNED",
+    "guide_status": "PLANNED",
+    "mock_visible": false
+  },
+  {
+    "locale": "lo-LA",
+    "native_name": "ລາວ",
+    "display_name": "라오어",
+    "rtl": false,
+    "ui_status": "PLANNED",
+    "guide_status": "PLANNED",
+    "mock_visible": false
+  }
+]

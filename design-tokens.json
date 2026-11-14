@@ -1,0 +1,71 @@
+{
+  "name": "CarCue",
+  "version": "1.0-handoff",
+  "status": "DESIGN_BASELINE",
+  "notes": [
+    "색은 제품 기준이며 경고 심각도를 덮어쓰지 않는다.",
+    "spacing·radius는 디자인 비율의 출발점이며 실제 dp·sp·터치 영역은 Pleos 요구사항과 기기 검수로 정한다.",
+    "제안서 기기 테두리·기울임·배경판은 앱 화면에 구현하지 않는다."
+  ],
+  "color": {
+    "brand": "#2859E8",
+    "onBrand": "#FFFFFF",
+    "background": "#FFFFFF",
+    "surface": "#FFFFFF",
+    "surfaceSubtle": "#F4F7FC",
+    "textPrimary": "#152132",
+    "textSecondary": "#526176",
+    "border": "#DCE4F1",
+    "focus": "#153AA3"
+  },
+  "typography": {
+    "primary": "플랫폼 한국어·다국어 지원 산세리프",
+    "weight": {
+      "regular": 400,
+      "medium": 500,
+      "semibold": 600,
+      "bold": 700
+    },
+    "priority": [
+      "화면 제목",
+      "현재 상태와 핵심 안내",
+      "다음 행동",
+      "참고한 안내·수신 시각"
+    ]
+  },
+  "spacingScale": [
+    4,
+    8,
+    12,
+    16,
+    24,
+    32,
+    48
+  ],
+  "radiusScale": {
+    "small": 8,
+    "medium": 12,
+    "large": 20
+  },
+  "component": {
+    "primaryAction": {
+      "background": "brand",
+      "foreground": "onBrand"
+    },
+    "emphasisBox": {
+      "background": "brand",
+      "foreground": "onBrand"
+    },
+    "defaultCard": {
+      "background": "surface",
+      "foreground": "textPrimary",
+      "border": "border"
+    }
+  },
+  "accessibility": [
+    "상태는 색과 문구를 함께 사용한다.",
+    "초점·선택 상태를 제공한다.",
+    "긴 번역·RTL·글자 확대에서 잘림을 확인한다.",
+    "주행 제한은 플랫폼 상태를 따른다."
+  ]
+}
