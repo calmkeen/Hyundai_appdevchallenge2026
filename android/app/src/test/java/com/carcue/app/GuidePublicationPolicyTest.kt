@@ -29,6 +29,10 @@ class GuidePublicationPolicyTest {
         assertEquals(listOf(f.step.id), guide.stepIds)
         assertEquals(listOf(f.step.officialCautions), guide.cautions)
         assertEquals(f.source.url, guide.sources.single().second)
+        assertEquals(f.guide.manualSetId, guide.manualSetId)
+        assertEquals(f.guide.sourceVersion, guide.sourceVersion)
+        assertEquals(f.guide.profileIds, guide.profileIds)
+        assertTrue(guide.publicationVerified)
     }
 
     @Test fun translatedContentRequiresReviewAndGlossaryVersion() {

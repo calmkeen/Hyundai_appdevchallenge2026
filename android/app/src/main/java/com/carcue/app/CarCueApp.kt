@@ -26,6 +26,7 @@ import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.*
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.time.ZoneId
+import java.time.Instant
 import java.time.format.DateTimeFormatter
 
 private val Blue = Color(0xFF2859E8)
@@ -117,7 +118,7 @@ fun CarCueApp(vm: CarCueViewModel) {
         Text(if (s.profile == null) "CarCue" else "Hyundai", color = Muted, fontSize = 15.sp)
         Text(s.profile?.name ?: "—", fontSize = 25.sp, fontWeight = FontWeight.Bold)
         if (s.profile != null) Text("${s.profile.year} · ${s.profile.market}", color = Muted)
-        Text(ko.get(if (s.profile == null) "ui_profile_unknown" else "ui_ca3a352a7386"), color = Color(0xFF8B4B00), fontSize = 13.sp)
+        Text(ko.get(if (s.profile == null) "ui_profile_unknown" else if (s.profile.verified) "ui_profile_manual_verified" else "ui_ca3a352a7386"), color = Color(0xFF8B4B00), fontSize = 13.sp)
         HorizontalDivider(Modifier.padding(vertical = 8.dp), color = Line)
         listOf(Page.HOME to ko.get("ui_034999faab05"), Page.STATUS to ko.get("ui_fc73f9507b0a"),
             Page.GUIDES to ko.get("ui_96918379aa24"), Page.ASK to ko.get("ui_7a087ed8150b")).forEach { (page, title) ->
@@ -138,14 +139,14 @@ fun CarCueApp(vm: CarCueViewModel) {
         Text(text, Modifier.padding(16.dp), fontSize = 15.sp, lineHeight = 23.sp, color = if (error) Color(0xFF884316) else Muted)
     }
 }
-@Composable private fun Action(title: String, enabled: Boolean = true, onClick: () -> Unit) {
-    Button(onClick = onClick, enabled = enabled, modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp), shape = RoundedCornerShape(12.dp)) {
+@Composable private fun Action(title: String, enabled: Boolean = true, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    Button(onClick = onClick, enabled = enabled, modifier = modifier.fillMaxWidth().heightIn(min = 64.dp), shape = RoundedCornerShape(12.dp)) {
         Text(title, fontSize = 18.sp, lineHeight = 25.sp)
     }
 }
-@Composable private fun Panel(title: String, detail: String, highlight: Boolean = false, onClick: (() -> Unit)? = null) {
+@Composable private fun Panel(title: String, detail: String, highlight: Boolean = false, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null) {
     Surface(onClick = { onClick?.invoke() }, enabled = onClick != null, color = if (highlight) Blue else Color.White,
-        border = if (highlight) null else BorderStroke(1.dp, Line), shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth()) {
+        border = if (highlight) null else BorderStroke(1.dp, Line), shape = RoundedCornerShape(16.dp), modifier = modifier.fillMaxWidth()) {
         Column(Modifier.padding(22.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(title, color = if (highlight) Color.White else Ink, fontWeight = FontWeight.SemiBold, fontSize = 21.sp, lineHeight = 29.sp)
             Text(detail, color = if (highlight) Color.White else Muted, fontSize = 16.sp, lineHeight = 25.sp)
@@ -154,9 +155,11 @@ fun CarCueApp(vm: CarCueViewModel) {
 }
 @Composable private fun ProfileScreen(vm: CarCueViewModel, s: UiState, ko: UiCopy) {
     Heading(ko.get("ui_8d18a8f56cc2"), ko.get("ui_b491620e8764"))
-    Notice(ko.get("ui_6fc3f26a9b34"))
+    Notice(ko.get(if (vm.content.profiles.any { it.verified }) "ui_profile_mixed_notice" else "ui_6fc3f26a9b34"))
     vm.content.profiles.forEach { p ->
-        Panel("${p.name} · ${p.year}", "${p.market} · BEV · ${p.id}\n" + ko.get("ui_cc624e1afe01"), onClick = { vm.chooseProfile(p) })
+        Panel("${p.name} · ${p.year}", "${p.market} · BEV\n" + ko.get(if (p.verified) "ui_profile_manual_verified" else "ui_ca3a352a7386") +
+            "\n" + ko.get(if (p.verified) "ui_profile_select_reviewed" else "ui_cc624e1afe01"),
+            modifier = Modifier.testTag("profile_${p.id}"), onClick = { vm.chooseProfile(p) })
     }
     if (s.deletionPending) Notice(ko.get("ui_74c30739d02d"))
     Text(ko.get("ui_ce0d787f948e"), color = Muted, fontSize = 14.sp)
@@ -185,6 +188,7 @@ fun CarCueApp(vm: CarCueViewModel) {
             VehicleSceneCard(s.reading, ko, interactive = false, profile = s.profile)
         }
     }
+    RelatedDoorGuide(vm, s, ko)
     Panel(ko.get("ui_96918379aa24"), ko.get("ui_b5935d7ba17c"), onClick = { vm.go(Page.GUIDES) })
     Panel(ko.get("ui_7a087ed8150b"), ko.get("ui_1a3926f02365"), onClick = vm::openAssistant)
 }
@@ -208,7 +212,7 @@ private fun Reading.description(ko: UiCopy): String = when {
 }
 @Composable private fun StatusScreen(vm: CarCueViewModel, s: UiState, ko: UiCopy) {
     Heading(ko.get("ui_fc73f9507b0a"), ko.get("ui_4915df98c8b8"))
-    Action(ko.get("ui_3b6510d9d5ee"), s.reading.status != ReadStatus.LOADING) { vm.refresh() }
+    Action(ko.get("ui_3b6510d9d5ee"), s.reading.status != ReadStatus.LOADING, Modifier.testTag("refresh_door_status")) { vm.refresh() }
     val interactive = s.ux.known && !s.ux.restricted
     val demo: ((String) -> Unit)? = if (BuildConfig.IS_MOCK && interactive) vm::scenario else null
     BoxWithConstraints {
@@ -227,8 +231,15 @@ private fun Reading.description(ko: UiCopy): String = when {
 @Composable private fun DoorReadingPanel(vm: CarCueViewModel, s: UiState, ko: UiCopy) {
     Panel(ko.get("ui_5f00d4793151"), s.reading.description(ko), highlight = s.reading.status == ReadStatus.VALUE && s.reading.value == "OPEN", onClick = { vm.go(Page.DETAIL) })
     Text("${s.reading.source} · ${s.reading.capability} · ${s.reading.status}", color = Muted, fontSize = 14.sp)
-    s.reading.receivedAt?.let { Text((ko.get("ui_cc088cb58015")) + DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault()).format(it), fontSize = 14.sp, color = Muted) }
+    s.reading.receivedAt?.let { Text((ko.get("ui_cc088cb58015")) + DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss XXX").withZone(ZoneId.systemDefault()).format(it), fontSize = 14.sp, color = Muted) }
     s.reading.previousValue?.let { Notice((ko.get("ui_467deb9ffd72")) + it + ko.get("ui_4a8f8d4b04bf")) }
+    RelatedDoorGuide(vm, s, ko)
+}
+@Composable private fun RelatedDoorGuide(vm: CarCueViewModel, s: UiState, ko: UiCopy) {
+    val guide = vm.content.relatedDoorGuide(s, Instant.now()) ?: return
+    OutlinedButton(onClick = { vm.openRelatedDoorGuide(guide.id) }, modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp).testTag("related_door_guide")) {
+        Text(ko.get("ui_context_guide_open") + "\n" + guide.title, fontSize = 17.sp)
+    }
 }
 @Composable private fun DoorDiagram(open: Boolean) {
     Canvas(Modifier.fillMaxWidth().height(170.dp).semantics { contentDescription = "Physical front-left door location (ROW_1_LEFT), not necessarily the driver door" }) {
@@ -243,11 +254,13 @@ private fun Reading.description(ko: UiCopy): String = when {
 @Composable private fun DetailScreen(vm: CarCueViewModel, s: UiState, ko: UiCopy) {
     Heading(s.reading.description(ko), ko.get("ui_27fb61365bb5"))
     VehicleSceneCard(s.reading, ko, interactive = s.ux.known && !s.ux.restricted, profile = s.profile)
-    Notice(ko.get("ui_94ee6190b2e4"))
-    Action(ko.get("ui_3b6510d9d5ee"), s.reading.status != ReadStatus.LOADING) { vm.refresh() }
-    OutlinedButton(onClick = { vm.go(Page.GUIDES) }, modifier = Modifier.fillMaxWidth().heightIn(min = 60.dp)) { Text(ko.get("ui_1577a2d2afdc")) }
+    Notice(ko.get("ui_door_reading_limit"))
+    if (s.guides.none { it.publicationVerified }) Notice(ko.get("ui_94ee6190b2e4"))
+    RelatedDoorGuide(vm, s, ko)
+    Action(ko.get("ui_3b6510d9d5ee"), s.reading.status != ReadStatus.LOADING, Modifier.testTag("refresh_door_status")) { vm.refresh() }
+    OutlinedButton(onClick = { vm.go(Page.GUIDES) }, modifier = Modifier.fillMaxWidth().heightIn(min = 60.dp)) { Text(ko.get("ui_96918379aa24")) }
     OutlinedButton(onClick = vm::openAssistant, modifier = Modifier.fillMaxWidth().heightIn(min = 60.dp)) { Text(ko.get("ui_d6b8c2700dd3")) }
-    Text(ko.get("ui_fc613175a649"), color = Muted)
+    if (s.profile?.verified != true) Text(ko.get("ui_fc613175a649"), color = Muted)
 }
 @Composable private fun GuidesScreen(vm: CarCueViewModel, s: UiState, ko: UiCopy) {
     var query by remember { mutableStateOf("") }
@@ -256,9 +269,8 @@ private fun Reading.description(ko: UiCopy): String = when {
     val guides = s.guides.filter { (it.title + it.body).contains(query, true) }
     if (guides.isEmpty()) Notice(ko.get("ui_7af6433d25e9"))
     guides.forEach { guide -> Panel(guide.title, guide.body, onClick = { vm.openGuide(guide) }) }
-    // Debug SDK builds can demonstrate the same guide UI without inventing
-    // reviewed manual content or replacing the real vehicle repository.
-    if (BuildConfig.DEBUG) Surface(onClick = { vm.openGuide(Guide("__layout_preview__", ko.get("ui_817e34c0f4e8"), ko.get(if (BuildConfig.IS_MOCK) "ui_275b15c57746" else "ui_sdk_guide_preview_body"),
+    // Preserve the historical layout example for demo only. SDK builds show published manuals.
+    if (BuildConfig.DEBUG && BuildConfig.IS_MOCK) Surface(onClick = { vm.openGuide(Guide("__layout_preview__", ko.get("ui_817e34c0f4e8"), ko.get(if (BuildConfig.IS_MOCK) "ui_275b15c57746" else "ui_sdk_guide_preview_body"),
         listOf((ko.get("ui_3e7fa72af50a")) to (ko.get("ui_d1c1fb5dfe7f")),
             (ko.get("ui_6389dba531a5")) to (ko.get("ui_0f89f99fff78")),
             (ko.get("ui_6a9bd682c497")) to (ko.get("ui_41867308eace"))), emptyList(), locale = s.locale)) }, modifier = Modifier.fillMaxWidth().testTag("guide_image_card"),
@@ -274,6 +286,14 @@ private fun Reading.description(ko: UiCopy): String = when {
     val guide = s.selectedGuide ?: return
     val step = guide.steps.getOrNull(s.guideStep)
     Heading(guide.title, guide.body)
+    if (guide.publicationVerified) {
+        Text(ko.get("ui_guide_live_status").replace("{status}", s.reading.description(ko)), fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.testTag("guide_live_door_status"))
+        Text("${s.reading.source} · ${s.reading.capability} · ${s.reading.status}", color = Muted, fontSize = 14.sp)
+        s.reading.receivedAt?.let { Text(ko.get("ui_cc088cb58015") + DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss XXX").withZone(ZoneId.systemDefault()).format(it), color = Muted, fontSize = 14.sp) }
+        Notice(ko.get("ui_door_reading_limit"))
+        Action(ko.get("ui_3b6510d9d5ee"), s.reading.status != ReadStatus.LOADING, Modifier.testTag("refresh_door_status")) { vm.refresh() }
+    }
     if (guide.id == "__layout_preview__") Notice(ko.get("ui_a94f7c5cbf98"))
     Text("${s.guideStep+1} / ${guide.steps.size.coerceAtLeast(1)}", color = Blue, fontWeight = FontWeight.Bold, fontSize = 22.sp,
         style = LocalTextStyle.current.copy(textDirection = TextDirection.Ltr))
@@ -292,14 +312,20 @@ private fun Reading.description(ko: UiCopy): String = when {
         OutlinedButton(onClick = { vm.step(-1) }, enabled = s.guideStep > 0, modifier = Modifier.weight(1f).heightIn(min = 60.dp)) { Text(ko.get("ui_da7e61c67cc5")) }
         Button(onClick = { vm.step(1) }, enabled = s.guideStep+1 < guide.steps.size, modifier = Modifier.weight(1f).heightIn(min = 60.dp)) { Text(ko.get("ui_aef613c6612d")) }
     }
-    Sources(guide.sources, ko)
+    Column(Modifier.fillMaxWidth().testTag("guide_manual_sources"), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        guide.sourceVersion?.let { Text(ko.get("ui_manual_version").replace("{version}", it), color = Muted, fontSize = 13.sp) }
+        Sources(guide.sources, ko, showUrls = guide.publicationVerified)
+    }
     if (!guide.id.startsWith("__")) OutlinedButton(onClick = { vm.openTranslation(guide.body, "GUIDE", guide.locale) }) { Text(ko.get("ui_translate_guide")) }
     Action(ko.get("ui_af7d9b9636de")) { vm.openAssistant() }
 }
-@Composable private fun Sources(sources: List<Pair<String, String>>, ko: UiCopy) {
+@Composable private fun Sources(sources: List<Pair<String, String>>, ko: UiCopy, showUrls: Boolean = false) {
     val handler = LocalUriHandler.current
     if (sources.isNotEmpty()) Text(ko.get("ui_f483cda99083"), fontWeight = FontWeight.SemiBold, fontSize = 19.sp)
-    sources.forEach { (title, url) -> TextButton(onClick = { if (url.startsWith("https://")) handler.openUri(url) }) { Text(title) } }
+    sources.forEach { (title, url) ->
+        TextButton(onClick = { if (url.startsWith("https://")) handler.openUri(url) }) { Text(title) }
+        if (showUrls) Text(url, color = Muted, fontSize = 12.sp, lineHeight = 18.sp)
+    }
 }
 @Composable private fun AssistantScreen(vm: CarCueViewModel, s: UiState, ko: UiCopy) {
     var input by remember(s.page, s.translationDraft) { mutableStateOf(if (s.page == Page.TRANSLATE) s.translationDraft else "") }

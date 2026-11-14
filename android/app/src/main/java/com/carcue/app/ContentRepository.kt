@@ -4,6 +4,7 @@ import android.content.Context
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
+import java.time.Instant
 
 class UiCopy(private val locale: String, private val strings: JSONObject) {
     fun get(key: String): String {
@@ -30,6 +31,18 @@ class ContentRepository(private val context: Context) {
     private val guidePolicy by lazy { GuidePublicationPolicy(profiles,
         (0 until localeCatalog.length()).map { localeCatalog.getJSONObject(it).getString("locale") }.toSet()) }
     private val guideCache by lazy { PublishedGuideCache(File(context.filesDir, "public_guides"), guidePolicy) { decodeGuides(JSONArray(it)) } }
+    private val stateGuideRules: List<StateGuideRule> by lazy {
+        try {
+            val data = array("state-guide-rules.json")
+            (0 until data.length()).map { data.getJSONObject(it).let { rule ->
+                StateGuideRule(rule.text("rule_id"), rule.text("profile_id"), rule.text("manual_set_id"), rule.text("source_version"),
+                    rule.text("property_id"), rule.text("area_id"), rule.text("value"), rule.text("guide_id"), rule.text("verification_status")) } }
+        } catch (_: Exception) { emptyList() } // Missing/malformed bundled rules never create a recommendation.
+    }
+    private val doorGuides by lazy { DoorGuidePolicy(profiles, stateGuideRules, BuildConfig.STATE_TTL_MS) }
+
+    fun relatedDoorGuide(state: UiState, now: Instant): Guide? = if (!state.sessionStarted) null else
+        doorGuides.relatedGuide(state.profile, state.locale, state.reading, state.ux, state.guides, now)
 
     // The same publication gate applies to both API results and offline cached results.
     fun parseGuides(data: JSONArray, profile: Profile, locale: String): List<Guide> =

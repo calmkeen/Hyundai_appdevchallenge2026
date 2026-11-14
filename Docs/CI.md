@@ -30,3 +30,5 @@ develop `4b8b65b`를 실제 push한 뒤 [첫 실행](https://github.com/calmkeen
 수정 통합본 develop `bfb548b`의 [실제 원격 실행](https://github.com/calmkeen/Hyundai_appdevchallenge2026/actions/runs/43566021842)은 성공했다. 계약/UI 자원, 가이드 카탈로그, 백엔드 회귀의 세 단계가 모두 success임을 Jobs API에서도 확인했다. 첫 실행의 실패 이력은 보존한다. 이 결과는 Android/SDK/AI 실제 기기·외부 서비스 시험을 포함하지 않는다.
 
 공식 문 안내 등록부터 계약 검사에 상태-가이드 규칙의 JSON Schema 및 실제 게시 콘텐츠 참조 검사를 포함한다. 백엔드 회귀에는 등록한 3언어 문 안내의 LIVE API 조회·다른 프로필/언어 차단·검수 콘텐츠의 초기화 방지 시험을 포함한다. 네트워크로 현대자동차 원문을 매 CI마다 가져오지는 않으며 원문 검토 증거와 해시는 별도로 보존한다.
+
+공식 콘텐츠 develop `25bb1c7`의 [원격 실행](https://github.com/calmkeen/Hyundai_appdevchallenge2026/actions/runs/43569403093)도 성공했다. SDK 전용 AVD 시험은 이 GitHub runner에서 수행하지 않았으며 별도 기기 증거로 관리한다.

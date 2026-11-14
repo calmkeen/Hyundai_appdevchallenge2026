@@ -4,6 +4,35 @@
 
 `android/` Compose 차량 앱, `backend/` FastAPI, `content/` 데이터, `contracts/` 인계 Schema, `assets/` 원본 시각 자산, `reference/` 원본 제안서다. 기획 문서는 `Docs/`에서 관리한다.
 
+## 현재 실제 개발 흐름: SDK 문 상태와 공식 가이드
+
+2024 한국시장 아이오닉 5의 공식 매뉴얼 요약을 실제 HTTP 서버에서 받고, 전용 AVD의 실제 Pleos 문 상태와 연결한다. 자료 검토는 `MANUAL_REVIEW_IONIQ5_2024_KR.md`, SDK 기기 시험은 `SDK_OFFICIAL_GUIDE_VALIDATION.md`를 따른다.
+
+저장소 루트에서 가이드용 LIVE 서버를 기존 Mock 서버와 별도 포트로 실행한다. 키를 비운 이 명령은 외부 AI를 호출하지 않는다.
+
+```bash
+mkdir -p output/qa
+CARCUE_MODE=LIVE OPENAI_API_KEY= OPENAI_MODEL= \
+CARCUE_DB=output/qa/official-guide-live.sqlite3 \
+.venv/bin/python -m uvicorn app.main:app --app-dir backend \
+  --host 127.0.0.1 --port 8001 --no-access-log
+```
+
+JDK/SDK를 지정하고 실제 SDK 앱을 빌드한다.
+
+```bash
+JAVA_HOME=/Users/younsung/hyundai/.tooling/jdk-17.0.21+9/Contents/Home \
+ANDROID_HOME=/Users/younsung/hyundai/.tooling/android-sdk \
+ANDROID_SDK_ROOT=/Users/younsung/hyundai/.tooling/android-sdk \
+android/gradlew -p android :app:assemblePleosDebug \
+  :app:assemblePleosDebugAndroidTest -PpleosSdkVersion=2.3.2 \
+  -PcarcueServerUrl=http://10.0.2.2:8001 --offline --no-daemon --max-workers=2
+```
+
+전용 AVD의 사용자 10에 APK를 설치하고 `ioniq5-ne1-2024-kr`/한국어·영어·일본어 중 하나를 선택한다. Park 상태에서 SDK 문 상태를 확인하고, 외부 Virtual Console로 앞좌석 왼쪽 문 열림 시험 조건을 주면 앱의 관련 안내 버튼이 나타난다. 가이드에서 재조회를 누르면 SDK GET을 수행한다. 앱이 문을 제어하지 않는다. CLOSED·미확인·오래된 값·다른 영역·주행 제한에서는 해당 추천을 하지 않는다.
+
+프로필은 사용자가 선택한 매뉴얼 범위이며 SDK의 자동 차종 인증이 아니다. 실제 자동차의 문을 조작한 검증과도 구분한다. 별도 Mock 흐름은 기존 회귀용으로 아래에 보존한다.
+
 ## Android
 
 JDK 17 또는 Gradle 8.10.2가 지원하는 JDK, Android Platform 35 / Build Tools 35.0.0이 필요하다. 최종 검증은 Temurin 17.0.21+9 ARM64로 수행했다. 이 작업 환경에서는 `JAVA_HOME=/Users/younsung/hyundai/.tooling/jdk-17.0.21+9/Contents/Home`을 사용한다.
@@ -27,7 +56,7 @@ adb -s <일반-테스트-AVD> shell am start -n com.carcue.app.demo/com.carcue.a
 실제 Pleos 빌드는 별도다. 기본 버전은 실제 빌드·수신한 Vehicle SDK 2.3.2다.
 
 ```bash
-./gradlew :app:assemblePleosDebug -PpleosSdkVersion=2.3.2
+./gradlew :app:assemblePleosDebug -PpleosSdkVersion=2.3.2 -PcarcueServerUrl=http://10.0.2.2:8001
 ```
 
 이번 환경은 Pleos Connect 2.1.0 / API 34 / Vehicle Service 2.3.22에서 설치·실행했다. 다른 환경에서도 해당 버전과 Maven 접근을 확인해야 한다. 일반 폰에서 Pleos SDK가 실행된다고 가정하지 않는다. 차량 속성 권한은 읽기용 `CAR_DOORS`이며 SDK 바인딩·네트워크 권한을 별도로 사용한다. CONTROL_* 권한과 제어 API 호출은 없다.
@@ -44,7 +73,7 @@ CARCUE_MODE=MOCK .venv/bin/python -m uvicorn app.main:app --app-dir backend --ho
 
 기본 모드는 MOCK이며 외부 AI를 호출하지 않는다. `/health`, `/docs`로 API를 확인할 수 있다. 세션은 `POST /v1/sessions`에서 발급하며 질문·번역·삭제에 `Authorization: Bearer <token>`이 필요하다. 프로필 ID만으로 대화에 접근할 수 없다.
 
-LIVE는 서버 환경에 `CARCUE_MODE=LIVE`, `OPENAI_API_KEY`, `OPENAI_MODEL`을 설정한다. `backend/.env.example`은 빈 설정 예시이며 실제 비밀값은 Git과 채팅에 남기지 않는다. 모델은 운영자가 Structured Outputs 호환 모델로 선택한다. `.env` 파일은 자동으로 읽지 않으므로 프로세스 환경으로 주입한다.
+공식 가이드 API는 `CARCUE_MODE=LIVE`에서 AI 키 없이도 동작한다. 실제 AI 연결은 별도로 서버 환경의 `OPENAI_API_KEY`, `OPENAI_MODEL`을 설정하고 호출 결과를 검증해야 한다. `backend/.env.example`은 빈 설정 예시이며 실제 비밀값은 Git과 채팅에 남기지 않는다. 모델은 운영자가 Structured Outputs 호환 모델로 선택한다. `.env` 파일은 자동으로 읽지 않으므로 프로세스 환경으로 주입한다.
 
 LIVE에서 공개 가능한 VERIFIED 프로필과 PUBLISHED 가이드를 등록하기 전에는 세션을 시작할 수 없다. 검수 자료가 없으면 OpenAI를 호출하지 않는다. 초기 LIVE 답변은 검수된 같은 언어 원문의 추출 방식이며, 출처 메타데이터와 허용 action은 서버에서 조립한다. 외부 API 요청은 25초 timeout, 자동 재시도 0회, 1,500 output token 상한이다.
 
@@ -52,12 +81,12 @@ LIVE에서 공개 가능한 VERIFIED 프로필과 PUBLISHED 가이드를 등록�
 
 ## 콘텐츠와 언어
 
-- `content/profiles/catalog.json`: 언어와 분리된 차량 사양. 제공한 두 항목은 개발용 UNVERIFIED다.
+- `content/profiles/catalog.json`: 언어와 분리된 차량 사양. 기존 두 항목은 개발용 UNVERIFIED로 보존하고 공식 2024 한국시장 아이오닉 5 매뉴얼 선택 프로필을 추가했다.
 - `content/guides/`: Schema를 지키고 정확한 profile/manual/source version과 검수된 출처 절을 등록한다. DRAFT는 검색/답변에 사용하지 않는다.
 - `content/locales/catalog.json`: 48개 언어 후보의 RTL·UI/가이드 지원 상태. Mock 선택 목록은 `mock_visible=true`인 한국어·영어·일본어 3개이며, 다른 후보 데이터는 보존한다.
-- `content/locales/ui.json`: 136개 UI 문구의 한국어·영어·일본어 초안. 실제 AI 번역이나 검수된 차량 안내를 뜻하지 않는다. 다른 후보는 준비 중이며 pleos 빌드에서는 영어 대체 안내를 표시한다. 언어를 추가할 때 화면 코드를 바꿀 필요가 없다.
+- `content/locales/ui.json`: 155개 UI 문구의 한국어·영어·일본어 초안. UI 번역과 개별 가이드의 검토 상태를 구분한다. 공식 문 안내는 한국시장 원문의 3언어 자체 요약이며 다른 후보 언어/주제는 준비 중이다. 언어를 추가할 때 화면 코드를 바꿀 필요가 없다.
 - `content/locales/country-locales.json`: 50개 지역의 개발 후보 매핑이며 방문 순위나 지원 완료 목록이 아니다.
-- `scripts/prepare_content.py`: 개발용 초안을 다시 만드는 도구. 검수 콘텐츠를 등록한 이후에는 백업 없이 실행하지 않는다.
+- `scripts/prepare_content.py`: 개발 초기 데이터 생성 도구. VERIFIED 프로필이나 PUBLISHED 가이드가 있으면 쓰기 전에 중단한다.
 
 QR 예시:
 
@@ -78,7 +107,7 @@ cd android
 
 Android 기기 테스트는 Mock 서버를 먼저 실행하고 일반 테스트 AVD 하나를 연결한다. 저장된 사용자 기기와 혼동하지 않게 `ANDROID_SERIAL`을 지정한다. 테스트 이미지에는 MOCK과 개발 프로필이 표시된다.
 
-## 시연 순서
+## 기존 Mock 회귀 시연 순서
 
 1. 미검수 시연 프로필을 선택하고 한국어 또는 영어를 선택한다.
 2. 현재 상태에서 MOCK 문 열림과 수신 출처·시각을 확인한다.
