@@ -32,8 +32,7 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
     private var requestJob: Job? = null
     private val assistantRequests = AssistantRequests()
     private var assistantGuideContext: AssistantGuideContext? = null
-    private var languageReturn = Page.HOME
-    private var assistantReturn = Page.HOME
+    private var returnPages = AssistantReturnPages()
     private var active = false
     private var started = false
     @Volatile private var operation = 0
@@ -94,22 +93,28 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
     fun chooseProfile(profile: Profile) {
         clearSession()
         mutable.update { it.copy(profile = profile, page = Page.LANGUAGE, error = null) }
-        languageReturn = Page.HOME
     }
-    fun chooseLanguage(tag: String) {
+    fun assistantActionScope(state: UiState) = AssistantBoundaryPolicy.actionScope(state)
+    fun chooseLanguage(tag: String, scope: AssistantActionScope = assistantActionScope(mutable.value)) {
         if (content.languages.none { it.tag == tag }) return
+        if (!AssistantBoundaryPolicy.canChooseLanguage(mutable.value, scope, active)) { rejectAssistantAction(scope); return }
         cancelRequest()
         assistantRequests.clear()
-        mutable.update { it.copy(locale = tag, page = GuideSelectionPolicy.destination(languageReturn, it.selectedGuide), externalResource = null, assistantRetry = AssistantRetry.NONE) }
+        mutable.update { AssistantBoundaryPolicy.languageChanged(it, tag).copy(
+            page = GuideSelectionPolicy.destination(returnPages.language, it.selectedGuide), externalResource = null, assistantRetry = AssistantRetry.NONE) }
         if (!mutable.value.sessionStarted) {
             mutable.update { it.copy(sessionStarted = true) }; startVehicle()
         }
         loadGuides()
     }
-    fun language() { languageReturn = mutable.value.page; go(Page.LANGUAGE) }
+    fun language() { returnPages = returnPages.enteringLanguage(mutable.value.page); go(Page.LANGUAGE) }
     fun go(page: Page) {
         val destination = GuideSelectionPolicy.destination(page, mutable.value.selectedGuide)
         if (mutable.value.sessionStarted && isLong(destination) && restricted()) { mutable.update { it.copy(error = "PARK_REQUIRED") }; return }
+        if (destination != mutable.value.page && mutable.value.page in listOf(Page.ASK, Page.TRANSLATE)) {
+            cancelRequest()
+            assistantRequests.clear()
+        }
         if (destination !in listOf(Page.ASK, Page.TRANSLATE, Page.LANGUAGE) ||
             mutable.value.page !in listOf(Page.ASK, Page.TRANSLATE, Page.LANGUAGE)) assistantGuideContext = null
         mutable.update { it.copy(page = destination, error = null) }
@@ -119,19 +124,33 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
         val current = mutable.value
         go(Page.ASK)
         if (mutable.value.page == Page.ASK) {
-            assistantReturn = current.page
+            returnPages = returnPages.enteringAssistant(current.page)
             assistantGuideContext = AssistantResponsePolicy.guideContext(current.page, current.selectedGuide, current.guideStep)
         }
     }
-    fun openTranslation(text: String, kind: String, sourceLocale: String) {
-        if (restricted()) return
-        assistantReturn = mutable.value.page
-        mutable.update { it.copy(translationDraft = text, translationKind = kind, translationSourceLocale = sourceLocale) }
+    fun openTranslation(text: String, kind: String, sourceLocale: String,
+        scope: AssistantActionScope = assistantActionScope(mutable.value)) {
+        if (!AssistantBoundaryPolicy.canOpenTranslation(mutable.value, scope, active, text, kind, sourceLocale)) {
+            rejectAssistantAction(scope); return
+        }
+        returnPages = returnPages.enteringTranslation(mutable.value.page)
+        mutable.update { it.copy(translationDraft = text, translationKind = kind, translationSourceLocale = sourceLocale,
+            translation = "", translationOriginal = "", translationTargetLocale = "", translationReview = "", translationMode = "",
+            translationProvider = AiProvider.UNKNOWN, translationModel = null) }
         go(Page.TRANSLATE)
     }
+    private fun rejectAssistantAction(scope: AssistantActionScope) {
+        // An old screen's event must not even replace a new session's error state.
+        if (!active || scope != assistantActionScope(mutable.value)) return
+        mutable.update { it.copy(error = if (restricted()) "PARK_REQUIRED" else "ASSISTANT_CONTEXT_CHANGED") }
+    }
+    fun revokeAssistantConsent(scope: AssistantConsentScope) {
+        if (!AssistantBoundaryPolicy.canRevoke(mutable.value, scope)) return
+        cancelRequest()
+        assistantRequests.clear()
+    }
     fun back() {
-        val page = mutable.value.page
-        go(when (page) { Page.ASK, Page.TRANSLATE -> assistantReturn; Page.GUIDE -> Page.GUIDES; Page.DETAIL -> Page.STATUS; Page.LANGUAGE -> languageReturn; else -> Page.HOME })
+        go(returnPages.back(mutable.value.page))
     }
     fun refresh() { repository.refresh() }
     fun openReadOnlyStatus() {
@@ -222,7 +241,7 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
         }
         if (removedSelection) {
             assistantGuideContext = null
-            if (assistantReturn == Page.GUIDE) assistantReturn = Page.GUIDES
+            returnPages = returnPages.withoutGuide()
         }
     }
     private fun loadGuides() {
@@ -247,9 +266,11 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
                 serverConnection = if (e is ApiFailure) "HTTP_${e.status}" else "UNAVAILABLE") } }
         }
     }
-    fun send(input: String, translate: Boolean = false, retry: Boolean = false, consent: Boolean = false) {
+    fun send(input: String, translate: Boolean = false, retry: Boolean = false, consent: Boolean = false,
+        scope: AssistantActionScope = assistantActionScope(mutable.value)) {
         val current = mutable.value
-        if (input.isBlank() || input.length > (if (translate) 3000 else 2000) || current.busy || restricted() || !current.sessionStarted) return
+        if (input.isBlank() || input.length > (if (translate) 3000 else 2000) || current.busy || !current.sessionStarted) return
+        if (!AssistantBoundaryPolicy.canSend(current, scope, active, translate)) { rejectAssistantAction(scope); return }
         if (!consent) { mutable.update { it.copy(error = "CONSENT_REQUIRED") }; return }
         val profile = current.profile ?: return
         val ticket = generation
@@ -268,7 +289,11 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
             citations = if (!translate) emptyList() else it.citations,
             officialCitations = if (!translate) emptyList() else it.officialCitations, externalResource = null,
             actions = if (!translate) emptyList() else it.actions,
-            translation = if (translate) "" else it.translation, translationOriginal = if (translate) "" else it.translationOriginal) }
+            translation = if (translate) "" else it.translation, translationOriginal = if (translate) "" else it.translationOriginal,
+            translationTargetLocale = if (translate) "" else it.translationTargetLocale,
+            translationReview = if (translate) "" else it.translationReview, translationMode = if (translate) "" else it.translationMode,
+            translationProvider = if (translate) AiProvider.UNKNOWN else it.translationProvider,
+            translationModel = if (translate) null else it.translationModel) }
         requestJob = viewModelScope.launch {
             try {
                 if (remote?.let { AssistantResponsePolicy.sessionExpired(it.expires, Instant.now()) } == true) forgetRemoteSession()
@@ -297,8 +322,13 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
                 val data = JSONObject(snapshot.payload)
                 mutable.update { it.copy(lastAiRequestId = snapshot.requestId) }
                 val result = withContext(Dispatchers.IO) { if (translate) api.translate(data, session) else api.ask(data, session) }
-                if (ticket != generation || op != operation || !mutable.value.sessionStarted || restricted()) return@launch
-                check(result.getString("request_id") == snapshot.requestId) { "Response request mismatch" }
+                if (ticket != generation || !AssistantBoundaryPolicy.canApplyReply(mutable.value, scope.consent, op, operation, active)) return@launch
+                if (!AssistantBoundaryPolicy.replyMatches(snapshot.requestId, intent.locale, result.optString("request_id"),
+                        result.optString(if (translate) "target_locale" else "locale"))) {
+                    mutable.update { it.copy(busy = false, serverConnection = "CONNECTED", error = "SERVER_RESPONSE_INVALID",
+                        assistantRetry = AssistantRetry.NEW_REQUEST, translationOriginal = if (translate) input else it.translationOriginal) }
+                    return@launch
+                }
                 val mode = result.getString("mode")
                 val provider = AssistantResponsePolicy.provider(mode, result.optString("ai_provider"))
                 val model = AssistantResponsePolicy.model(result.optString("ai_model").takeUnless { it == "null" })
@@ -307,6 +337,7 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
                 if (translate) mutable.update { it.copy(busy = false, serverConnection = "CONNECTED", translationMode = mode,
                     translationOriginal = result.getString("original_text"), translation = if (status == "TRANSLATED") result.optString("translated_text").takeUnless { t -> t == "null" } ?: "" else "",
                     translationSourceLocale = if (status == "TRANSLATED") result.getString("source_locale") else it.translationSourceLocale,
+                    translationTargetLocale = if (status == "TRANSLATED") result.getString("target_locale") else "",
                     translationProvider = provider, translationModel = model, translationReview = result.getString("review_status"),
                     error = outcome.error, assistantRetry = outcome.retry) }
                 else {
@@ -351,6 +382,7 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
         remote = null
         deletion.finishActive()
         assistantRequests.clear(); assistantGuideContext = null
+        returnPages = AssistantReturnPages()
         mutable.value = UiState(sessionEpoch = generation, reading = Reading(source = source), ux = mutable.value.ux, internetAvailable = mutable.value.internetAvailable, deletionPending = deletion.pending.value)
     }
     fun endSession() { clearSession() }

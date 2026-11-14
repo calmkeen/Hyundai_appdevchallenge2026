@@ -923,5 +923,35 @@
     "ko-KR": "현재 세션에서 사용할 수 있는 등록된 공식 링크가 아닙니다. 차량과 가이드를 다시 확인해주세요.",
     "en": "This official link is unavailable in the current session. Check the vehicle and guide again.",
     "ja-JP": "現在のセッションでは利用できない公式リンクです。車両とガイドを再確認してください。"
+  },
+  "ui_assistant_context_changed": {
+    "ko-KR": "선택한 화면이나 이용 정보가 바뀌었어요. 현재 화면에서 다시 선택해 주세요.",
+    "en": "The screen or session has changed. Select the action again on the current screen.",
+    "ja-JP": "画面または利用情報が変わりました。現在の画面でもう一度選択してください。"
+  },
+  "ui_assistant_language_auto": {
+    "ko-KR": "자동 감지",
+    "en": "Detect automatically",
+    "ja-JP": "自動検出"
+  },
+  "ui_answer_source_language": {
+    "ko-KR": "답변 원문 언어: {locale}",
+    "en": "Original answer language: {locale}",
+    "ja-JP": "回答の原文の言語: {locale}"
+  },
+  "ui_translation_source_language": {
+    "ko-KR": "번역할 원문 언어: {locale}",
+    "en": "Source language: {locale}",
+    "ja-JP": "翻訳元の言語: {locale}"
+  },
+  "ui_translation_target_language": {
+    "ko-KR": "선택한 번역 대상 언어: {locale}",
+    "en": "Selected target language: {locale}",
+    "ja-JP": "選択した翻訳先の言語: {locale}"
+  },
+  "ui_translation_result_language": {
+    "ko-KR": "이 번역 결과의 언어: {locale}",
+    "en": "This translation is in: {locale}",
+    "ja-JP": "この翻訳結果の言語: {locale}"
   }
 }
