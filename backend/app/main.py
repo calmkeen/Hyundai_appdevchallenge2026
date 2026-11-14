@@ -10,8 +10,9 @@ from datetime import datetime, timezone
 from fastapi import FastAPI, Header, HTTPException, Request
 from fastapi.responses import JSONResponse
 from .content import Catalog
+from .answer_policy import answer_units, validate_answer
 from .models import AskRequest, SessionRequest, TranslateRequest
-from .provider import Provider
+from .provider import create_provider
 from .storage import Store
 
 NO_SOURCE_MESSAGES = {
@@ -24,6 +25,11 @@ UNAVAILABLE_MESSAGES = {
     "en": "The answer could not be verified. Please use the saved guides.",
     "ja-JP": "現在、回答を確認できません。保存済みのガイドをご利用ください。",
 }
+FOLLOW_UP_MESSAGES = {
+    "ko-KR": "선택한 문 안내에서 어떤 부분을 더 확인하고 싶으신가요?",
+    "en": "Which part of the selected door guide would you like to check?",
+    "ja-JP": "選択したドアのガイドのどの部分を確認したいですか？",
+}
 
 
 def timestamp(value):
@@ -34,12 +40,12 @@ def create_app(db_path=None, catalog=None, provider=None, mode=None):
     app = FastAPI(title="CarCue", version="0.1.0")
     store = Store(db_path or os.getenv("CARCUE_DB", "carcue.sqlite3"), int(os.getenv("CARCUE_SESSION_MINUTES", "120")))
     catalog = catalog or Catalog()
-    provider = provider or Provider()
+    provider = provider or create_provider()
     mode = mode or os.getenv("CARCUE_MODE", "MOCK")
     if mode not in ("LIVE", "MOCK"):
         raise ValueError("CARCUE_MODE must be LIVE or MOCK")
     locks, quota = {}, []
-    app.state.store, app.state.catalog = store, catalog
+    app.state.store, app.state.catalog, app.state.provider = store, catalog, provider
 
     async def purge_loop():
         while True:
@@ -86,7 +92,10 @@ def create_app(db_path=None, catalog=None, provider=None, mode=None):
         if row:
             if row[0] != fingerprint:
                 raise HTTPException(409, "REQUEST_ID_REUSED_WITH_DIFFERENT_INPUT")
-            return json.loads(row[1])
+            value = json.loads(row[1])
+            # Preserve the fingerprint, but permit an explicit retry of a transient
+            # failure. Confirmed answers/no-source results remain idempotent.
+            return None if value.get("status") == "TEMPORARILY_UNAVAILABLE" else value
 
     def reserve(session):
         now = time.time()
@@ -105,8 +114,9 @@ def create_app(db_path=None, catalog=None, provider=None, mode=None):
         with store.transaction() as db:
             if not db.execute("SELECT id FROM sessions WHERE id=? AND expires>?", (session, time.time())).fetchone():
                 raise HTTPException(401, "SESSION_ENDED")
-            db.execute("INSERT INTO results VALUES(?,?,?,?)", (session, request_id, fingerprint, json.dumps(result, ensure_ascii=False)))
-            if question:
+            db.execute("INSERT INTO results VALUES(?,?,?,?) ON CONFLICT(session,request) DO UPDATE SET response=excluded.response",
+                       (session, request_id, fingerprint, json.dumps(result, ensure_ascii=False)))
+            if question and result["status"] == "ANSWERED":
                 db.execute("INSERT INTO history(session,question,answer) VALUES(?,?,?)", (session, question, result["answer"]))
                 db.execute("DELETE FROM history WHERE session=? AND position NOT IN (SELECT position FROM history WHERE session=? ORDER BY position DESC LIMIT 3)", (session, session))
 
@@ -174,28 +184,28 @@ def create_app(db_path=None, catalog=None, provider=None, mode=None):
             result = {"request_id": request.request_id, "status": "NO_RELIABLE_SOURCE", "locale": request.locale,
                 "answer": NO_SOURCE_MESSAGES.get(request.locale, NO_SOURCE_MESSAGES["en"]),
                 "citations": [], "follow_up_question": None,
-                "actions": [{"kind": "SELECT_PROFILE", "target_id": None}], "mode": mode}
+                "actions": [{"kind": "SELECT_PROFILE", "target_id": None}], "mode": mode,
+                "ai_provider": "NOT_CALLED", "ai_model": None}
             # MOCK never calls OpenAI and never synthesizes a supposedly sourced answer.
             if sources and mode == "LIVE":
                 try:
                     output = await provider.ask(request, sources, store.context(request.session_id))
                     index = {s["source_id"]: (g, s) for g in sources for s in g["sources"]}
-                    if any(s not in index for s in output.source_ids):
+                    if output.status == "ANSWERED" and any(s not in index for s in output.source_ids):
                         raise ValueError("CITATION_OUTSIDE_RETRIEVAL")
                     if output.status == "ANSWERED" and not output.source_ids:
                         raise ValueError("ANSWER_WITHOUT_CITATION")
                     if output.status == "ANSWERED":
-                        quoted = output.answer.strip()
-                        cited_guides = [index[sid][0] for sid in output.source_ids]
-                        passages = [g["body"] for g in cited_guides] + [step["body"] for g in cited_guides for step in g["steps"]]
-                        if not quoted or not any(quoted in passage for passage in passages):
-                            raise ValueError("UNSUPPORTED_PARAPHRASE")
+                        validate_answer(output, sources)
                     # Conservative semantic filter; it is not a substitute for human evaluations.
-                    if re.search(r"safe to drive|you can drive|고장 원인은|운전해도|주행해도|안전합니다", output.answer, re.I):
+                    if output.status == "ANSWERED" and re.search(r"safe to drive|you can drive|고장 원인은|운전해도|주행해도|안전합니다", output.answer, re.I):
                         raise ValueError("UNSAFE_CLAIM")
-                    result.update(status=output.status, answer=output.answer, follow_up_question=output.follow_up_question, actions=[])
-                    if output.status == "NEED_MORE_INFO" and not output.follow_up_question:
-                        raise ValueError("MISSING_FOLLOW_UP")
+                    # Non-answer text from a model is never an unchecked vehicle
+                    # instruction. Assemble localized fixed notices on the server.
+                    answer = output.answer if output.status == "ANSWERED" else NO_SOURCE_MESSAGES.get(request.locale, NO_SOURCE_MESSAGES["en"])
+                    follow_up = FOLLOW_UP_MESSAGES.get(request.locale, FOLLOW_UP_MESSAGES["en"]) if output.status == "NEED_MORE_INFO" else None
+                    result.update(status=output.status, answer=answer, follow_up_question=follow_up, actions=[],
+                                  ai_provider=getattr(provider, "kind", "UNKNOWN"), ai_model=getattr(provider, "model", None))
                     if output.status == "ANSWERED":
                         for sid in dict.fromkeys(output.source_ids):
                             g, s = index[sid]
@@ -206,7 +216,8 @@ def create_app(db_path=None, catalog=None, provider=None, mode=None):
                                              {"kind": "REFRESH_STATUS", "target_id": "door.position"}]
                 except Exception:
                     # Never expose provider details, credentials or a partial unvalidated answer.
-                    result.update(status="TEMPORARILY_UNAVAILABLE", answer=UNAVAILABLE_MESSAGES.get(request.locale, UNAVAILABLE_MESSAGES["en"]), citations=[], actions=[], follow_up_question=None)
+                    result.update(status="TEMPORARILY_UNAVAILABLE", answer=UNAVAILABLE_MESSAGES.get(request.locale, UNAVAILABLE_MESSAGES["en"]), citations=[], actions=[], follow_up_question=None,
+                                  ai_provider="NOT_CALLED", ai_model=None)
             save(request.session_id, request.request_id, fingerprint, result, request.question)
             return result
 
@@ -227,23 +238,44 @@ def create_app(db_path=None, catalog=None, provider=None, mode=None):
             result = {"request_id": request.request_id, "original_text": request.text,
                 "source_locale": request.source_locale, "target_locale": request.target_locale,
                 "translated_text": None, "glossary_version": None, "review_status": "UNREVIEWED",
-                "status": "TEMPORARILY_UNAVAILABLE", "mode": mode}
-            if request.content_kind == "GUIDE":
-                match = next((g for g in catalog.published(request.profile_id, request.target_locale)
-                              if g["guide_id"] == request.guide_id), None)
-                original = next((g for g in catalog.published(request.profile_id)
-                                if g["guide_id"] == request.guide_id and g["body"] == request.text
-                                and (request.source_locale == "auto" or request.source_locale == g["locale"])), None)
-                if match and original and match["source_version"] == original["source_version"] and match["glossary_version"] == original["glossary_version"]:
-                    result.update(status="TRANSLATED", translated_text=match["body"], review_status=match["translation_review_status"], glossary_version=match["glossary_version"])
+                "status": "TEMPORARILY_UNAVAILABLE", "mode": mode, "ai_provider": "NOT_CALLED", "ai_model": None}
+            if request.content_kind in {"GUIDE", "ANSWER"}:
+                # Local small-model evaluation inverted a prohibition. Manual
+                # answers are complete reviewed units, so reuse the corresponding
+                # reviewed translation rather than regenerate an instruction.
+                originals = [(g, u) for g in catalog.published(request.profile_id)
+                             if (request.source_locale == "auto" or request.source_locale == g["locale"])
+                             and (request.content_kind != "GUIDE" or g["guide_id"] == request.guide_id)
+                             for u in answer_units([g])
+                             if u["text"] == request.text and (request.content_kind != "GUIDE" or u["unit_id"].endswith(":body"))]
+                if len(originals) == 1:
+                    original, unit = originals[0]
+                    prefix = ":".join((original["guide_id"], original["locale"], original["source_version"]))
+                    suffix = unit["unit_id"][len(prefix):]
+                    translated = [(g, u) for g in catalog.published(request.profile_id, request.target_locale)
+                                  if g["guide_id"] == original["guide_id"] and g["manual_set_id"] == original["manual_set_id"]
+                                  and g["source_version"] == original["source_version"]
+                                  and (g["locale"] == g["source_locale"] or
+                                       (g["translation_review_status"] == "REVIEWED" and g["glossary_version"]))
+                                  for u in answer_units([g])
+                                  if u["unit_id"] == ":".join((g["guide_id"], g["locale"], g["source_version"])) + suffix]
+                    if len(translated) == 1:
+                        match, target_unit = translated[0]
+                        result.update(status="TRANSLATED", source_locale=original["locale"], translated_text=target_unit["text"],
+                                      review_status=match["translation_review_status"], glossary_version=match["glossary_version"],
+                                      ai_provider="STORED_GUIDE")
             elif mode == "LIVE":
                 try:
                     output = await provider.translate(request)
+                    processing_locale(output.source_locale)
+                    if request.source_locale != "auto" and output.source_locale != request.source_locale:
+                        raise ValueError("TRANSLATION_SOURCE_LOCALE_CHANGED")
                     # Number/unit mismatches fail closed; negation/meaning still need human review.
                     tokens = lambda text: re.findall(r"\d+(?:[.,]\d+)?|%|kPa|PSI|kWh|km|°C", text)
                     if sorted(tokens(request.text)) != sorted(tokens(output.translated_text)):
                         raise ValueError("TRANSLATION_NUMBERS_CHANGED")
-                    result.update(status="TRANSLATED", source_locale=output.source_locale, translated_text=output.translated_text)
+                    result.update(status="TRANSLATED", source_locale=output.source_locale, translated_text=output.translated_text,
+                                  ai_provider=getattr(provider, "kind", "UNKNOWN"), ai_model=getattr(provider, "model", None))
                 except Exception:
                     pass
             save(request.session_id, request.request_id, fingerprint, result)
