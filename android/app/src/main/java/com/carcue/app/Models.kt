@@ -84,6 +84,7 @@ data class UiState(
     val translationDraft: String = "",
     val translationKind: String = "QUESTION",
     val translationSourceLocale: String = "auto",
+    val translationTargetLocale: String = "",
     val error: String? = null,
     val deletionPending: Boolean = false,
     val eventLog: List<String> = emptyList(),
