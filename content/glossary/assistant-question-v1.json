@@ -1,0 +1,26 @@
+{
+  "version": "carcue-assistant-question-v1",
+  "status": "REVIEWED",
+  "content_kind": "QUESTION",
+  "review_method": "AI-assisted exact comparison with the published Korean, English and Japanese CarCue guide summaries",
+  "human_certified_review": false,
+  "oem_approved": false,
+  "validation_limit": "Term preservation is a partial check; it does not certify complete translation meaning or detect every added condition.",
+  "scope": {
+    "profile_id": "ioniq5-ne1-2024-kr",
+    "manual_set_id": "hyundai-ioniq5-ne1-2024-kr",
+    "source_version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+    "guide_id": "ioniq5-door-open-check"
+  },
+  "terms": [
+    {
+      "term_id": "INDICATED_DOOR",
+      "review_status": "REVIEWED",
+      "phrases": {
+        "ko-KR": "표시된 문",
+        "en": "indicated door",
+        "ja-JP": "表示されたドア"
+      }
+    }
+  ]
+}

@@ -21,13 +21,15 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
 from app.answer_policy import answer_units, validate_answer
 from app.content import Catalog
+from app.translation_terms import load_question_terms
 
 PROFILE = "ioniq5-ne1-2024-kr"
 GUIDE = "ioniq5-door-open-check"
+QUESTION_GLOSSARY_VERSION = "carcue-assistant-question-v1"
 QUESTIONS = {
     "ko-KR": "문을 닫기 전에 무엇을 확인해야 하나요?",
-    "en": "What should I check before closing the door?",
-    "ja-JP": "ドアを閉める前に何を確認すればいいですか？",
+    "en": "What should I check before closing the indicated door?",
+    "ja-JP": "表示されたドアを閉める前に何を確認しますか？",
 }
 UNSUPPORTED = {
     "ko-KR": ["충전은 어떻게 하나요?", "브레이크액 교환방법을 알려주세요"],
@@ -165,6 +167,7 @@ def main():
         report["ollama_version"] = version
         report["installed_model"] = {key: models[0].get(key) for key in ("name", "model", "digest", "size", "details")}
         catalog, guides, answers, selected_units = Catalog(), {}, {}, {}
+        question_terms = load_question_terms()
         for locale, text in QUESTIONS.items():
             guide, = [g for g in catalog.published(PROFILE, locale) if g["guide_id"] == GUIDE]
             remote = call(backend, "/v1/guides/" + GUIDE + "?" + urlencode({"profile_id": PROFILE, "locale": locale}))
@@ -190,14 +193,19 @@ def main():
         locales = list(QUESTIONS)
         for index, source in enumerate(locales):
             target = locales[(index + 1) % len(locales)]
+            terms = question_terms.lookup(catalog.profile(PROFILE), "auto", target, QUESTIONS[source])
+            expected_version = QUESTION_GLOSSARY_VERSION if terms else None
+            require(terms is None or terms["version"] == expected_version, "QUESTION_TERM_VERSION_MISMATCH")
             data = {**payload(source), "source_locale": "auto", "target_locale": target,
                     "text": QUESTIONS[source], "content_kind": "QUESTION"}
             before = len(audit.events())
             result = call(backend, "/v1/translate", "POST", data, source)
-            report["translations"].append({"content_kind": "QUESTION", "source": source, "target": target, "result": retained(result)})
+            report["translations"].append({"content_kind": "QUESTION", "source": source, "target": target,
+                                           "expected_glossary_version": expected_version, "result": retained(result)})
             local_result(result)
             require(result.get("status") == "TRANSLATED" and result.get("review_status") == "UNREVIEWED"
                     and result.get("source_locale") == source and result.get("target_locale") == target
+                    and result.get("glossary_version") == expected_version
                     and result.get("original_text") == QUESTIONS[source] and bool(result.get("translated_text"))
                     and numbers(QUESTIONS[source]) == numbers(result["translated_text"]), "DYNAMIC_QUESTION_TRANSLATION_INVALID")
             expect_call(data["request_id"], before, "ModelTranslation")
