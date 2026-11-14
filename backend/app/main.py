@@ -41,6 +41,8 @@ def create_app(db_path=None, catalog=None, provider=None, mode=None):
     store = Store(db_path or os.getenv("CARCUE_DB", "carcue.sqlite3"), int(os.getenv("CARCUE_SESSION_MINUTES", "120")))
     catalog = catalog or Catalog()
     provider = provider or create_provider()
+    if hasattr(provider, "source_locales"):
+        provider.source_locales = tuple(item["locale"] for item in catalog.locales if item.get("ui_status", "PLANNED") != "PLANNED")
     mode = mode or os.getenv("CARCUE_MODE", "MOCK")
     if mode not in ("LIVE", "MOCK"):
         raise ValueError("CARCUE_MODE must be LIVE or MOCK")

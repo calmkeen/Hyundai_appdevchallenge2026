@@ -190,7 +190,7 @@ def main():
         locales = list(QUESTIONS)
         for index, source in enumerate(locales):
             target = locales[(index + 1) % len(locales)]
-            data = {**payload(source), "source_locale": source, "target_locale": target,
+            data = {**payload(source), "source_locale": "auto", "target_locale": target,
                     "text": QUESTIONS[source], "content_kind": "QUESTION"}
             before = len(audit.events())
             result = call(backend, "/v1/translate", "POST", data, source)

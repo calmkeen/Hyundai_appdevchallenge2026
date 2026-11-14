@@ -31,13 +31,13 @@ class ConsoleReadinessTimeout(TimeoutError):
 class PleosConsoleSession:
     def __init__(self, base_url="http://127.0.0.1:8088", client="carcue-validation", *,
                  heartbeat_interval=1.0, heartbeat_timeout=1.0, request_timeout=5.0,
-                 heartbeat_max_age=2.5):
+                 heartbeat_max_age=2.5, close_timeout=5.0):
         parsed = urlsplit(base_url)
         if (parsed.scheme != "http" or parsed.hostname not in {"127.0.0.1", "localhost", "::1"}
                 or parsed.username is not None or parsed.password is not None
                 or parsed.path not in {"", "/"} or parsed.query or parsed.fragment):
             raise ValueError("Console must use an HTTP loopback origin")
-        if not client or min(heartbeat_interval, heartbeat_timeout, request_timeout) <= 0 or heartbeat_max_age <= heartbeat_interval:
+        if not client or min(heartbeat_interval, heartbeat_timeout, request_timeout, close_timeout) <= 0 or heartbeat_max_age <= heartbeat_interval:
             raise ValueError("Invalid Console lease timing or client")
         self.base_url = base_url.rstrip("/")
         self.client = client
@@ -45,6 +45,7 @@ class PleosConsoleSession:
         self.heartbeat_timeout = heartbeat_timeout
         self.request_timeout = request_timeout
         self.heartbeat_max_age = heartbeat_max_age
+        self.close_timeout = close_timeout
         self._stop = threading.Event()
         self._lock = threading.Lock()
         self._thread = None
@@ -52,6 +53,7 @@ class PleosConsoleSession:
         self._closed = False
         self._last_heartbeat = None
         self._heartbeat_error = None
+        self._heartbeat_failures = 0
         self._readiness = None
         self._readiness_error = None
         self._close_error = None
@@ -78,6 +80,7 @@ class PleosConsoleSession:
         except ConsoleRequestError as exc:
             with self._lock:
                 self._heartbeat_error = exc.details
+                self._heartbeat_failures += 1
             raise
         with self._lock:
             self._last_heartbeat = time.monotonic()
@@ -97,9 +100,15 @@ class PleosConsoleSession:
             raise RuntimeError("Console session is already closed")
         if self._started:
             return self
-        self._pulse()
         self._started = True
         self._thread = threading.Thread(target=self._heartbeat_loop, name="pleos-console-heartbeat", daemon=True)
+        try:
+            self._pulse()
+        except ConsoleRequestError:
+            # Starting the browser/DDS bridge can outlast one heartbeat HTTP
+            # deadline. Keep the error visible and let bounded wait_ready recover;
+            # no request/fixture is allowed until a fresh heartbeat succeeds.
+            pass
         self._thread.start()
         return self
 
@@ -164,6 +173,7 @@ class PleosConsoleSession:
         with self._lock:
             return {"heartbeat_running": self._thread is not None and self._thread.is_alive(),
                     "heartbeat_error": self._heartbeat_error,
+                    "heartbeat_failures": self._heartbeat_failures,
                     "heartbeat_age_seconds": None if self._last_heartbeat is None else round(time.monotonic() - self._last_heartbeat, 3),
                     "readiness": self._readiness, "readiness_error": self._readiness_error,
                     "close_error": self._close_error}
@@ -180,7 +190,7 @@ class PleosConsoleSession:
         if self._started:
             try:
                 self._fetch("/browser/session?" + urlencode({"client": self.client, "closing": "1"}),
-                            "POST", self.heartbeat_timeout, json_response=False)
+                            "POST", self.close_timeout, json_response=False)
             except ConsoleRequestError as exc:
                 with self._lock:
                     self._close_error = exc.details
