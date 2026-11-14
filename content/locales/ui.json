@@ -838,5 +838,45 @@
     "ko-KR": "원문 안내",
     "en": "Original guide",
     "ja-JP": "原文の案内"
+  },
+  "ui_guides_bundled": {
+    "ko-KR": "앱에 포함된 검수 안내",
+    "en": "Reviewed guidance included with the app",
+    "ja-JP": "アプリに含まれる確認済みガイド"
+  },
+  "ui_guides_cached": {
+    "ko-KR": "기기에 저장한 검수 안내",
+    "en": "Reviewed guidance saved on this device",
+    "ja-JP": "この端末に保存した確認済みガイド"
+  },
+  "ui_guides_online": {
+    "ko-KR": "서버에서 받은 검수 안내",
+    "en": "Reviewed guidance received from the server",
+    "ja-JP": "サーバーから取得した確認済みガイド"
+  },
+  "ui_guides_offline": {
+    "ko-KR": "안내 서버에 연결하지 못했어요. 저장된 안내를 확인해 주세요.",
+    "en": "The guidance server is unavailable. You can view saved guidance.",
+    "ja-JP": "ガイドサーバーに接続できません。保存されたガイドを確認できます。"
+  },
+  "ui_guides_no_saved": {
+    "ko-KR": "이 차량과 언어에 맞는 저장 안내가 없어요. 연결 후 다시 확인해 주세요.",
+    "en": "No saved guidance matches this vehicle and language. Check again when connected.",
+    "ja-JP": "この車両と言語に合う保存済みガイドがありません。接続後にもう一度確認してください。"
+  },
+  "ui_guides_refresh": {
+    "ko-KR": "안내 업데이트 확인",
+    "en": "Check for guidance updates",
+    "ja-JP": "ガイドの更新を確認"
+  },
+  "ui_guides_withdrawn": {
+    "ko-KR": "이 안내는 현재 제공되지 않아요. 안내 목록을 다시 확인해 주세요.",
+    "en": "This guidance is no longer available. Check the guidance list.",
+    "ja-JP": "このガイドは現在提供されていません。ガイド一覧を確認してください。"
+  },
+  "ui_assistant_saved_guides": {
+    "ko-KR": "저장 안내 보기",
+    "en": "View saved guidance",
+    "ja-JP": "保存されたガイドを見る"
   }
 }

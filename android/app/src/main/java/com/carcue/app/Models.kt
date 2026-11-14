@@ -5,6 +5,7 @@ import java.time.Instant
 enum class Capability { UNKNOWN, SUPPORTED, UNSUPPORTED, CHECK_FAILED }
 enum class ReadStatus { NOT_REQUESTED, LOADING, VALUE, UNAVAILABLE, ERROR, STALE }
 enum class Source { MOCK, PLEOS }
+enum class GuideOrigin { NONE, BUNDLED, CACHE, SERVER }
 fun doorPositionValue(raw: Int, minimum: Int?, maximum: Int?, area: String): String =
     if (minimum == 0 && maximum == 1 && area == "ROW_1_LEFT") when (raw) {
         0 -> "CLOSED"
@@ -40,7 +41,7 @@ data class Language(val tag: String, val native: String, val korean: String, val
 data class Guide(val id: String, val title: String, val body: String, val steps: List<Pair<String, String>>, val sources: List<Pair<String, String>>,
     val locale: String = "ko-KR", val stepIds: List<String> = emptyList(), val cautions: List<List<String>> = emptyList(),
     val manualSetId: String? = null, val sourceVersion: String? = null, val profileIds: List<String> = emptyList(),
-    val publicationVerified: Boolean = false)
+    val publicationVerified: Boolean = false, val origin: GuideOrigin = GuideOrigin.NONE)
 data class UiState(
     val page: Page = Page.PROFILE,
     val profile: Profile? = null,
@@ -50,6 +51,8 @@ data class UiState(
     val ux: UxState = UxState(),
     val vehicleConnection: String = "NOT_CONNECTED",
     val serverConnection: String = "NOT_CONNECTED",
+    val guideConnection: String = "NOT_CONNECTED",
+    val guidesLoading: Boolean = false,
     val internetAvailable: Boolean? = null,
     val answer: String = "",
     val answerMode: String = "",

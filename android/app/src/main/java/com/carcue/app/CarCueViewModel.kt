@@ -158,22 +158,40 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
         relatedDoorGuide()?.takeIf { it.id == guideId }?.let(::openGuide)
     }
     fun step(delta: Int) { mutable.update { it.copy(guideStep = (it.guideStep + delta).coerceIn(0, (it.selectedGuide?.steps?.size ?: 1).minus(1).coerceAtLeast(0))) } }
+    fun refreshGuides() { if (mutable.value.sessionStarted && !restricted()) loadGuides() }
+    private fun applyGuides(profile: Profile, locale: String, guides: List<Guide>, connection: String? = null) {
+        mutable.update { current ->
+            val selected = GuideSelectionPolicy.reconcile(current.selectedGuide, profile, locale, guides)
+            val removed = current.selectedGuide?.publicationVerified == true && selected == null
+            current.copy(guides = guides, selectedGuide = selected,
+                guideStep = current.guideStep.coerceAtMost((selected?.steps?.size ?: 1).minus(1).coerceAtLeast(0)),
+                page = if (removed && current.page == Page.GUIDE) Page.GUIDES else current.page,
+                error = if (removed) "GUIDE_UNAVAILABLE" else current.error,
+                guideConnection = connection ?: current.guideConnection,
+                guidesLoading = connection == null,
+                serverConnection = if (connection == "CONNECTED") connection else current.serverConnection)
+        }
+    }
     private fun loadGuides() {
         val p = mutable.value.profile ?: return
         val locale = mutable.value.locale
         val ticket = generation
         val request = guideRequests.begin(p, locale)
+        mutable.update { it.copy(guides = it.guides.filter { guide -> guide.locale == locale && p.id in guide.profileIds },
+            guideConnection = "CONNECTING", guidesLoading = true) }
         viewModelScope.launch {
             val cached = withContext(Dispatchers.IO) { content.cachedGuides(p, locale) }
-            if (ticket == generation && locale == mutable.value.locale && guideRequests.isCurrent(request)) mutable.update { it.copy(guides = cached) }
+            if (ticket == generation && locale == mutable.value.locale && guideRequests.isCurrent(request)) applyGuides(p, locale, cached)
             try {
                 val data = withContext(Dispatchers.IO) { api.guides(p.id, locale) }
                 val guides = withContext(Dispatchers.IO) {
                     guideRequests.commitIfCurrent(request) { content.saveGuides(p, locale, data) }
                 } ?: return@launch
-                if (ticket == generation && locale == mutable.value.locale && guideRequests.isCurrent(request)) mutable.update { it.copy(guides = guides, serverConnection = "CONNECTED") }
+                if (ticket == generation && locale == mutable.value.locale && guideRequests.isCurrent(request)) applyGuides(p, locale, guides, "CONNECTED")
             } catch (_: CancellationException) { /* no late response */ }
-            catch (e: Exception) { if (ticket == generation && locale == mutable.value.locale && guideRequests.isCurrent(request)) mutable.update { it.copy(serverConnection = if (e is ApiFailure) "HTTP_${e.status}" else "UNAVAILABLE") } }
+            catch (e: Exception) { if (ticket == generation && locale == mutable.value.locale && guideRequests.isCurrent(request)) mutable.update { it.copy(
+                guideConnection = if (e is ApiFailure) "HTTP_${e.status}" else "UNAVAILABLE", guidesLoading = false,
+                serverConnection = if (e is ApiFailure) "HTTP_${e.status}" else "UNAVAILABLE") } }
         }
     }
     fun send(input: String, translate: Boolean = false, retry: Boolean = false, consent: Boolean = false) {

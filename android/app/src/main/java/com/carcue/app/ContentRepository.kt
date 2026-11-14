@@ -31,6 +31,29 @@ class ContentRepository(private val context: Context) {
     private val guidePolicy by lazy { GuidePublicationPolicy(profiles,
         (0 until localeCatalog.length()).map { localeCatalog.getJSONObject(it).getString("locale") }.toSet()) }
     private val guideCache by lazy { PublishedGuideCache(File(context.filesDir, "public_guides"), guidePolicy) { decodeGuides(JSONArray(it)) } }
+    private val bundledFallbackAllowed: Boolean by lazy {
+        try {
+            val prefs = context.getSharedPreferences("public_guide_bootstrap", Context.MODE_PRIVATE)
+            val recorded = if (prefs.contains("enabled")) prefs.getBoolean("enabled", false) else null
+            @Suppress("DEPRECATION")
+            val installation = if (recorded == null) runCatching {
+                context.packageManager.getPackageInfo(context.packageName, 0)
+            }.getOrNull() else null
+            BundledGuideBootstrap.resolve(recorded, installation?.firstInstallTime, installation?.lastUpdateTime) {
+                prefs.edit().putBoolean("enabled", it).commit()
+            }
+        } catch (_: Exception) { false }
+    }
+    private val bundledGuides: List<PublishedGuideRecord> by lazy {
+        // One raw array keeps duplicate-identity rejection effective across asset files.
+        try {
+            val data = JSONArray()
+            context.assets.list("guides").orEmpty().filter { it.endsWith(".json") }.sorted().forEach { name ->
+                data.put(JSONObject(context.assets.open("guides/$name").bufferedReader().use { it.readText() }))
+            }
+            decodeGuides(data)
+        } catch (_: Exception) { emptyList() }
+    }
     private val stateGuideRules: List<StateGuideRule> by lazy {
         try {
             val data = array("state-guide-rules.json")
@@ -47,9 +70,15 @@ class ContentRepository(private val context: Context) {
     // The same publication gate applies to both API results and offline cached results.
     fun parseGuides(data: JSONArray, profile: Profile, locale: String): List<Guide> =
         guidePolicy.published(decodeGuides(data), profile, locale).map { it.toGuide() }
-    fun cachedGuides(profile: Profile, locale: String): List<Guide> = guideCache.read(profile, locale).map { it.toGuide() }
+    fun cachedGuides(profile: Profile, locale: String): List<Guide> {
+        // A known empty, corrupt or blocked snapshot wins over bundled content.
+        val snapshot = guideCache.readSnapshot(profile, locale)
+        if (snapshot != null) return snapshot.map { it.toGuide().copy(origin = GuideOrigin.CACHE) }
+        if (!bundledFallbackAllowed) return emptyList()
+        return guidePolicy.published(bundledGuides, profile, locale).map { it.toGuide().copy(origin = GuideOrigin.BUNDLED) }
+    }
     fun saveGuides(profile: Profile, locale: String, data: JSONArray): List<Guide> =
-        guideCache.replace(profile, locale, data.toString()).map { it.toGuide() }
+        guideCache.replace(profile, locale, data.toString()).map { it.toGuide().copy(origin = GuideOrigin.SERVER) }
 
     private fun decodeGuides(data: JSONArray): List<PublishedGuideRecord> = decodeUnambiguousPublishedGuides(
         (0 until data.length()).map { data.optJSONObject(it) },
