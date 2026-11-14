@@ -20,3 +20,9 @@ python -m pytest backend/tests -q
 GitHub의 브랜치 보호나 필수 상태 검사는 이 YAML만으로 설정되지 않는다. 원격 운영을 구성할 때 실제 저장소 설정을 확인해 별도로 적용한다.
 
 검수 가이드 등록 feature부터 게시 메타데이터 카탈로그 검사와 등록·게시 정책/API 테스트도 같은 CI에서 실행한다. 기본 DRAFT가 검사에 통과해도 게시 가능한 실제 매뉴얼이 있다는 뜻은 아니다. 절차는 `GUIDE_CONTENT_WORKFLOW.md`를 따른다.
+
+## 최초 원격 실행과 수정
+
+develop `4b8b65b`를 실제 push한 뒤 [첫 실행](https://github.com/calmkeen/Hyundai_appdevchallenge2026/actions/runs/43565452391)은 job 생성 전 실패했다(jobs 0개). 로컬 YAML 파싱은 통과했지만 GitHub context 사용 가능 범위까지 검사하지 못했다. `jobs.<job_id>.env`에 쓴 `runner.temp`는 해당 위치에서 지원되지 않는 설정이었다.
+
+`feature/ci-runner-context`에서 `CARCUE_DB`를 백엔드 테스트 **step의 env**로 옮겼다. [GitHub 공식 context 표](https://docs.github.com/en/actions/reference/workflows-and-actions/contexts#context-availability)에 따르면 step env에서는 runner를 사용할 수 있다. 읽기 전용 권한과 MOCK/비어 있는 AI 키 설정은 유지한다. 원격 수정 실행 결과는 작업 기록/검증 보고서에서 로컬 검사와 구분한다.

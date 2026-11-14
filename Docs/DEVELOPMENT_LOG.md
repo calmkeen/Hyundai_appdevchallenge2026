@@ -8,6 +8,7 @@
 | GF-001 작업 흐름 | `feature/git-flow-workflow` | Git Flow 규칙·작업 기록·PR 양식, 기존 규칙 보존 | 독립 커밋 후 로컬 develop 통합 완료 |
 | GF-002 기본 CI | `feature/basic-ci` | 계약·백엔드 검증을 PR/브랜치 CI로 연결 | 계약/148개 UI 자원·백엔드 26개 로컬 통과, YAML 검사 후 로컬 통합. GitHub 실행은 별도 |
 | GD-001 검수 가이드 등록 | `feature/reviewed-guide-import` | 공유 게시 정책, 검사/원자적 등록 CLI, API의 게시 불가 항목 차단, 아키텍처 결정 | 백엔드 117개·계약/148개 UI 자원·기본 DRAFT 카탈로그·CI YAML 로컬 통과. 실제 매뉴얼 등록 없음 |
+| GF-003 CI context 수정 | `feature/ci-runner-context` | 최초 원격 실행에서 발견한 job env의 runner context 오류를 step env로 이동 | 공식 context 범위 대조·로컬 YAML 검사 후 커밋. 원격 실행 결과는 별도 확인 |
 
 사용자가 2026-11-14 develop과 작업 브랜치의 원격 push를 요청했다. 기존 6개 브랜치를 `git push --atomic -u origin ...`으로 시도했으나 HTTPS Username 자격 증명이 없어 실패했다. 원격은 main만 존재하며 변경되지 않았다. 연결된 GitHub API에는 push 권한이 있으나 Git CLI 인증과는 별개다. GitHub Desktop은 기존 토큰 만료로 로그아웃 상태다. 사용자가 정상 Git 인증을 복구하면 기존 SHA 그대로 재시도한다. 자격 증명 복사나 API를 통한 커밋 이력 재생성은 하지 않는다. 기본 CI의 실제 범위와 재현은 `CI.md`를 따른다.
 
