@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.update
 import org.json.JSONArray
 import org.json.JSONObject
 import java.time.Instant
-import java.util.UUID
 
 class CarCueViewModel(application: Application) : AndroidViewModel(application) {
     val content = ContentRepository(application)
@@ -29,9 +28,8 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
     private var remote: RemoteSession? = null
     @Volatile private var generation = 0
     private var requestJob: Job? = null
-    private var requestId: String? = null
-    private var retryInput: String? = null
-    private var retryIsTranslation = false
+    private val assistantRequests = AssistantRequests()
+    private var assistantGuideContext: AssistantGuideContext? = null
     private var languageReturn = Page.HOME
     private var assistantReturn = Page.HOME
     private var active = false
@@ -96,7 +94,8 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
     fun chooseLanguage(tag: String) {
         if (content.languages.none { it.tag == tag }) return
         cancelRequest()
-        mutable.update { it.copy(locale = tag, page = languageReturn) }
+        assistantRequests.clear()
+        mutable.update { it.copy(locale = tag, page = languageReturn, assistantRetry = AssistantRetry.NONE) }
         if (!mutable.value.sessionStarted) {
             mutable.update { it.copy(sessionStarted = true) }; startVehicle()
         }
@@ -105,10 +104,19 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
     fun language() { languageReturn = mutable.value.page; go(Page.LANGUAGE) }
     fun go(page: Page) {
         if (mutable.value.sessionStarted && isLong(page) && restricted()) { mutable.update { it.copy(error = "PARK_REQUIRED") }; return }
+        if (page !in listOf(Page.ASK, Page.TRANSLATE, Page.LANGUAGE) ||
+            mutable.value.page !in listOf(Page.ASK, Page.TRANSLATE, Page.LANGUAGE)) assistantGuideContext = null
         mutable.update { it.copy(page = page, error = null) }
         if (page == Page.GUIDES) loadGuides()
     }
-    fun openAssistant() { assistantReturn = mutable.value.page; go(Page.ASK) }
+    fun openAssistant() {
+        val current = mutable.value
+        go(Page.ASK)
+        if (mutable.value.page == Page.ASK) {
+            assistantReturn = current.page
+            assistantGuideContext = AssistantResponsePolicy.guideContext(current.page, current.selectedGuide, current.guideStep)
+        }
+    }
     fun openTranslation(text: String, kind: String, sourceLocale: String) {
         if (restricted()) return
         assistantReturn = mutable.value.page
@@ -175,58 +183,97 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
         val profile = current.profile ?: return
         val ticket = generation
         val op = ++operation
-        if (!retry || retryInput != input || retryIsTranslation != translate) requestId = UUID.randomUUID().toString()
-        retryInput = input; retryIsTranslation = translate
+        val isDraft = translate && input == current.translationDraft
+        val intent = AssistantIntent(input, translate, profile.id, current.locale,
+            sourceLocale = if (isDraft) current.translationSourceLocale else "auto",
+            contentKind = if (isDraft) current.translationKind else "QUESTION",
+            guide = if (translate) {
+                if (isDraft && current.translationKind == "GUIDE") current.selectedGuide?.let { AssistantGuideContext(it.id, null) } else null
+            } else assistantGuideContext)
+        val resend = retry && current.assistantRetry == AssistantRetry.RESEND
         mutable.update { it.copy(busy = true, error = null, answer = if (!translate) "" else it.answer,
+            answerStatus = if (!translate) "" else it.answerStatus, followUpQuestion = if (!translate) "" else it.followUpQuestion,
+            assistantRetry = AssistantRetry.NONE,
             citations = if (!translate) emptyList() else it.citations,
             actions = if (!translate) emptyList() else it.actions,
             translation = if (translate) "" else it.translation, translationOriginal = if (translate) "" else it.translationOriginal) }
         requestJob = viewModelScope.launch {
             try {
+                if (remote?.let { AssistantResponsePolicy.sessionExpired(it.expires, Instant.now()) } == true) forgetRemoteSession()
                 val session = remote ?: withContext(Dispatchers.IO) {
                     api.start(profile.id, current.locale).also { created -> deletion.registerCreated(created) { ticket == generation && op == operation } }
                 }
                 if (ticket != generation || op != operation) return@launch
                 remote = session
-                val data = JSONObject().put("request_id", requestId).put("session_id", session.id).put("profile_id", profile.id)
-                if (translate) {
-                    data.put("source_locale", if (input == current.translationDraft) current.translationSourceLocale else "auto")
-                        .put("target_locale", current.locale).put("text", input).put("content_kind", if (input == current.translationDraft) current.translationKind else "QUESTION")
-                    if (current.translationKind == "GUIDE" && input == current.translationDraft) data.put("guide_id", current.selectedGuide?.id)
-                } else {
-                    data.put("locale", current.locale).put("question", input)
-                    data.put("guide_context", JSONObject().put("guide_id", current.selectedGuide?.id?.takeUnless { it.startsWith("__") } ?: JSONObject.NULL)
-                        .put("step_id", current.selectedGuide?.stepIds?.getOrNull(current.guideStep) ?: JSONObject.NULL))
-                    val r = current.reading.expired(Instant.now(), BuildConfig.STATE_TTL_MS)
-                    data.put("vehicle_context", JSONArray().put(JSONObject().put("property_id", r.propertyId).put("area_id", r.areaId)
-                        .put("value", r.value ?: JSONObject.NULL).put("read_status", r.status.name)
-                        .put("received_at", r.receivedAt?.toString() ?: JSONObject.NULL).put("source", r.source.name)))
+                val snapshot = assistantRequests.prepare(intent, session.id, resend) { id ->
+                    val data = JSONObject().put("request_id", id).put("session_id", session.id).put("profile_id", profile.id)
+                    if (translate) {
+                        data.put("source_locale", intent.sourceLocale).put("target_locale", intent.locale)
+                            .put("text", intent.input).put("content_kind", intent.contentKind)
+                        intent.guide?.let { data.put("guide_id", it.guideId) }
+                    } else {
+                        data.put("locale", intent.locale).put("question", intent.input)
+                        data.put("guide_context", JSONObject().put("guide_id", intent.guide?.guideId ?: JSONObject.NULL)
+                            .put("step_id", intent.guide?.stepId ?: JSONObject.NULL))
+                        val r = current.reading.expired(Instant.now(), BuildConfig.STATE_TTL_MS)
+                        data.put("vehicle_context", JSONArray().put(JSONObject().put("property_id", r.propertyId).put("area_id", r.areaId)
+                            .put("value", r.value ?: JSONObject.NULL).put("read_status", r.status.name)
+                            .put("received_at", r.receivedAt?.toString() ?: JSONObject.NULL).put("source", r.source.name)))
+                    }
+                    data.toString()
                 }
+                val data = JSONObject(snapshot.payload)
+                mutable.update { it.copy(lastAiRequestId = snapshot.requestId) }
                 val result = withContext(Dispatchers.IO) { if (translate) api.translate(data, session) else api.ask(data, session) }
                 if (ticket != generation || op != operation || !mutable.value.sessionStarted || restricted()) return@launch
-                if (translate) mutable.update { it.copy(busy = false, serverConnection = "CONNECTED", answerMode = result.getString("mode"),
-                    translationOriginal = result.getString("original_text"), translation = result.optString("translated_text").takeUnless { t -> t == "null" } ?: "",
-                    translationReview = result.getString("review_status"), error = if (result.getString("status") == "TRANSLATED") null else "TRANSLATION_UNAVAILABLE") }
+                check(result.getString("request_id") == snapshot.requestId) { "Response request mismatch" }
+                val mode = result.getString("mode")
+                val provider = AssistantResponsePolicy.provider(mode, result.optString("ai_provider"))
+                val model = AssistantResponsePolicy.model(result.optString("ai_model").takeUnless { it == "null" })
+                val status = result.getString("status")
+                val outcome = if (translate) AssistantResponsePolicy.translation(status) else AssistantResponsePolicy.ask(status)
+                if (translate) mutable.update { it.copy(busy = false, serverConnection = "CONNECTED", translationMode = mode,
+                    translationOriginal = result.getString("original_text"), translation = if (status == "TRANSLATED") result.optString("translated_text").takeUnless { t -> t == "null" } ?: "" else "",
+                    translationSourceLocale = if (status == "TRANSLATED") result.getString("source_locale") else it.translationSourceLocale,
+                    translationProvider = provider, translationModel = model, translationReview = result.getString("review_status"),
+                    error = outcome.error, assistantRetry = outcome.retry) }
                 else {
                     val c = result.getJSONArray("citations")
                     val citations = (0 until c.length()).map { c.getJSONObject(it).let { s -> s.getString("title") to s.getString("url") } }
                     val a = result.getJSONArray("actions")
                     val actions = (0 until a.length()).map { a.getJSONObject(it).let { action -> action.getString("kind") to action.optString("target_id").takeUnless { id -> id == "null" } } }
-                    mutable.update { it.copy(busy = false, serverConnection = "CONNECTED", answer = result.getString("answer"), answerMode = result.getString("mode"), answerLocale = result.getString("locale"), citations = citations, actions = actions) }
+                    mutable.update { it.copy(busy = false, serverConnection = "CONNECTED", answer = if (outcome.error == "SERVER_RESPONSE_INVALID") "" else result.getString("answer"), answerMode = mode,
+                        answerLocale = result.getString("locale"), answerStatus = status,
+                        followUpQuestion = if (status == "NEED_MORE_INFO") result.optString("follow_up_question").takeUnless { q -> q == "null" } ?: "" else "",
+                        answerProvider = provider, answerModel = model, citations = if (outcome.error == "SERVER_RESPONSE_INVALID") emptyList() else citations,
+                        actions = if (outcome.error == "SERVER_RESPONSE_INVALID") emptyList() else actions,
+                        error = outcome.error, assistantRetry = outcome.retry) }
                 }
             } catch (_: CancellationException) { /* no late response */ }
             catch (e: Exception) {
-                if (ticket == generation && op == operation) mutable.update { it.copy(busy = false, serverConnection = "UNAVAILABLE", answer = "", citations = emptyList(),
-                    error = if (e is ApiFailure) "HTTP_${e.status}" else "SERVER_UNAVAILABLE") }
+                if (ticket == generation && op == operation) {
+                    if (e is ApiFailure && AssistantResponsePolicy.expired(e.status, e.code)) forgetRemoteSession()
+                    val outcome = if (e is ApiFailure) AssistantResponsePolicy.http(e.status, e.code)
+                        else AssistantOutcome("SERVER_UNAVAILABLE", AssistantRetry.RESEND)
+                    mutable.update { it.copy(busy = false, serverConnection = "UNAVAILABLE", answer = "", followUpQuestion = "", citations = emptyList(), actions = emptyList(),
+                        translationOriginal = if (translate) input else it.translationOriginal,
+                        error = outcome.error, assistantRetry = outcome.retry) }
+                }
             } finally { if (ticket == generation && op == operation) mutable.update { it.copy(busy = false) } }
         }
+    }
+    private fun forgetRemoteSession() {
+        remote = null
+        assistantRequests.clear()
+        deletion.finishActive()
+        mutable.update { it.copy(deletionPending = deletion.pending()) }
     }
     fun cancelRequest() { operation++; requestJob?.cancel(); requestJob = null; mutable.update { it.copy(busy = false) } }
     private fun clearSession() {
         generation++; guideRequests.invalidate(); cancelRequest(); stopVehicle()
         remote = null
         deletion.finishActive()
-        requestId = null; retryInput = null
+        assistantRequests.clear(); assistantGuideContext = null
         mutable.value = UiState(reading = Reading(source = source), ux = mutable.value.ux, internetAvailable = mutable.value.internetAvailable, deletionPending = deletion.pending())
         viewModelScope.launch { withContext(Dispatchers.IO) { deletion.retry(api) }; mutable.update { it.copy(deletionPending = deletion.pending()) } }
     }

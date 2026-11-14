@@ -15,6 +15,13 @@ class MainActivity : ComponentActivity() {
         setContent { CarCueApp(model) }
     }
     override fun onNewIntent(intent: Intent) { super.onNewIntent(intent); model.deepLink(intent.data) }
-    override fun onStart() { super.onStart(); model.foreground() }
-    override fun onStop() { model.background(); super.onStop() }
+    override fun onStart() {
+        super.onStart()
+        if (BuildConfig.DEBUG) android.util.Log.i("CarCueLifecycle", "START")
+        model.foreground()
+    }
+    override fun onStop() {
+        if (BuildConfig.DEBUG) android.util.Log.i("CarCueLifecycle", "STOP")
+        model.background(); super.onStop()
+    }
 }
