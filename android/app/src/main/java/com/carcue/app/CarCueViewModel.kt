@@ -99,7 +99,7 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
         if (content.languages.none { it.tag == tag }) return
         cancelRequest()
         assistantRequests.clear()
-        mutable.update { it.copy(locale = tag, page = languageReturn, assistantRetry = AssistantRetry.NONE) }
+        mutable.update { it.copy(locale = tag, page = GuideSelectionPolicy.destination(languageReturn, it.selectedGuide), assistantRetry = AssistantRetry.NONE) }
         if (!mutable.value.sessionStarted) {
             mutable.update { it.copy(sessionStarted = true) }; startVehicle()
         }

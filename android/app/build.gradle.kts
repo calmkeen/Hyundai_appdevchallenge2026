@@ -9,7 +9,7 @@ android {
     defaultConfig {
         // A separate installed QA package proves first-install offline behavior without clearing user data.
         applicationId = providers.gradleProperty("carcueApplicationId").getOrElse("com.carcue.app").also {
-            require(it in setOf("com.carcue.app", "com.carcue.app.offlineqa"))
+            require(it in setOf("com.carcue.app", "com.carcue.app.offlineqa", "com.carcue.app.offlineqa2"))
         }
         minSdk = 28
         targetSdk = 35
