@@ -44,7 +44,19 @@
     "manual_set_id": "hyundai-ioniq5-ne1-2024-kr",
     "manual_version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
     "verification_status": "VERIFIED",
-    "support_contacts": [],
+    "support_contacts": [
+      {
+        "id": "hyundai-kr-customer-support",
+        "kind": "WEBSITE",
+        "title": "현대자동차 고객 문의",
+        "url": "https://www.hyundai.com/kr/ko/e/customer/center",
+        "market_code": "KR",
+        "source_locale": "ko-KR",
+        "verification_status": "VERIFIED",
+        "evidence_url": "https://www.hyundai.com/kr/ko/e/customer/center",
+        "reviewed_at": "2026-11-14T12:45:09.962773Z"
+      }
+    ],
     "is_demo": false,
     "verification_scope": [
       "2024 Korea Korean owner manual applicability",

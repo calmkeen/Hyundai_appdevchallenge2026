@@ -26,6 +26,8 @@
 
 확인되지 않은 기본 프로필을 실제 차량 프로필로 게시하지 않는다. 언어는 이 모델에 고정하지 않는다. 지원 연락처가 없으면 임의 번호 대신 등록된 공식 사이트만 표시하거나 비활성화한다.
 
+현재 `support_contacts`의 WEBSITE 레코드는 `id`, `kind`, `title`, `url`, `market_code`, `source_locale`, `verification_status`, `evidence_url`, `reviewed_at`를 가진다. 지원의 `market_code`는 프로필과 같아야 하며, UI 언어 변경으로 다른 시장의 사이트를 선택하지 않는다. UTC 검토시각과 등록 언어·검증 상태·HTTPS 출처를 검사한다. 등록 범위와 실제 수집 근거는 `OFFICIAL_LINK_CATALOG.md`를 따른다.
+
 ### VehicleReading
 
 한 API의 한 영역에 대한 상태다. 배터리 전체 상태와 특정 문 상태를 같은 원시 구조로 억지로 표현하지 말고 정규화된 값과 raw 값을 구분한다.
@@ -171,6 +173,8 @@ QR 딥링크는 초기에는 `carcue://guide?profile_id=<등록된 ID>`처럼 �
 `ANSWERED`이면 citations가 하나 이상 있어야 하고, 각 출처의 profile/manual/source version이 이번 검색 결과와 일치해야 한다. citations의 이름·URL·절 정보는 모델이 임의로 채우는 대신 서버의 자료 레코드에서 구성한다.
 
 허용하는 actions는 `OPEN_GUIDE`, `OPEN_MANUAL`, `REFRESH_STATUS`, `OPEN_SUPPORT`, `SELECT_PROFILE`다. 각각 등록된 가이드·매뉴얼·상태·지원 정보만 가리킬 수 있다. 임의 URL, 코드 실행, `SET_DOOR` 같은 제어 행동은 허용하지 않는다.
+
+서버 응답의 `OPEN_MANUAL.target_id`는 현재 검증된 citation의 `source_id`, `OPEN_SUPPORT.target_id`는 선택 프로필의 등록 지원 `id`다. URL 자체는 target ID로 허용하지 않는다. 앱은 최신 프로필/판본과 실제 UX 제한을 다시 확인해 등록 URL을 해석하고 열기 실패를 처리한다. 기존 immutable 게시 가이드 단계에 남은 raw URL target은 legacy로 보존하며 실행 권한으로 사용하지 않는다.
 
 `mode=LIVE`는 실제 서버 처리 경로라는 뜻이며 차량 상태까지 실제 수신됐다는 보증이 아니다. 실제 차량 상태의 출처는 각 VehicleReading의 `source`로 별도 판정한다.
 

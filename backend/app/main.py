@@ -12,6 +12,7 @@ from fastapi.responses import JSONResponse
 from .content import Catalog
 from .answer_policy import answer_units, validate_answer
 from .models import AskRequest, SessionRequest, TranslateRequest
+from .official_links import manual_actions, support_actions
 from .provider import create_provider
 from .storage import Store
 from .translation_terms import load_question_terms, validate_target_terms
@@ -136,14 +137,14 @@ def create_app(db_path=None, catalog=None, provider=None, mode=None):
 
     @app.get("/v1/vehicle-profiles")
     def profiles():
-        return [p for p in catalog.profiles if mode == "MOCK" or p["verification_status"] == "VERIFIED"]
+        return [catalog.public_profile(p) for p in catalog.profiles if mode == "MOCK" or p["verification_status"] == "VERIFIED"]
 
     @app.get("/v1/vehicle-profiles/{profile_id}")
     def profile(profile_id: str):
         p = catalog.profile(profile_id)
         if not p or (mode == "LIVE" and p["verification_status"] != "VERIFIED"):
             raise HTTPException(404, "PROFILE_NOT_FOUND")
-        return p
+        return catalog.public_profile(p)
 
     @app.get("/v1/locales")
     def locales():
@@ -224,10 +225,14 @@ def create_app(db_path=None, catalog=None, provider=None, mode=None):
                                 "title": s["title"], "url": s["url"], "section": s["section"]})
                         result["actions"] = [{"kind": "OPEN_GUIDE", "target_id": result["citations"][0]["guide_id"]},
                                              {"kind": "REFRESH_STATUS", "target_id": "door.position"}]
+                        result["actions"] += manual_actions(result["citations"], sources, catalog.profile(request.profile_id))
+                        result["actions"] += support_actions(catalog.support_contacts(request.profile_id))
                 except Exception:
                     # Never expose provider details, credentials or a partial unvalidated answer.
                     result.update(status="TEMPORARILY_UNAVAILABLE", answer=UNAVAILABLE_MESSAGES.get(request.locale, UNAVAILABLE_MESSAGES["en"]), citations=[], actions=[], follow_up_question=None,
                                   ai_provider="NOT_CALLED", ai_model=None)
+            if mode == "LIVE" and result["status"] in {"NO_RELIABLE_SOURCE", "NEED_MORE_INFO"}:
+                result["actions"] += support_actions(catalog.support_contacts(request.profile_id))
             save(request.session_id, request.request_id, fingerprint, result, request.question)
             return result
 

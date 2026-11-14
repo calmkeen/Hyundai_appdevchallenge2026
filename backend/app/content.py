@@ -5,6 +5,7 @@ from collections import Counter
 from pathlib import Path
 
 from .guide_policy import ValidationIssue, validate_guide
+from .official_links import registered_support_contacts, resolve_support, resolve_manual
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -46,6 +47,21 @@ class Catalog:
 
     def locale(self, locale):
         return next((item for item in self.locales if item["locale"] == locale), None)
+
+    def support_contacts(self, profile_id):
+        matches = [profile for profile in self.profiles if profile.get("profile_id") == profile_id]
+        return registered_support_contacts(matches[0], self.locales) if len(matches) == 1 else []
+
+    def support(self, profile_id, target_id):
+        matches = [profile for profile in self.profiles if profile.get("profile_id") == profile_id]
+        return resolve_support(matches[0], self.locales, target_id) if len(matches) == 1 else None
+
+    def manual_source(self, profile_id, locale, target_id):
+        return resolve_manual(self.published(profile_id, locale), self.profile(profile_id), target_id)
+
+    def public_profile(self, profile):
+        # Do not expose an invalid support record merely because its profile exists.
+        return {**profile, "support_contacts": self.support_contacts(profile["profile_id"])}
 
     def published(self, profile_id, locale=None):
         candidates = self._publication_candidates()
