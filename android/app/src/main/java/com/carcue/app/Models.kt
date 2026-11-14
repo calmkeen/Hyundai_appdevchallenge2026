@@ -38,7 +38,9 @@ data class Profile(val id: String, val name: String, val year: Int, val market: 
     val manualSetId: String? = null, val manualVersion: String? = null)
 data class Language(val tag: String, val native: String, val korean: String, val rtl: Boolean, val uiStatus: String)
 data class Guide(val id: String, val title: String, val body: String, val steps: List<Pair<String, String>>, val sources: List<Pair<String, String>>,
-    val locale: String = "ko-KR", val stepIds: List<String> = emptyList(), val cautions: List<List<String>> = emptyList())
+    val locale: String = "ko-KR", val stepIds: List<String> = emptyList(), val cautions: List<List<String>> = emptyList(),
+    val manualSetId: String? = null, val sourceVersion: String? = null, val profileIds: List<String> = emptyList(),
+    val publicationVerified: Boolean = false)
 data class UiState(
     val page: Page = Page.PROFILE,
     val profile: Profile? = null,

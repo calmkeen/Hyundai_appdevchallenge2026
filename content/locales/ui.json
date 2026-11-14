@@ -738,5 +738,40 @@
     "ko-KR": "안내 이미지 예시 · 실제 조작 절차는 준비 중입니다",
     "en": "Guide image preview · vehicle procedures are being prepared",
     "ja-JP": "案内画像の表示例 · 実際の操作手順は準備中です"
+  },
+  "ui_profile_mixed_notice": {
+    "ko-KR": "이용 차량과 같은 차종·연식·판매지역을 선택해 주세요. 매뉴얼 확인 여부를 각 항목에 표시해요. SDK가 차종을 자동 인증한 것은 아니에요.",
+    "en": "Select the model, year and market of the vehicle you are using. Each entry shows its manual review status. The SDK does not automatically authenticate the model.",
+    "ja-JP": "利用する車両と同じ車種・年式・販売地域を選んでください。各項目にマニュアルの確認状況を表示します。SDKによる車種の自動認証ではありません。"
+  },
+  "ui_profile_manual_verified": {
+    "ko-KR": "매뉴얼 자료 확인됨 · 실제 차량 일치는 직접 확인해 주세요",
+    "en": "Manual source reviewed · confirm the actual vehicle matches",
+    "ja-JP": "マニュアル資料を確認済み · 実際の車両との一致をご確認ください"
+  },
+  "ui_profile_select_reviewed": {
+    "ko-KR": "매뉴얼 확인 프로필로 선택 →",
+    "en": "Select reviewed manual profile →",
+    "ja-JP": "マニュアル確認済みのプロフィールを選択 →"
+  },
+  "ui_context_guide_open": {
+    "ko-KR": "열린 문 관련 공식 안내 보기",
+    "en": "View the official door-open guide",
+    "ja-JP": "ドア開放に関する公式ガイドを見る"
+  },
+  "ui_guide_live_status": {
+    "ko-KR": "현재 수신 상태 · {status}",
+    "en": "Current reading · {status}",
+    "ja-JP": "現在の受信状態 · {status}"
+  },
+  "ui_door_reading_limit": {
+    "ko-KR": "앞좌석 왼쪽 문 위치의 수신값이에요. 닫힘 수신도 잠금·안전 여부를 뜻하지 않아요. 안내는 선택한 차량과 매뉴얼 범위에만 적용돼요.",
+    "en": "This reading describes the front-left door position. A closed reading does not confirm locking or safety. Guidance applies only to the selected vehicle and manual.",
+    "ja-JP": "前席左側ドアの位置の受信値です。閉状態の受信でも、施錠や安全を確認したことにはなりません。ガイドは選択した車両とマニュアルの範囲にのみ適用されます。"
+  },
+  "ui_manual_version": {
+    "ko-KR": "매뉴얼 · {version}",
+    "en": "Manual · {version}",
+    "ja-JP": "マニュアル · {version}"
   }
 }

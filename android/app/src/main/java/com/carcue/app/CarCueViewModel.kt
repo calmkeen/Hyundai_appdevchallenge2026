@@ -144,6 +144,11 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
         chooseProfile(profile)
     }
     fun openGuide(guide: Guide) { mutable.update { it.copy(selectedGuide = guide, guideStep = 0) }; go(Page.GUIDE) }
+    fun relatedDoorGuide(now: Instant = Instant.now()): Guide? = content.relatedDoorGuide(mutable.value, now)
+    fun openRelatedDoorGuide(guideId: String) {
+        // The displayed button can outlive its reading. Recheck freshness, UX and metadata at the tap.
+        relatedDoorGuide()?.takeIf { it.id == guideId }?.let(::openGuide)
+    }
     fun step(delta: Int) { mutable.update { it.copy(guideStep = (it.guideStep + delta).coerceIn(0, (it.selectedGuide?.steps?.size ?: 1).minus(1).coerceAtLeast(0))) } }
     private fun loadGuides() {
         val p = mutable.value.profile ?: return
