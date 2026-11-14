@@ -132,12 +132,17 @@ class Provider:
             schema = create_model("ModelTranslation", __base__=ModelTranslation,
                                   source_locale=(Literal[allowed], ...))
         payload = request.model_dump(exclude={"session_id", "request_id"})
+        instructions = TRANSLATION_INSTRUCTIONS
         if request.content_kind == "QUESTION" and self.term_lookup is not None:
             match = self.term_lookup(request.profile_id, request.source_locale, request.target_locale, request.text)
             if match:
                 payload.update(matching_terms=match["terms"], glossary_version=match["version"])
+                targets = list(dict.fromkeys(term["target"] for term in match["terms"]))
+                instructions += ("\nRequired exact target phrases (vocabulary data): " + json.dumps(targets, ensure_ascii=False)
+                                 + "\ntranslated_text MUST contain every phrase above literally. Never shorten a described part "
+                                   "to a generic noun or replace its target phrase with a synonym. Preserve the source question's conditions exactly.")
         return await self.structured(payload,
-            schema, TRANSLATION_INSTRUCTIONS, request_id=request.request_id, max_output_tokens=3000)
+            schema, instructions, request_id=request.request_id, max_output_tokens=3000)
 
 
 class DisabledProvider(Provider):
