@@ -4,6 +4,7 @@ import org.junit.Assert.*
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
+import java.io.File
 
 /** Exercises the real file cache with a pure metadata decoder; org.json is an Android platform API. */
 class PublishedGuideCacheTest {
@@ -20,7 +21,8 @@ class PublishedGuideCacheTest {
         assertTrue(cache.replace(f.profile, "ko-KR", payload(emptyList())).isEmpty())
         assertTrue(cache.read(f.profile, "ko-KR").isEmpty())
         assertTrue(cache().read(f.profile, "ko-KR").isEmpty())
-        assertTrue(temporary.root.listFiles().orEmpty().isEmpty())
+        assertNotNull(cache().readSnapshot(f.profile, "ko-KR"))
+        assertEquals(1, temporary.root.listFiles().orEmpty().size)
     }
 
     @Test fun successfulResponseWithoutPublishableContentAlsoInvalidatesPreviousCache() {
@@ -28,6 +30,21 @@ class PublishedGuideCacheTest {
         cache.replace(f.profile, "ko-KR", payload(listOf(f.guide)))
         assertTrue(cache.replace(f.profile, "ko-KR", payload(listOf(f.guide.copy(lifecycle = "DRAFT")))).isEmpty())
         assertTrue(cache().read(f.profile, "ko-KR").isEmpty())
+        assertNotNull(cache().readSnapshot(f.profile, "ko-KR"))
+    }
+
+    @Test fun missingScopeIsAbsentWhileLegacyReadRemainsEmpty() {
+        assertNull(cache().readSnapshot(f.profile, "ko-KR"))
+        assertTrue(cache().read(f.profile, "ko-KR").isEmpty())
+    }
+
+    @Test fun emptyFirstServerResponseCreatesKnownSnapshotAndBlocksBootstrapAfterRestart() {
+        val cache = cache()
+        val empty = payload(emptyList())
+        cache.replace(f.profile, "ko-KR", empty)
+        assertEquals(empty, temporary.root.listFiles()!!.single().readText())
+        assertEquals(emptyList<PublishedGuideRecord>(), cache().readSnapshot(f.profile, "ko-KR"))
+        assertNull(cache().readSnapshot(f.profile, "en"))
     }
 
     @Test fun offlineReadIsBoundToProfileManualVersionAndLocale() {
@@ -69,6 +86,40 @@ class PublishedGuideCacheTest {
         cache.replace(f.profile, "ko-KR", payload(listOf(f.guide)))
         temporary.root.listFiles()!!.single().writeText("corrupt-cache")
         assertTrue(cache.read(f.profile, "ko-KR").isEmpty())
+        assertEquals(emptyList<PublishedGuideRecord>(), cache().readSnapshot(f.profile, "ko-KR"))
+    }
+
+    @Test fun emptySnapshotDoesNotWithdrawOtherLocaleOrManualScopes() {
+        val cache = cache()
+        val english = f.guide.copy(locale = "en", translationReviewStatus = "REVIEWED", glossaryVersion = "fixture-glossary")
+        cache.replace(f.profile, "ko-KR", payload(listOf(f.guide)))
+        cache.replace(f.profile, "en", payload(listOf(english)))
+        cache.replace(f.profile, "ko-KR", payload(emptyList()))
+        assertEquals(emptyList<PublishedGuideRecord>(), cache().readSnapshot(f.profile, "ko-KR"))
+        assertEquals(listOf(english), cache().readSnapshot(f.profile, "en"))
+        assertNull(cache().readSnapshot(f.profile.copy(manualVersion = "v2"), "ko-KR"))
+        assertNull(cache().readSnapshot(f.profile.copy(id = "other-profile"), "ko-KR"))
+    }
+
+    @Test fun invalidStorageIsKnownEmptyRatherThanUnseen() {
+        val blocked = temporary.newFile("not-a-directory")
+        val cache = PublishedGuideCache(blocked, f.policy()) { responses.getValue(it) }
+        assertEquals(emptyList<PublishedGuideRecord>(), cache.readSnapshot(f.profile, "ko-KR"))
+        assertTrue(cache.replace(f.profile, "ko-KR", payload(emptyList())).isEmpty())
+        assertEquals(emptyList<PublishedGuideRecord>(), cache.readSnapshot(f.profile, "ko-KR"))
+    }
+
+    @Test fun failedWithdrawalWriteBlocksCurrentProcessButCannotPersistAcrossRestart() {
+        val cache = cache()
+        cache.replace(f.profile, "ko-KR", payload(listOf(f.guide)))
+        val target = temporary.root.listFiles()!!.single()
+        // Force the actual atomic-write path to fail without relying on host permissions.
+        val blockedTemp = File(temporary.root, target.name + ".tmp").apply { mkdir() }
+        File(blockedTemp, "blocker").writeText("synthetic-storage-failure")
+        assertTrue(cache.replace(f.profile, "ko-KR", payload(emptyList())).isEmpty())
+        assertEquals(emptyList<PublishedGuideRecord>(), cache.readSnapshot(f.profile, "ko-KR"))
+        // No durable withdrawal was possible: this known physical I/O limit is not a restart guarantee.
+        assertEquals(listOf(f.guide), cache().readSnapshot(f.profile, "ko-KR"))
     }
 
     @Test fun successfulReplacementLeavesOnlyTheNewCompletePayload() {

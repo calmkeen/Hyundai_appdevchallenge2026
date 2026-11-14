@@ -17,11 +17,20 @@ internal class PublishedGuideCache(
     // If local storage fails, a successful server response must still supersede the old in-process cache.
     private val invalidated = mutableSetOf<String>()
 
-    @Synchronized fun read(profile: Profile, locale: String): List<PublishedGuideRecord> {
+    @Synchronized fun read(profile: Profile, locale: String): List<PublishedGuideRecord> =
+        readSnapshot(profile, locale).orEmpty()
+
+    /** Null means no stored snapshot; a known empty/invalid snapshot must block bundled fallback. */
+    @Synchronized fun readSnapshot(profile: Profile, locale: String): List<PublishedGuideRecord>? {
         val key = key(profile, locale)
         if (key in invalidated) return emptyList()
         return try {
-            policy.published(decode(File(directory, "$key.json").readText()), profile, locale)
+            // exists() alone cannot distinguish inaccessible storage from absence.
+            if (Files.notExists(directory.toPath())) return null
+            if (!Files.isDirectory(directory.toPath())) return emptyList()
+            val target = File(directory, "$key.json")
+            if (Files.notExists(target.toPath())) return null
+            policy.published(decode(target.readText()), profile, locale)
         } catch (_: Exception) { emptyList() }
     }
 
@@ -32,14 +41,13 @@ internal class PublishedGuideCache(
         invalidated.add(key)
         try {
             val target = File(directory, "$key.json")
-            if (accepted.isEmpty()) {
-                if (target.exists() && !target.delete()) throw IOException("Could not invalidate guide cache")
-            } else {
-                write(target, payload)
-            }
+            // Persist the original decodable response even when no guide is
+            // publishable. Deleting it would make server withdrawal look unsynced.
+            write(target, payload)
             invalidated.remove(key)
         } catch (_: IOException) {
             // Return the fresh server result, but do not fall back to superseded cached content.
+            // If storage refuses the write, a restart cannot remember this in-memory invalidation.
         } catch (_: SecurityException) {
             // The same fail-closed rule applies when the filesystem denies access.
         }

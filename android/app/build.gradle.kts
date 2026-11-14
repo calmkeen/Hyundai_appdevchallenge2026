@@ -7,7 +7,10 @@ android {
     namespace = "com.carcue.app"
     compileSdk = 35
     defaultConfig {
-        applicationId = "com.carcue.app"
+        // A separate installed QA package proves first-install offline behavior without clearing user data.
+        applicationId = providers.gradleProperty("carcueApplicationId").getOrElse("com.carcue.app").also {
+            require(it in setOf("com.carcue.app", "com.carcue.app.offlineqa", "com.carcue.app.offlineqa2", "com.carcue.app.offlineqa3"))
+        }
         minSdk = 28
         targetSdk = 35
         versionCode = 1

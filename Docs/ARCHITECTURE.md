@@ -84,3 +84,11 @@ backend/app/
 유료 OpenAI 연결은 사용자 요청으로 보류했다. 기존 어댑터를 보존하고 기본 factory는 DISABLED 또는 OLLAMA_LOCAL만 허용한다. 모델은 Mac 서버에서 실행하며 APK에는 포함하지 않는다. ask는 검수 단위 ID 선택, ANSWER/GUIDE 번역은 동일 판본의 저장 번역, 자유 QUESTION 생성 번역은 실제 의미 오류 확인 후 기본 보류했고, 명시적 개발 옵션에서만 UNREVIEWED로 시험한다. 완전한 주의문·출처·프로필 검증을 통과해야 한다. 질문 용어 보존 검사도 전체 의미 정확성을 보증하지 않는다. 실제 호출과 제한은 `LOCAL_AI_INTEGRATION.md`에 기록한다.
 
 앱은 MVVM/UDF를 유지하고 `AssistantRequestPolicy`로 전송 재시도와 새 요청을 구분한다. 네트워크 재전송은 동일 request_id와 직렬화 본문을 보존한다. 서버의 일시 불가 결과에 대한 사용자 재시도는 새 요청이며, 세션 만료·동의 철회·UX 제한·종료 시에는 기존 취소·삭제 정책을 적용한다.
+
+## 오프라인 가이드와 삭제 복구
+
+동봉 자료·파일 캐시·서버 결과는 같은 게시 정책을 통과하며 GuideOrigin BUNDLED/CACHE/SERVER로 표시한다. guideConnection은 차량 SDK·AI 요청 상태와 분리한다. 캐시의 null은 미존재이고 빈/손상 스냅샷은 알려진 차단 상태다. 서버의 빈 응답도 원자적으로 저장해 앱 재실행이 동봉 자료로 철회를 되돌리지 않게 한다. v1의 삭제형 빈 캐시를 처음 설치로 오인하지 않도록 설치 시각과 영속 bootstrap 결정을 사용한다. 기존 갱신 설치에 결정이 없으면 동봉 fallback을 차단하고 서버 동기화/기존 유효 캐시를 사용한다.
+
+화면의 Guide 객체는 실행 시 현재 목록에서 다시 찾는다. 같은 profile/manual/locale의 철회는 열린 가이드와 질문의 복귀 대상에도 반영하고, UI 언어만 바뀐 다른 원문은 임의로 철회하지 않는다.
+
+삭제 작업은 앱 프로세스 범위의 SessionDeletionRecovery에서 수행한다. 순수 SessionDeletionStore 포트와 단일 coordinator가 중복 trigger를 합치며 기본 최대3회(1초·3초 대기)로 제한한다. request/VM 취소와 독립이고, 늦은 세션 생성·연결 복구·foreground·이용 종료·수동 확인이 같은 처리기를 사용한다. 최소 삭제 자격 정보만 SharedPreferences에 남기며 본문·번역·차량값은 저장하지 않는다. HTTP200의 명시 DELETED 또는 정확한 세션 무효/만료401 확인 후에만 큐에서 제거한다. 프로세스 재시작 복구는 별도 실제 기기 검증으로 판단한다.

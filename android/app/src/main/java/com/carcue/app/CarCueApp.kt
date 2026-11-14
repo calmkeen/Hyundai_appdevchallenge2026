@@ -86,6 +86,7 @@ fun CarCueApp(vm: CarCueViewModel) {
                                                 "TRANSLATION_UNAVAILABLE" -> get("ui_241983579b6f")
                                                 "AI_UNAVAILABLE" -> get("ui_ai_unavailable")
                                                 "SESSION_EXPIRED" -> get("ui_ai_session_expired")
+                                                "GUIDE_UNAVAILABLE" -> get("ui_guides_withdrawn")
                                                 else -> get("ui_91a49aa8ca0f")
                                             }, error = true)
                                         }
@@ -274,10 +275,16 @@ private fun Reading.description(ko: UiCopy): String = when {
 @Composable private fun GuidesScreen(vm: CarCueViewModel, s: UiState, ko: UiCopy) {
     var query by remember { mutableStateOf("") }
     Heading(ko.get("ui_96918379aa24"), "${s.profile?.name} · ${s.profile?.year} · ${s.profile?.market}")
+    GuideConnectionNotice(s, ko)
+    OutlinedButton(onClick = vm::refreshGuides, enabled = !s.guidesLoading,
+        modifier = Modifier.testTag("refresh_guides")) { Text(ko.get("ui_guides_refresh")) }
     OutlinedTextField(query, { query = it.take(100) }, label = { Text(ko.get("ui_5f3488318abb")) }, modifier = Modifier.fillMaxWidth(), singleLine = true)
     val guides = s.guides.filter { (it.title + it.body).contains(query, true) }
-    if (guides.isEmpty()) Notice(ko.get("ui_7af6433d25e9"))
-    guides.forEach { guide -> Panel(guide.title, guide.body, onClick = { vm.openGuide(guide) }) }
+    if (guides.isEmpty()) Notice(ko.get(if (query.isBlank() && s.guideConnection != "CONNECTED" && !s.guidesLoading) "ui_guides_no_saved" else "ui_7af6433d25e9"))
+    guides.forEach { guide ->
+        GuideOriginLabel(guide, ko)
+        Panel(guide.title, guide.body, onClick = { vm.openGuide(guide) })
+    }
     // Preserve the historical layout example for demo only. SDK builds show published manuals.
     if (BuildConfig.DEBUG && BuildConfig.IS_MOCK) Surface(onClick = { vm.openGuide(Guide("__layout_preview__", ko.get("ui_817e34c0f4e8"), ko.get(if (BuildConfig.IS_MOCK) "ui_275b15c57746" else "ui_sdk_guide_preview_body"),
         listOf((ko.get("ui_3e7fa72af50a")) to (ko.get("ui_d1c1fb5dfe7f")),
@@ -295,6 +302,8 @@ private fun Reading.description(ko: UiCopy): String = when {
     val guide = s.selectedGuide ?: return
     val step = guide.steps.getOrNull(s.guideStep)
     Heading(guide.title, guide.body)
+    GuideOriginLabel(guide, ko)
+    GuideConnectionNotice(s, ko)
     if (guide.publicationVerified) {
         Text(ko.get("ui_guide_live_status").replace("{status}", s.reading.description(ko)), fontWeight = FontWeight.SemiBold,
             modifier = Modifier.testTag("guide_live_door_status"))
@@ -328,6 +337,20 @@ private fun Reading.description(ko: UiCopy): String = when {
     if (!guide.id.startsWith("__")) OutlinedButton(onClick = { vm.openTranslation(guide.body, "GUIDE", guide.locale) }) { Text(ko.get("ui_translate_guide")) }
     Action(ko.get("ui_af7d9b9636de")) { vm.openAssistant() }
 }
+@Composable private fun GuideOriginLabel(guide: Guide, ko: UiCopy) {
+    val key = when (guide.origin) {
+        GuideOrigin.BUNDLED -> "ui_guides_bundled"
+        GuideOrigin.CACHE -> "ui_guides_cached"
+        GuideOrigin.SERVER -> "ui_guides_online"
+        GuideOrigin.NONE -> return
+    }
+    Text(ko.get(key), color = Muted, fontSize = 14.sp, modifier = Modifier.testTag("guide_origin_${guide.origin}"))
+}
+@Composable private fun GuideConnectionNotice(s: UiState, ko: UiCopy) {
+    if (!s.guidesLoading && s.guideConnection != "CONNECTED" && s.guideConnection != "NOT_CONNECTED" && s.guides.isNotEmpty()) {
+        Notice(ko.get("ui_guides_offline"))
+    }
+}
 @Composable private fun Sources(sources: List<Pair<String, String>>, ko: UiCopy, showUrls: Boolean = false) {
     val handler = LocalUriHandler.current
     if (sources.isNotEmpty()) Text(ko.get("ui_f483cda99083"), fontWeight = FontWeight.SemiBold, fontSize = 19.sp)
@@ -355,6 +378,11 @@ private fun Reading.description(ko: UiCopy): String = when {
     if (s.busy) { LinearProgressIndicator(Modifier.fillMaxWidth()); TextButton(onClick = vm::cancelRequest) { Text(ko.get("ui_25fa53c0d70d")) } }
     if (s.assistantRetry != AssistantRetry.NONE) OutlinedButton(onClick = { vm.send(input, translate, retry = true, consent = consent) }, enabled = !s.busy && consent && input.isNotBlank(), modifier = Modifier.testTag("ai_retry")) {
         Text(ko.get(if (s.assistantRetry == AssistantRetry.RESEND) "ui_16c72fd12cf2" else "ui_ai_retry_new"))
+    }
+    if (s.error in setOf("SERVER_UNAVAILABLE", "AI_UNAVAILABLE", "TRANSLATION_UNAVAILABLE") && s.guides.any { it.publicationVerified }) {
+        OutlinedButton(onClick = { vm.go(Page.GUIDES) }, modifier = Modifier.testTag("assistant_saved_guides")) {
+            Text(ko.get("ui_assistant_saved_guides"))
+        }
     }
     if (translate && s.translationOriginal.isNotEmpty()) {
         Panel(ko.get("ui_0201f36241b8"), s.translationOriginal)

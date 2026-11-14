@@ -172,3 +172,9 @@ python3 scripts/record_native_showcase.py
 원본 실행 녹화를 보존한 상태에서 `python3 scripts/render_app_intro.py`로 소개 영상을 만든다. 결과는 `output/qa/carcue-app-intro.mp4`이며 32초·1920×1080·30fps다. 실제 기능 화면에 제목·설명·시작·마무리·외부 무료 배경음악을 더한다. 기획은 `APP_INTRO_VIDEO.md`, 편집 구성은 `app-intro.json`을 따른다. 영상의 Mock 표시와 AI 준비 중 표시를 유지한다.
 
 음원과 실차 사진의 출처·라이선스는 `MEDIA_CREDITS.md`를 따른다. 음악 파일이 없으면 소개 영상 도구가 검증된 원작자 URL에서 다운로드하고 SHA256을 대조한다. 유튜브 게시 시 `output/qa/carcue-app-intro-credits.txt`의 음악 표기를 설명란에 포함한다.
+
+## 오프라인 기본 안내와 종료 복구 검증
+
+새 설치의 동봉 검수 안내와 서버 캐시를 구분한다. 안내 목록의 ‘안내 업데이트 확인’은 가이드 HTTP 조회이며 차량 새로고침 GET과 별도다. 서버 연결이 안 되면 검수된 동봉/저장 자료만 제공하고 AI 실패 화면의 ‘저장 안내 보기’로 이동한다. 서버가 성공적으로 빈 목록을 반환하면 철회를 저장하며, 오래된 버튼으로 다시 열 수 없다. 기존 삭제형 캐시를 쓰던 갱신 설치는 새 설치로 추측하지 않는다.
+
+기존 패키지/사용자 데이터를 지우지 않고 최초 실행을 시험하려면 같은 소스에 `-PcarcueApplicationId=com.carcue.app.offlineqa`를 주어 별도 QA 패키지를 빌드한다. 기본값은 계속 com.carcue.app이다. 새 QA 패키지도 pleos flavor의 실제 SDK를 사용한다. 실제 시험 절차와 결과는 `OFFLINE_SESSION_VALIDATION.md`에 기록한다. 삭제 대기 표시는 프로필 화면의 ‘서버 삭제 다시 확인’ 버튼으로 같은 제한된 재시도를 실행한다. 유료 AI와 자유 질문 생성 번역의 보류 정책은 유지한다.

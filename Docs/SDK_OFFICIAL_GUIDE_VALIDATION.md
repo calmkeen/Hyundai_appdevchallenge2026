@@ -10,6 +10,10 @@
 
 별도 `CarCue_Pleos21_LocalAI`/API34/user10에서 실제 Capability·GET CLOSED→OPEN/CLOSED callback·차량 프레임 변경과 원본복귀·정확한 공식 가이드/두 출처·재조회·주행 차단·Park복귀·이용종료/unregister/release를 확인했다. Console도 Park/속도0/CLOSED로 복구했다. 기존 AVD userdata를 보존했고, `car_service` 부재를 우회하거나 UX 조건을 완화하지 않았다. 이 SDK 시험은 로컬 AI 호출 0회이며 AI 앱 시험과 구분한다. 이후 guarded AI 시험용 test-only APK는 별도 해시/실행으로 기록한다. 앱 APK는 동일하다. 앱 Window 캡처이지 실차/물리 디스플레이 녹화 검증은 아니다.
 
+## 오프라인·종료 복구 최종 기본 APK 회귀
+
+2026-11-14 `output/apk/carcue-pleos-offline-session-debug.apk` SHA `9dea39807f7ecb545784e84da489b81c044fb4a61e92f596cd42fb4870d696ce` / test `0df63e0c0975ef20ff7b958f628590ee85be4dc68ac7e4603f1d9da3fb2a4432`를 user10에 -r 업데이트한 설치본과 대조했다. `official-guide-offline-session-20261114-01`은 **20.285초/8단계 OK**이며 SDK GET·문callback·차량시각화·공식안내·재조회·Drive/Park UX·동일Listener해제/release·최종 fixture 복구까지 완료했다. 이 SDK 시나리오는 AI 호출이 없다. 별도 QA패키지의 최초 오프라인/프로세스 재시작 실제 시험은 `OFFLINE_SESSION_VALIDATION.md`에 구분했다. 기본 앱 데이터/기존 결과는 보존했다.
+
 ## 구현한 데이터 흐름
 
 1. 사용자가 `ioniq5-ne1-2024-kr`(2024 한국시장 아이오닉 5)을 선택한다. 이 선택은 매뉴얼 적용 범위를 정하며 SDK의 차종/VIN 인증이 아니다.

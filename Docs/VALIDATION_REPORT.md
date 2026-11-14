@@ -2,6 +2,16 @@
 
 2026-11-14. 실차, 공식 전용 AVD의 실제 SDK, 일반 AVD의 Mock, 외부 AI 대역을 구분한다.
 
+## 오프라인 안내·종료 복구 · 2026-11-14
+
+최종 전용 QA 설치의 run04는 **57.131초 + 새 프로세스 6.889초**, 총16단계 통과다. 실제 Pleos SDK 문 GET/OPEN·CLOSED callback, KO/EN/JA 동봉·서버 안내와 EN 캐시, 서버 중단 시 AI 실패·저장 안내 연결, 정상 생성 세션의 오프라인 종료→프로세스 재시작→동일 SQLite 서버 복구→실제 DELETE 확인과 sessions/results/history 각1→0을 검증했다. 모델은 무료 로컬 Ollama/Qwen3를1회 실제 호출했고 유료 AI·생성 질문 번역은 보류했다.
+
+기존 앱 com.carcue.app의 최종 APK `9dea39807f7ecb545784e84da489b81c044fb4a61e92f596cd42fb4870d696ce`도 SDK 전체 회귀 **20.285초/8단계 통과**했다. 실제 설치 해시·차량 픽셀 변경/복귀·공식 안내·재조회·Drive 주행 제한/Park복귀·unregister/release·fixture Park/0/CLOSED 복구를 확인했다. 기본 패키지의 기존 데이터는 지우지 않았다.
+
+JVM **84개 통과**, UI177 문구/계약/가이드4레코드·상태규칙1개 검사 통과. 서버철회·손상·쓰기실패·늦은POST·비정상2xx/202는 단위/계약 시험 범위이고 실제 기기의 모든 장애 주입을 주장하지 않는다. 기존 demo의 Mock과 이번 전용 AVD 실제 SDK 및 실제 로컬 HTTP를 구분한다. 자세한 해시·16PNG 독립검토·시행착오·재현 명령은 `OFFLINE_SESSION_VALIDATION.md`를 따른다.
+
+run01 성공 및 run02 Console 준비 실패/run03 후반 진입 실패/같은앱 추가진단을 보존했다. 마지막 run04와 기본 패키지 SDK 회귀는 자체 cleanup이 통과했다. 보조 warmup helper의 종료1/close확인불가와 emulator launcher 종료137은 별도 한계로 기록했다. 종료 명령OK/ADB장치 제거·기존userdata보존을 확인했으며 완전한 clean process exit0으로 확대하지 않는다. 원격 push·CI 결과는 별도 확인한다.
+
 ## 무료 로컬 AI와 최종 Pleos 앱 · 2026-11-14
 
 사용자 요청으로 유료 OpenAI 연결은 보류했다. Mac의 공식 Ollama 0.40.16/qwen3:4b를 실제 실행하며 API 비용·키·유료 자동 전환은 없다. 모델은 APK에 포함하지 않는다. 실제 API/앱의 성공·실패 원기록과 사례별 의미 검토는 `LOCAL_AI_INTEGRATION.md`, `LOCAL_AI_APP_VALIDATION.md`를 따른다. 기존 영상·음악은 변경하지 않았다.

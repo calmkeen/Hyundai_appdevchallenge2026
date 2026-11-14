@@ -40,3 +40,5 @@ SDK 연결 develop `547da78`의 [원격 실행](https://github.com/calmkeen/Hyun
 현재 CI는 같은 계약/카탈로그/백엔드 명령을 사용하며, 실제 Ollama 실행·Android 빌드·전용 AVD 시험은 포함하지 않는다. 로컬 전체 backend370개, UI168 문구·가이드4레코드·상태규칙1개, Android JVM52개를 확인했다. 실제 모델/앱/SDK 증거는 `LOCAL_AI_INTEGRATION.md`, `LOCAL_AI_APP_VALIDATION.md`에 분리했다. 기본 환경은 MOCK/DISABLED이고 유료 API 자동전환은 없다.
 
 최신 기능의 원격 CI는 해당 develop push 후 별도 확인한다. 이전 develop `eac1986` 실행43576062421의 성공을 이번 코드의 실행으로 확대하지 않는다.
+
+오프라인·종료 복구 단계는 UI177 자원/콘텐츠·서버370 회귀를 같은 CI에서 검사한다. Android JVM84·실제 AVD16단계·기본앱SDK8단계는 로컬 별도 실행이며 GitHub runner에서 SDK/모델을 실행하지 않는다. `OFFLINE_SESSION_VALIDATION.md` 참조.

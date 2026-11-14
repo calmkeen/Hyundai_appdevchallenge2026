@@ -99,7 +99,7 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
         if (content.languages.none { it.tag == tag }) return
         cancelRequest()
         assistantRequests.clear()
-        mutable.update { it.copy(locale = tag, page = languageReturn, assistantRetry = AssistantRetry.NONE) }
+        mutable.update { it.copy(locale = tag, page = GuideSelectionPolicy.destination(languageReturn, it.selectedGuide), assistantRetry = AssistantRetry.NONE) }
         if (!mutable.value.sessionStarted) {
             mutable.update { it.copy(sessionStarted = true) }; startVehicle()
         }
@@ -107,11 +107,12 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
     }
     fun language() { languageReturn = mutable.value.page; go(Page.LANGUAGE) }
     fun go(page: Page) {
-        if (mutable.value.sessionStarted && isLong(page) && restricted()) { mutable.update { it.copy(error = "PARK_REQUIRED") }; return }
-        if (page !in listOf(Page.ASK, Page.TRANSLATE, Page.LANGUAGE) ||
+        val destination = GuideSelectionPolicy.destination(page, mutable.value.selectedGuide)
+        if (mutable.value.sessionStarted && isLong(destination) && restricted()) { mutable.update { it.copy(error = "PARK_REQUIRED") }; return }
+        if (destination !in listOf(Page.ASK, Page.TRANSLATE, Page.LANGUAGE) ||
             mutable.value.page !in listOf(Page.ASK, Page.TRANSLATE, Page.LANGUAGE)) assistantGuideContext = null
-        mutable.update { it.copy(page = page, error = null) }
-        if (page == Page.GUIDES) loadGuides()
+        mutable.update { it.copy(page = destination, error = null) }
+        if (destination == Page.GUIDES) loadGuides()
     }
     fun openAssistant() {
         val current = mutable.value
@@ -155,29 +156,65 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
         if (mutable.value.sessionStarted && restricted()) { mutable.update { it.copy(error = "PARK_REQUIRED") }; return }
         chooseProfile(profile)
     }
-    fun openGuide(guide: Guide) { mutable.update { it.copy(selectedGuide = guide, guideStep = 0) }; go(Page.GUIDE) }
+    fun openGuide(guide: Guide) {
+        val current = mutable.value
+        if (!current.sessionStarted) return
+        if (restricted()) { mutable.update { it.copy(error = "PARK_REQUIRED") }; return }
+        val selected = if (BuildConfig.DEBUG && BuildConfig.IS_MOCK && guide.id == "__layout_preview__") guide
+            else current.profile?.let { GuideSelectionPolicy.resolveOpen(guide, it, current.locale, current.guides) }
+        if (selected == null) {
+            mutable.update { it.copy(error = "GUIDE_UNAVAILABLE") }
+            return
+        }
+        mutable.update { it.copy(selectedGuide = selected, guideStep = 0) }
+        go(Page.GUIDE)
+    }
     fun relatedDoorGuide(now: Instant = Instant.now()): Guide? = content.relatedDoorGuide(mutable.value, now)
     fun openRelatedDoorGuide(guideId: String) {
         // The displayed button can outlive its reading. Recheck freshness, UX and metadata at the tap.
         relatedDoorGuide()?.takeIf { it.id == guideId }?.let(::openGuide)
     }
     fun step(delta: Int) { mutable.update { it.copy(guideStep = (it.guideStep + delta).coerceIn(0, (it.selectedGuide?.steps?.size ?: 1).minus(1).coerceAtLeast(0))) } }
+    fun refreshGuides() { if (mutable.value.sessionStarted && !restricted()) loadGuides() }
+    private fun applyGuides(profile: Profile, locale: String, guides: List<Guide>, connection: String? = null) {
+        var removedSelection = false
+        mutable.update { current ->
+            val selected = GuideSelectionPolicy.reconcile(current.selectedGuide, profile, locale, guides)
+            val removed = current.selectedGuide?.publicationVerified == true && selected == null
+            removedSelection = removed
+            current.copy(guides = guides, selectedGuide = selected,
+                guideStep = current.guideStep.coerceAtMost((selected?.steps?.size ?: 1).minus(1).coerceAtLeast(0)),
+                page = if (removed && current.page == Page.GUIDE) Page.GUIDES else current.page,
+                error = if (removed) "GUIDE_UNAVAILABLE" else current.error,
+                guideConnection = connection ?: current.guideConnection,
+                guidesLoading = connection == null,
+                serverConnection = if (connection == "CONNECTED") connection else current.serverConnection)
+        }
+        if (removedSelection) {
+            assistantGuideContext = null
+            if (assistantReturn == Page.GUIDE) assistantReturn = Page.GUIDES
+        }
+    }
     private fun loadGuides() {
         val p = mutable.value.profile ?: return
         val locale = mutable.value.locale
         val ticket = generation
         val request = guideRequests.begin(p, locale)
+        mutable.update { it.copy(guides = it.guides.filter { guide -> guide.locale == locale && p.id in guide.profileIds },
+            guideConnection = "CONNECTING", guidesLoading = true) }
         viewModelScope.launch {
             val cached = withContext(Dispatchers.IO) { content.cachedGuides(p, locale) }
-            if (ticket == generation && locale == mutable.value.locale && guideRequests.isCurrent(request)) mutable.update { it.copy(guides = cached) }
+            if (ticket == generation && locale == mutable.value.locale && guideRequests.isCurrent(request)) applyGuides(p, locale, cached)
             try {
                 val data = withContext(Dispatchers.IO) { api.guides(p.id, locale) }
                 val guides = withContext(Dispatchers.IO) {
                     guideRequests.commitIfCurrent(request) { content.saveGuides(p, locale, data) }
                 } ?: return@launch
-                if (ticket == generation && locale == mutable.value.locale && guideRequests.isCurrent(request)) mutable.update { it.copy(guides = guides, serverConnection = "CONNECTED") }
+                if (ticket == generation && locale == mutable.value.locale && guideRequests.isCurrent(request)) applyGuides(p, locale, guides, "CONNECTED")
             } catch (_: CancellationException) { /* no late response */ }
-            catch (e: Exception) { if (ticket == generation && locale == mutable.value.locale && guideRequests.isCurrent(request)) mutable.update { it.copy(serverConnection = if (e is ApiFailure) "HTTP_${e.status}" else "UNAVAILABLE") } }
+            catch (e: Exception) { if (ticket == generation && locale == mutable.value.locale && guideRequests.isCurrent(request)) mutable.update { it.copy(
+                guideConnection = if (e is ApiFailure) "HTTP_${e.status}" else "UNAVAILABLE", guidesLoading = false,
+                serverConnection = if (e is ApiFailure) "HTTP_${e.status}" else "UNAVAILABLE") } }
         }
     }
     fun send(input: String, translate: Boolean = false, retry: Boolean = false, consent: Boolean = false) {
