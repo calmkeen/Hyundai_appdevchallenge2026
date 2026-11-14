@@ -70,11 +70,13 @@ def main():
     parser.add_argument("--apk", default="android/app/build/outputs/apk/pleos/debug/app-pleos-debug.apk")
     parser.add_argument("--test-apk", default="android/app/build/outputs/apk/androidTest/pleos/debug/app-pleos-debug-androidTest.apk")
     parser.add_argument("--install", action="store_true", help="Replace both APKs with -r; preserve app data")
+    parser.add_argument("--install-timeout", type=int, default=180, help="Host APK-install deadline; SDK/UI assertions keep their own deadlines")
     parser.add_argument("--source-version", default=SOURCE_VERSION)
     parser.add_argument("--run-id", default=datetime.now(timezone.utc).strftime("official-guide-%Y%m%dT%H%M%SZ-") + secrets.token_hex(3))
     parser.add_argument("--output-dir", default="output/qa/pleos-official-guide", help="Parent directory; run ID is appended")
     parser.add_argument("--record", action="store_true", help="Optional unedited AVD screen recording, unique filename")
     args = parser.parse_args()
+    require(90 <= args.install_timeout <= 600, "Install timeout must be between 90 and 600 seconds")
     require(bool(re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{0,63}", args.run_id)), "Invalid run ID")
     require(bool(re.fullmatch(r"[A-Za-z0-9_-]{1,100}", args.source_version)), "Invalid source version")
     require(args.serial.startswith("emulator-"), "Refusing a physical device")
@@ -114,6 +116,8 @@ def main():
     require(adb("shell", "getprop", "ro.kernel.qemu") == "1", "Refusing a physical vehicle/device")
     avd = adb("shell", "getprop", "ro.boot.qemu.avd_name")
     require(avd == args.avd == "CarCue_Pleos21", "Use only the dedicated CarCue Pleos AVD")
+    android_api = adb("shell", "getprop", "ro.build.version.sdk")
+    require(android_api == "34", "Expected the official API34 Pleos AVD")
     require(adb("shell", "getprop", "sys.boot_completed") == "1", "AVD not booted")
     user = adb("shell", "am", "get-current-user")
     require(user.isdigit() and user != "0", "Wait for the foreground automotive user")
@@ -133,9 +137,20 @@ def main():
             and {source["url"] for source in guide["sources"]} == SOURCE_URLS
             and all(source["verification_status"] == "VERIFIED" for source in guide["sources"]),
             "LIVE guide metadata/source mismatch")
+    print("PRECHECK PASS: isolated API34 AVD/user; LIVE official profile, guide, manual version and both sources", flush=True)
     if args.install:
         for path in (apk, test_apk):
-            require("Success" in adb("install", "--no-streaming", "--user", user, "-r", str(path), timeout=90), "APK replacement failed")
+            print("INSTALL: " + path.name + " (preserving app data)", flush=True)
+            try:
+                require("Success" in adb("install", "--no-streaming", "--user", user, "-r", str(path), timeout=args.install_timeout), "APK replacement failed")
+            except Exception as exc:
+                (out / "preflight-failure.json").write_text(json.dumps({
+                    "run_id": args.run_id, "phase": "APK_INSTALL", "error_type": type(exc).__name__,
+                    "apk_name": path.name, "apk_sha256": sha(path), "install_timeout_seconds": args.install_timeout,
+                    "instrumentation_started": False, "physical_vehicle_tested": False,
+                }, indent=2) + "\n")
+                raise
+            print("INSTALL PASS: " + path.name, flush=True)
     installed_hashes = {}
     with tempfile.TemporaryDirectory(dir=out, prefix="installed-hash-") as temp:
         for package, expected in ((PACKAGE, apk), (PACKAGE + ".test", test_apk)):
@@ -145,6 +160,7 @@ def main():
             adb("pull", paths[0].removeprefix("package:"), str(local), timeout=60)
             require(sha(local) == sha(expected), "Installed APK differs from the current build: " + package)
             installed_hashes[package] = sha(local)
+    print("INSTALLED HASH PASS: app and instrumentation match the current build", flush=True)
     require(not app("ls", "-d", markers, check=False), "App evidence directory already exists; choose a new run ID")
     require(not adb("shell", "ls", remote_video, check=False), "Remote recording path already exists; choose a new run ID")
     service = adb("shell", "dumpsys", "package", "ai.pleos.playground.service.vehicle")
@@ -159,6 +175,8 @@ def main():
     success = False
     sdk_events = []
     error = None
+    cleanup_attempts = []
+    restored_fixture = None
     command = base + ["shell", "am", "instrument", "--user", user, "-w", "-r",
                       "-e", "validateOfficialGuide", "true", "-e", "runId", args.run_id,
                       "-e", "expectedSourceVersion", args.source_version,
@@ -203,6 +221,7 @@ def main():
             require(recorder_pid is not None, "Could not identify this run's recorder")
         with (out / "instrumentation.txt").open("x") as log:
             process = subprocess.Popen(command, stdout=log, stderr=subprocess.STDOUT)
+            print("INSTRUMENTATION STARTED: " + args.run_id, flush=True)
             deadline = time.monotonic() + 240
             while time.monotonic() < deadline:
                 console(heartbeat, "POST")
@@ -217,6 +236,7 @@ def main():
                         for path in paths:
                             fixture(marker, path)
                         handled.add(marker)
+                        print("EXTERNAL CONSOLE FIXTURE: " + marker, flush=True)
                 if "done" in present:
                     success = True
                     app("touch", markers + "/host-finished")
@@ -243,15 +263,40 @@ def main():
             scoped = scoped[:end]
         sdk_events = [match.group(1) for line in scoped.splitlines() if (match := SDK_EVENT.search(line))]
         (out / "sdk-events.txt").write_text("\n".join(sdk_events) + "\n")
-        (out / "console-events.json").write_text(json.dumps(fixtures, indent=2) + "\n")
-        fixture("RESTORE_PARK", "/vehicle/controls?speed=0&accelerator=0&brake=0")
-        fixture("RESTORE_PARK", "/vehicle/gear?gear=Park")
-        fixture("RESTORE_CLOSED", "/vehicle/body?door_fl=0")
-        console(heartbeat + "&closing=1", "POST")
+        # Recording/process teardown can outlive the console's browser lease.
+        # Reacquire it before restoration rather than treating HTTP 503 as an SDK failure.
+        for attempt in range(1, 4):
+            try:
+                console(heartbeat, "POST")
+                fixture("RESTORE_PARK", "/vehicle/controls?speed=0&accelerator=0&brake=0")
+                fixture("RESTORE_PARK", "/vehicle/gear?gear=Park")
+                fixture("RESTORE_CLOSED", "/vehicle/body?door_fl=0")
+                body = console("/vehicle/body")
+                controls = console("/vehicle/controls")
+                gear = console("/vehicle/gear")
+                restored_fixture = {"front_left": body.get("body", body)["doors"]["front_left"],
+                                    "speed_kph": controls["speed_kph"], "gear": gear["actual"]["value"]}
+                require(restored_fixture == {"front_left": False, "speed_kph": 0, "gear": "Park"},
+                        "Final external fixture values differ from Park/0/CLOSED")
+                cleanup_attempts.append({"attempt": attempt, "restored": True})
+                print("RESTORE PASS: external console confirms Park / speed 0 / front-left closed", flush=True)
+                break
+            except Exception as exc:
+                cleanup_attempts.append({"attempt": attempt, "restored": False, "error_type": type(exc).__name__,
+                                         "http_status": getattr(exc, "code", None)})
+                time.sleep(.5)
+        try:
+            console(heartbeat + "&closing=1", "POST")
+        except Exception as exc:
+            cleanup_attempts.append({"phase": "CLOSE_LEASE", "error_type": type(exc).__name__,
+                                     "http_status": getattr(exc, "code", None)})
         (out / "console-events.json").write_text(json.dumps(fixtures, indent=2) + "\n")
         (out / "run-status.json").write_text(json.dumps({"run_id": args.run_id, "instrumentation_done": success,
-                                                        "error_type": error, "physical_vehicle_tested": False}, indent=2) + "\n")
+                                                        "error_type": error, "cleanup_attempts": cleanup_attempts,
+                                                        "restored_fixture": restored_fixture,
+                                                        "physical_vehicle_tested": False}, indent=2) + "\n")
 
+    require(restored_fixture == {"front_left": False, "speed_kph": 0, "gear": "Park"}, "Host fixture restoration failed; inspect run-status.json")
     require("OK (1 test)" in (out / "instrumentation.txt").read_text(), "Instrumentation assertions failed")
     expected_events = [
         "PLEOS:CAPABILITY_RECEIVED:ROW_1_LEFT:min=0:max=1:access=",
@@ -289,15 +334,19 @@ def main():
     artifacts = [path for path in out.iterdir() if path.is_file()]
     metadata = {
         "type": "REAL_PLEOS_AVD_OFFICIAL_GUIDE_VALIDATION", "validated_at": datetime.now(timezone.utc).isoformat(),
-        "run_id": args.run_id, "serial": args.serial, "avd": avd, "android_user": int(user),
+        "run_id": args.run_id, "serial": args.serial, "avd": avd, "android_api": int(android_api), "android_user": int(user),
         "backend_mode": health["mode"], "app_server_url": "http://10.0.2.2:8001", "declared_sdk_version": "2.3.2",
         "vehicle_service": service_version,
         "apk_sha256": sha(apk), "test_apk_sha256": sha(test_apk), "installed_apk_sha256": installed_hashes,
         "profile_id": PROFILE_ID, "manual_set_id": MANUAL_SET_ID, "source_version": args.source_version,
         "guide_id": GUIDE_ID, "source_urls": sorted(SOURCE_URLS), "visual_result": visual,
-        "phases": phases, "virtual_console_events": fixtures,
+        "phases": phases, "virtual_console_events": fixtures, "restored_fixture": restored_fixture,
+        "cleanup_attempts": cleanup_attempts,
         "physical_vehicle_tested": False, "profile_selected_by_user": True, "sdk_identified_vehicle_model": False,
         "app_sdk_set_called": False, "external_ai_called": False, "seatbelt_status_connected": False,
+        "screen_recording": {"requested": args.record, "file": "screenrecord.mp4" if args.record else None,
+                             "app_screen_visibility_verified": False,
+                             "review_required": "Optional physical-display recording needs separate visual QA; instrumentation screenshots/assertions prove app behavior"},
         "vehicle_log_policy": "allowlisted door.position ROW_1_LEFT/UX/lifecycle events only; no VIN or raw vehicle payloads",
         "files_sha256": {path.name: sha(path) for path in artifacts},
     }
