@@ -30,5 +30,28 @@
     "verification_status": "UNVERIFIED",
     "support_contacts": [],
     "is_demo": true
+  },
+  {
+    "profile_id": "ioniq5-ne1-2024-kr",
+    "manufacturer": "Hyundai",
+    "model_code": "NE1",
+    "display_name": "IONIQ 5",
+    "model_year": 2024,
+    "market_code": "KR",
+    "powertrain": "BEV",
+    "option_codes": [],
+    "steering_position": "LEFT",
+    "manual_set_id": "hyundai-ioniq5-ne1-2024-kr",
+    "manual_version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+    "verification_status": "VERIFIED",
+    "support_contacts": [],
+    "is_demo": false,
+    "verification_scope": [
+      "2024 Korea Korean owner manual applicability",
+      "door-open warning",
+      "door closing body-part precaution"
+    ],
+    "selection_method": "USER_CONFIRMED",
+    "sdk_vehicle_identity_verified": false
   }
 ]

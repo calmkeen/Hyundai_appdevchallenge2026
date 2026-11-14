@@ -6,8 +6,10 @@
 
 | 구분 | 명령/환경 | 결과 |
 | --- | --- | --- |
-| 서버 회귀 | `.venv/bin/python -m pytest backend/tests -q` | 최신 117개 통과. 기존 26개 + 게시 정책/API 73개 + 등록 CLI 18개. AnyIO deprecation warning 1개 |
-| 가이드 카탈로그 | `.venv/bin/python scripts/import_guides.py check --json` | VALID, 1개 DRAFT 구조 검사. 실제 게시 자료 없음 |
+| 서버 회귀 | `.venv/bin/python -m pytest backend/tests -q` | 최신 133개 통과. 이전 117개 + 공식 콘텐츠/LIVE API/규칙/초기화 보존 16개. AnyIO deprecation warning 1개 |
+| 가이드 카탈로그 | `.venv/bin/python scripts/import_guides.py check --json` | VALID, 공식 문 안내 3언어 PUBLISHED + DRAFT 1개 = 4개 레코드 |
+| 공식 매뉴얼 자료 | 포털 연식/시장/DocID 대조, HTML 및 PDF 인쇄 2-7/4-21 시각 대조, ko/en/ja 독립 의미 검토 | 한국시장 NE1/2024 범위 확인. AI 보조 검토이며 OEM/인간 전문가 검수 아님 |
+| 상태-가이드 규칙 | `scripts/check_contracts.py` | 1개 OPEN/ROW_1_LEFT 규칙의 스키마·프로필/판본·언어별 게시 가이드/관련 property 통과 |
 | GitHub Actions | develop `bfb548b`, run `43566021842` | 실제 원격 success. 계약/UI 자원·가이드 카탈로그·백엔드 회귀 단계 모두 성공. 최초 runner context 오류 수정 후 확인 |
 | Android 단위 | `:app:testDemoDebugUnitTest` | 최신 31개 통과 (기존 상태 6 + 게시 정책 14 + 파일 캐시 7 + 요청 순서 4), 실패/오류/건너뜀 0 |
 | Mock 기기 회귀 | API 35 / 1280×800 / `CarCueFlowTest` | 5개 통과, 원본 개폐 프레임 픽셀 차이·안전벨트 미연결·세 언어·기존 흐름 |

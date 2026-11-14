@@ -5,8 +5,14 @@
     "display_name": "한국어",
     "rtl": false,
     "ui_status": "DRAFT",
-    "guide_status": "PLANNED",
-    "mock_visible": true
+    "guide_status": "PARTIAL",
+    "mock_visible": true,
+    "guide_profile_ids": [
+      "ioniq5-ne1-2024-kr"
+    ],
+    "guide_topics": [
+      "door"
+    ]
   },
   {
     "locale": "en",
@@ -14,8 +20,14 @@
     "display_name": "영어",
     "rtl": false,
     "ui_status": "DRAFT",
-    "guide_status": "PLANNED",
-    "mock_visible": true
+    "guide_status": "PARTIAL",
+    "mock_visible": true,
+    "guide_profile_ids": [
+      "ioniq5-ne1-2024-kr"
+    ],
+    "guide_topics": [
+      "door"
+    ]
   },
   {
     "locale": "ja-JP",
@@ -23,8 +35,14 @@
     "display_name": "일본어",
     "rtl": false,
     "ui_status": "DRAFT",
-    "guide_status": "PLANNED",
-    "mock_visible": true
+    "guide_status": "PARTIAL",
+    "mock_visible": true,
+    "guide_profile_ids": [
+      "ioniq5-ne1-2024-kr"
+    ],
+    "guide_topics": [
+      "door"
+    ]
   },
   {
     "locale": "zh-Hans",

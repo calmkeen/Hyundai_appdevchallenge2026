@@ -1,0 +1,79 @@
+{
+  "guide_id": "ioniq5-door-open-check",
+  "profile_ids": [
+    "ioniq5-ne1-2024-kr"
+  ],
+  "manual_set_id": "hyundai-ioniq5-ne1-2024-kr",
+  "source_version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+  "topic": "door",
+  "title": "문 열림 표시 확인",
+  "body": "표시된 문을 닫기 전에 손과 머리 등 신체가 문 움직임에 걸리지 않는지 살피세요. 그다음 문을 끝까지 닫으세요. 출발 전에는 도어 전체와 후드·테일게이트가 완전히 닫혔는지, 계기판의 경고문과 열린 부분 표시가 모두 사라졌는지 확인하세요.",
+  "locale": "ko-KR",
+  "source_locale": "ko-KR",
+  "glossary_version": null,
+  "lifecycle": "PUBLISHED",
+  "translation_review_status": "NOT_APPLICABLE",
+  "sources": [
+    {
+      "source_id": "hyundai-ne1-2024-kr-door-open-warning",
+      "title": "Hyundai IONIQ 5 2024 — Korean owner manual",
+      "url": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/idff13cd5359c.html",
+      "version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+      "section": "클러스터 표시창 정보 > 도어, 후드, 테일게이트 열림 · 인쇄 4-21 / PDF 167",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "source_id": "hyundai-ne1-2024-kr-door-pinch-caution",
+      "title": "Hyundai IONIQ 5 2024 — Korean owner manual",
+      "url": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/id0d6d99a8d21.html",
+      "version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+      "section": "도어/테일게이트/유리창을 열고 닫을 때 조심 · 인쇄 2-7 / PDF 85",
+      "verification_status": "VERIFIED"
+    }
+  ],
+  "steps": [
+    {
+      "step_id": "check-pinch-area",
+      "order": 1,
+      "title": "닫기 전 끼임 위험 살피기",
+      "body": "문이 움직이는 곳에 사람의 손이나 머리 등 신체가 닿지 않는지 살핀 뒤 문을 닫으세요.",
+      "image_asset_id": null,
+      "official_cautions": [
+        "몸의 일부가 문틈에 있으면 닫지 마세요."
+      ],
+      "source_ids": [
+        "hyundai-ne1-2024-kr-door-pinch-caution"
+      ],
+      "related_properties": [
+        "door.position"
+      ],
+      "actions": []
+    },
+    {
+      "step_id": "check-closure-display",
+      "order": 2,
+      "title": "닫힘과 차량 표시 확인",
+      "body": "출발하기 전에 모든 문과 후드·테일게이트가 끝까지 닫혔는지 살피세요. 차량 계기판에서도 경고문과 열린 부분 표시가 둘 다 사라졌는지 직접 확인하세요.",
+      "image_asset_id": null,
+      "official_cautions": [
+        "계기판의 경고문과 열림 표시가 모두 해제됐는지 직접 확인하세요."
+      ],
+      "source_ids": [
+        "hyundai-ne1-2024-kr-door-open-warning"
+      ],
+      "related_properties": [
+        "door.position"
+      ],
+      "actions": [
+        {
+          "kind": "REFRESH_STATUS",
+          "target_id": "door.position"
+        },
+        {
+          "kind": "OPEN_MANUAL",
+          "target_id": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/idff13cd5359c.html"
+        }
+      ]
+    }
+  ]
+}

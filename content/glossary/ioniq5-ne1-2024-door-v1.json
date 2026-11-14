@@ -1,0 +1,40 @@
+{
+  "version": "carcue-ne1-2024-door-v1",
+  "status": "REVIEWED",
+  "source_locale": "ko-KR",
+  "review_method": "AI-assisted source comparison with independent second-agent semantic review",
+  "human_certified_review": false,
+  "oem_approved": false,
+  "terms": [
+    {
+      "id": "ROW_1_LEFT",
+      "ko-KR": "앞좌석 왼쪽 문",
+      "en": "Front-left door",
+      "ja-JP": "前席左側ドア"
+    },
+    {
+      "id": "HOOD",
+      "ko-KR": "후드",
+      "en": "Hood",
+      "ja-JP": "ボンネット"
+    },
+    {
+      "id": "TAILGATE",
+      "ko-KR": "테일게이트",
+      "en": "Tailgate",
+      "ja-JP": "テールゲート"
+    },
+    {
+      "id": "PINCHING",
+      "ko-KR": "끼임",
+      "en": "Pinching",
+      "ja-JP": "挟み込み"
+    },
+    {
+      "id": "FULLY_CLOSED",
+      "ko-KR": "완전히 닫힘",
+      "en": "Fully closed",
+      "ja-JP": "完全に閉まっている"
+    }
+  ]
+}
