@@ -5,8 +5,10 @@
 | 작업 | 브랜치 | 범위와 완료 조건 | 상태 |
 | --- | --- | --- | --- |
 | 기준선 통합 | 기존 `feature/carcue-mvp` → develop | SDK/앱/영상/문서 전체 이력을 보존해 통합, main 보존 | 로컬 통합 `137e905`, MVP 기준 `0c7b39d` |
-| GF-001 작업 흐름 | `feature/git-flow-workflow` | Git Flow 규칙·작업 기록·PR 양식, 기존 규칙 보존 | 구현·문서 검사 완료, 로컬 통합 대상 |
-| GF-002 기본 CI | `feature/basic-ci` | 기존 계약·백엔드 검증을 PR/브랜치 CI로 연결, 로컬 명령 통과와 GitHub 실행을 구분 | 다음 독립 작업 |
+| GF-001 작업 흐름 | `feature/git-flow-workflow` | Git Flow 규칙·작업 기록·PR 양식, 기존 규칙 보존 | 독립 커밋 후 로컬 develop 통합 완료 |
+| GF-002 기본 CI | `feature/basic-ci` | 계약·백엔드 검증을 PR/브랜치 CI로 연결 | 계약/148개 UI 자원·백엔드 26개 로컬 통과, YAML 검사 후 로컬 통합. GitHub 실행은 별도 |
+
+GF-001과 GF-002는 원격 push를 하지 않은 로컬 작업이다. 기본 CI의 실제 범위와 재현은 `CI.md`를 따른다.
 
 ## 다음 제품 작업
 

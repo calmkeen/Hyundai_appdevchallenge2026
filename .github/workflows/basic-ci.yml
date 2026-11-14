@@ -1,0 +1,38 @@
+name: Basic validation
+
+"on":
+  pull_request:
+    branches: [develop, main, 'release/**']
+  push:
+    branches: [develop, main, 'feature/**', 'release/**', 'hotfix/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contracts-and-backend:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      CARCUE_MODE: MOCK
+      CARCUE_DB: ${{ runner.temp }}/carcue-ci.sqlite3
+      OPENAI_API_KEY: ''
+      OPENAI_MODEL: ''
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: pip
+          cache-dependency-path: backend/requirements.lock.txt
+      - name: Install locked dependencies
+        run: python -m pip install -r backend/requirements.lock.txt
+      - name: Validate contracts and UI resources
+        run: python scripts/check_contracts.py
+      - name: Run backend regression tests
+        run: python -m pytest backend/tests -q
