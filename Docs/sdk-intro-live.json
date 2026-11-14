@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "audio": ".tooling/media/scott-buckley-a-kind-of-hope.mp3",
+  "audio_sha256": "d0dc554c0db9ea208b4f59e4f0c1b4446aa7ef622c7bfeffca278130a46c51f1",
+  "audio_start": 12,
+  "audio_volume": 0.32,
+  "audio_fade_in_seconds": 0.8,
+  "audio_fade_out_seconds": 1.4,
+  "source_display": [2560, 1440],
+  "crop_xywh": [854, 90, 1682, 1210],
+  "hero_asset": "content/illustrations/pleos-reference/car/frame-020.png",
+  "safety_asset": "content/illustrations/pleos-reference/seatbelt.png",
+  "hero_title": "차량·안전벨트 안내",
+  "hero_caption": "앱 안의 Pleos 참고 시각화",
+  "visual_credit": "차량·벨트: 사용자 지정 Pleos 참고 화면 · 벨트 센서 미연결",
+  "intro_notice": "모든 기능 화면은 같은 최신 Pleos SDK 앱에서 촬영",
+  "outro_notice": "전용 AVD의 실제 SDK · 무료 로컬 AI 선택 · 검수된 저장 번역",
+  "segments": [
+    {
+      "kind": "intro", "duration": 3,
+      "title": "언제, 어디서든,\n평소와 같은 경험을.",
+      "subtitle": "차량이 달라도, 익숙한 안내와 사용 경험"
+    },
+    {
+      "kind": "video", "scene_id": "profile", "duration": 2,
+      "chapter": "01  시작하기", "title": "내 차량에 맞춰\n시작하세요",
+      "subtitle": "차종·연식·판매지역을\n먼저 확인해요"
+    },
+    {
+      "kind": "video", "scene_id": "language-ko", "duration": 2,
+      "chapter": "01  시작하기", "title": "안내를 읽기 편한\n내 언어로",
+      "subtitle": "한국어 · English · 日本語\n차량 사양은 그대로예요"
+    },
+    {
+      "kind": "video", "scene_id": "door-closed", "duration": 2,
+      "chapter": "02  차량 상태", "title": "차량 상태를\n앱 안에서",
+      "subtitle": "Pleos SDK로 받은\n앞좌석 왼쪽 문 상태",
+      "detail": "실제 SDK 수신 · 전용 AVD"
+    },
+    {
+      "kind": "video", "scene_id": "door-open", "duration": 2,
+      "chapter": "02  차량 상태", "title": "문이 열리면\n그림도 함께",
+      "subtitle": "실제 변경 알림을 받아\n차량 시각화도 바뀌어요",
+      "detail": "닫힘 → 열림 · SDK 수신"
+    },
+    {
+      "kind": "video", "scene_id": "door-restored", "duration": 2,
+      "chapter": "02  차량 상태", "title": "다시 닫히면\n표시도 돌아와요",
+      "subtitle": "닫힘 알림까지 받아\n앱의 차량도 함께 갱신",
+      "detail": "열림 → 닫힘 · SDK 수신"
+    },
+    {
+      "kind": "video", "scene_id": "seatbelt", "duration": 2,
+      "chapter": "03  익숙한 시각화", "title": "안전벨트 안내를\n익숙한 그림으로",
+      "subtitle": "사용자가 지정한\nPleos 참고 이미지를 표시",
+      "detail": "착용 상태 센서 미연결"
+    },
+    {
+      "kind": "video", "scene_id": "official-guide-step2", "duration": 2,
+      "chapter": "04  공식 안내", "title": "차량에 맞는\n확인 순서",
+      "subtitle": "검수된 문 안내에서\n주의문과 원문까지 확인",
+      "detail": "2024 IONIQ 5 · 한국 사양"
+    },
+    {
+      "kind": "video", "scene_id": "ask-ko", "duration": 2,
+      "chapter": "05  질문과 답변", "title": "문을 닫기 전,\n무엇을 볼까요?",
+      "subtitle": "무료 로컬 AI가 안내를 고르고\n서버가 주의문까지 조립해요",
+      "detail": "실제 Ollama · 검수 안내 선택"
+    },
+    {
+      "kind": "video", "scene_id": "translation-en", "duration": 2,
+      "chapter": "05  원문과 번역", "title": "영어로도\n원문과 함께",
+      "subtitle": "추가 생성 없이\n검수된 같은 안내를 확인",
+      "detail": "검수된 저장 번역"
+    },
+    {
+      "kind": "video", "scene_id": "language-en", "scene_kind": "LANGUAGE_TRANSITION", "duration": 2,
+      "chapter": "06  언어 전환", "title": "언어를 바꿔도\n차량은 그대로",
+      "subtitle": "메뉴와 새 답변은 영어로\n한국 판매사양은 유지해요"
+    },
+    {
+      "kind": "video", "scene_id": "ask-en", "duration": 2,
+      "chapter": "06  익숙한 언어", "title": "영어에서도\n같은 주의사항",
+      "subtitle": "닫기 전 확인과 금지문\n공식 출처를 함께 보여줘요",
+      "detail": "실제 무료 로컬 AI 선택"
+    },
+    {
+      "kind": "video", "scene_id": "ask-ja", "duration": 2,
+      "chapter": "06  익숙한 언어", "title": "일본어에서도\n같은 안내",
+      "subtitle": "메뉴와 안내는 일본어로\n원문·매뉴얼 범위는 유지",
+      "detail": "실제 무료 로컬 AI 선택"
+    },
+    {
+      "kind": "video", "scene_id": "drive-restricted", "duration": 2,
+      "chapter": "07  차량 UX", "title": "플랫폼의 제한에\n맞춰서",
+      "subtitle": "실제 주행 제한이 오면\n입력과 긴 안내를 막아요",
+      "detail": "실제 CarUxRestrictions 수신"
+    },
+    {
+      "kind": "video", "scene_id": "end-session", "duration": 2,
+      "chapter": "08  이용 마치기", "title": "이용이 끝나면\n가볍게 마무리",
+      "subtitle": "질문·번역·선택을 정리하고\n기본 안내는 남겨 둬요"
+    },
+    {
+      "kind": "outro", "duration": 3,
+      "title": "익숙한 경험을,\n어디서나.",
+      "subtitle": "한국어  ·  English  ·  日本語"
+    }
+  ]
+}
