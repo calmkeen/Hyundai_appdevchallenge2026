@@ -1,0 +1,13 @@
+[
+  {
+    "rule_id": "ioniq5-ne1-2024-kr-row1left-open",
+    "profile_id": "ioniq5-ne1-2024-kr",
+    "manual_set_id": "hyundai-ioniq5-ne1-2024-kr",
+    "source_version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+    "property_id": "door.position",
+    "area_id": "ROW_1_LEFT",
+    "value": "OPEN",
+    "guide_id": "ioniq5-door-open-check",
+    "verification_status": "VERIFIED"
+  }
+]

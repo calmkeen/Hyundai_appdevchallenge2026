@@ -1,0 +1,79 @@
+{
+  "guide_id": "ioniq5-door-open-check",
+  "profile_ids": [
+    "ioniq5-ne1-2024-kr"
+  ],
+  "manual_set_id": "hyundai-ioniq5-ne1-2024-kr",
+  "source_version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+  "topic": "door",
+  "title": "Check the door-open indication",
+  "body": "Before closing the indicated door, check that hands, heads and other body parts are clear of its path, then close it fully. Before driving, directly check that all doors, the hood and the tailgate are fully closed and that both the warning message and the open-part indication have cleared from the instrument cluster.",
+  "locale": "en",
+  "source_locale": "ko-KR",
+  "glossary_version": "carcue-ne1-2024-door-v1",
+  "lifecycle": "PUBLISHED",
+  "translation_review_status": "REVIEWED",
+  "sources": [
+    {
+      "source_id": "hyundai-ne1-2024-kr-door-open-warning",
+      "title": "Hyundai IONIQ 5 2024 — Korean owner manual",
+      "url": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/idff13cd5359c.html",
+      "version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+      "section": "클러스터 표시창 정보 > 도어, 후드, 테일게이트 열림 · 인쇄 4-21 / PDF 167",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "source_id": "hyundai-ne1-2024-kr-door-pinch-caution",
+      "title": "Hyundai IONIQ 5 2024 — Korean owner manual",
+      "url": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/id0d6d99a8d21.html",
+      "version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+      "section": "도어/테일게이트/유리창을 열고 닫을 때 조심 · 인쇄 2-7 / PDF 85",
+      "verification_status": "VERIFIED"
+    }
+  ],
+  "steps": [
+    {
+      "step_id": "check-pinch-area",
+      "order": 1,
+      "title": "Check for body parts before closing",
+      "body": "Before closing the door, check that hands, heads and other body parts are clear of its path.",
+      "image_asset_id": null,
+      "official_cautions": [
+        "Do not close the door while any body part is in the opening."
+      ],
+      "source_ids": [
+        "hyundai-ne1-2024-kr-door-pinch-caution"
+      ],
+      "related_properties": [
+        "door.position"
+      ],
+      "actions": []
+    },
+    {
+      "step_id": "check-closure-display",
+      "order": 2,
+      "title": "Check closure and the vehicle display",
+      "body": "Before driving, directly check that all doors, the hood and the tailgate are fully closed and that both the warning message and the open-part indication have disappeared from the instrument cluster.",
+      "image_asset_id": null,
+      "official_cautions": [
+        "Check the vehicle display itself to confirm that both the warning message and the opening indication have cleared."
+      ],
+      "source_ids": [
+        "hyundai-ne1-2024-kr-door-open-warning"
+      ],
+      "related_properties": [
+        "door.position"
+      ],
+      "actions": [
+        {
+          "kind": "REFRESH_STATUS",
+          "target_id": "door.position"
+        },
+        {
+          "kind": "OPEN_MANUAL",
+          "target_id": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/idff13cd5359c.html"
+        }
+      ]
+    }
+  ]
+}

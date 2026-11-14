@@ -1,6 +1,7 @@
 """Validate supplied contracts and ensure unpublished content cannot be mistaken for production."""
 import json
 import re
+import sys
 from pathlib import Path
 from jsonschema import Draft202012Validator
 
@@ -26,3 +27,11 @@ for key, translations in ui.items():
         assert translations.get(locale), (key, locale)
         assert set(re.findall(r"\{\w+\}", translations[locale])) == set(re.findall(r"\{\w+\}", translations["en"])), (key, locale)
 print(f"PASS {len(keys)} referenced UI keys; {len(ui)} resources in all 3 mock languages, placeholders preserved")
+sys.path.insert(0, str(root / "backend"))
+from app.content import Catalog
+from app.guide_rules import validate_state_guide_rules
+Draft202012Validator.check_schema(json.loads((root / "contracts/state-guide-rules.schema.json").read_text()))
+rules = json.loads((root / "content/state-guide-rules.json").read_text())
+issues = validate_state_guide_rules(rules, Catalog())
+assert not issues, issues
+print(f"PASS {len(rules)} verified SDK state-to-guide rule(s), exact profile/manual and published content")
