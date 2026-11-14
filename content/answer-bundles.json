@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "bundles": [
+    {
+      "policy_id": "ioniq5-door-closing-complete-v1",
+      "guide_id": "ioniq5-door-open-check",
+      "profile_ids": [
+        "ioniq5-ne1-2024-kr"
+      ],
+      "manual_set_id": "hyundai-ioniq5-ne1-2024-kr",
+      "source_version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+      "topic": "door",
+      "unit_suffix": ":closing-bundle:v1",
+      "source_ids": [
+        "hyundai-ne1-2024-kr-door-open-warning",
+        "hyundai-ne1-2024-kr-door-pinch-caution"
+      ],
+      "locales": [
+        "ko-KR",
+        "en",
+        "ja-JP"
+      ],
+      "required_steps": [
+        {
+          "step_id": "check-pinch-area",
+          "order": 1,
+          "source_ids": [
+            "hyundai-ne1-2024-kr-door-pinch-caution"
+          ]
+        },
+        {
+          "step_id": "check-closure-display",
+          "order": 2,
+          "source_ids": [
+            "hyundai-ne1-2024-kr-door-open-warning"
+          ]
+        }
+      ],
+      "records": [
+        {
+          "locale": "ko-KR",
+          "payload_sha256": "ef87365b5eda02ac91668c214cec586a526ff26b95d49da5cc041b072d34473f",
+          "bundle_sha256": "7aaf7a268be7b2bd2cf5f416413f444d533b81f0ea62ec09fe375a9260b31b5b"
+        },
+        {
+          "locale": "en",
+          "payload_sha256": "4957d350a2b4798d5afc8d3f5ac89a5068c465497e0c921388be66ace1691096",
+          "bundle_sha256": "07c13baf206b2f448733f4769184bd73e019d20e4767e022b4044a27236aedf7"
+        },
+        {
+          "locale": "ja-JP",
+          "payload_sha256": "31f2eb5f631a5eaa627709f2e354e580ba7da6d747ccc14ff462f7b012d2f3aa",
+          "bundle_sha256": "67e3d3969819f336f53069c0521b5e2ffe3750e4a4e99b18ea169c57fa08c928"
+        }
+      ],
+      "content_basis": "PUBLISHED_CARCUE_REVIEWED_SUMMARIES",
+      "review_method": "Deterministic assembly of the existing AI-assisted reviewed CarCue summaries and explicit caution summaries; no new translation or verbatim OEM prohibition claim",
+      "human_certified_review": false,
+      "oem_approved": false
+    }
+  ]
+}

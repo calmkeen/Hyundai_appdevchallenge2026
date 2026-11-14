@@ -186,6 +186,9 @@ def test_duplicate_profile_identity_cannot_offer_a_support_action():
 def test_publication_valid_source_id_outside_action_contract_cannot_become_manual_target(source_id):
     catalog, provider = Catalog(), ReviewedUnitFixture()
     guide = next(item for item in catalog.guides if item.get("guide_id") == "ioniq5-door-open-check" and item["locale"] == "ko-KR")
+    # This regression targets the generic publication/action contracts. The
+    # pinned production closing guide intentionally rejects any payload change.
+    guide["guide_id"] = "synthetic-legacy-source-id-guide"
     previous = guide["sources"][0]["source_id"]
     guide["sources"][0]["source_id"] = source_id
     for step in guide["steps"]:

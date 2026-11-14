@@ -20,6 +20,7 @@ PROFILE = "ioniq5-ne1-2024-kr"
 def question(locale="ko-KR"):
     return AskRequest(request_id="private-request-id", session_id="private-session-id", profile_id=PROFILE,
                       locale=locale, question="문을 닫기 전에 무엇을 확인하나요?",
+                      guide_context={"guide_id": "ioniq5-door-open-check", "step_id": "check-closure-display"},
                       vehicle_context=[{"property_id": "door.position", "area_id": "ROW_1_LEFT",
                                         "value": "OPEN", "read_status": "VALUE", "source": "PLEOS"}])
 
@@ -32,7 +33,7 @@ def completed(value, **changes):
 @pytest.mark.parametrize("locale", ["ko-KR", "en", "ja-JP"])
 def test_local_model_selects_only_a_reviewed_unit_and_server_keeps_every_caution(locale):
     guides = Catalog().published(PROFILE, locale)
-    unit = answer_units(guides)[1]
+    unit = answer_units(guides)[0]
     calls, audit = [], []
 
     def handler(request):
@@ -47,20 +48,22 @@ def test_local_model_selects_only_a_reviewed_unit_and_server_keeps_every_caution
         schema = wire["format"]
         assert schema["additionalProperties"] is False
         assert set(schema["properties"]) == {"status", "unit_id"}
-        choices = schema["properties"]["unit_id"]["anyOf"][0]["enum"]
-        assert choices == [u["unit_id"] for u in answer_units(guides)]
+        choice = schema["properties"]["unit_id"]["anyOf"][0]
+        assert choice == {"const": unit["unit_id"], "type": "string"}
         payload = json.loads(wire["messages"][1]["content"])
         assert payload["locale"] == locale and payload["question"] == question(locale).question
         assert payload["vehicle_context"][0]["value"] == "OPEN"
         assert payload["history"] == [["older question", "older answer"]] * 3
-        assert payload["candidates"][1]["text"] == unit["text"]
-        assert "source_ids" not in payload["candidates"][1]
+        assert len(payload["candidates"]) == 1
+        assert payload["candidates"][0]["text"] == unit["text"]
+        assert payload["guide_context"]["step_id"] == "check-closure-display"
+        assert "source_ids" not in payload["candidates"][0]
         return httpx.Response(200, json=completed({"status": "ANSWERED", "unit_id": unit["unit_id"]}))
 
     provider = OllamaProvider(transport=httpx.MockTransport(handler), audit=audit.append)
     answer = asyncio.run(provider.ask(question(locale), guides, [("older question", "older answer")] * 4))
     assert validate_answer(answer, guides) == unit
-    assert all(caution in answer.answer for caution in guides[0]["steps"][0]["official_cautions"])
+    assert all(part in answer.answer for step in guides[0]["steps"] for part in [step["body"], *step["official_cautions"]])
     assert len(calls) == len(audit) == 1 and provider.key == ""
     event = audit[0]
     assert event["model"] == "qwen3:4b" and event["prompt_tokens"] == 42 and event["output_tokens"] == 12
