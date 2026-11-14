@@ -1,10 +1,36 @@
 import json
+import re
+import unicodedata
 from collections import Counter
 from pathlib import Path
 
 from .guide_policy import ValidationIssue, validate_guide
 
 ROOT = Path(__file__).resolve().parents[2]
+
+# Search aliases identify the reviewed door topic, not additional procedures.
+# Korean particles and Japanese sentences cannot be split on spaces like English.
+_DOOR_QUERY = re.compile(
+    r"\bdoors?\b|ドア|扉|도어|"
+    r"(?<![가-힣a-z])문(?=$|[\s?!.,:·]|이|을|은|에|과|도|만|부터|까지|열|닫|틈)",
+    re.IGNORECASE,
+)
+_CHARGING_QUERY = re.compile(r"\bcharg(?:e|es|ed|ing|er|ers)\b|충전|充電|チャージ", re.IGNORECASE)
+# Full-match only: a selected door guide may resolve a short referential
+# follow-up, never supply sources for an arbitrary different question.
+_DOOR_FOLLOWUP = re.compile(
+    r"(?:(?:그\s*)?다음(?:에는|엔|은)?요|(?:그\s*)?다음\s*단계는(?:\s*무엇인가요)?|"
+    r"what(?:'s| is)?\s+next|what should i do next|what is the next step|next step|"
+    r"(?:その)?次は|次(?:はどう|に何を)すればいいですか|次の手順は)[\s?!。.!]*",
+    re.IGNORECASE,
+)
+
+
+def _door_guide(guide):
+    # The publication contract also supports a body-only guide. With steps,
+    # require an explicit property association instead of guessing from its text.
+    return guide["topic"] == "door" and (not guide["steps"] or any(
+        "door.position" in step["related_properties"] for step in guide["steps"]))
 
 
 class Catalog:
@@ -70,10 +96,24 @@ class Catalog:
         return [g for score, g in sorted(scored, key=lambda pair: pair[0], reverse=True) if score][:5]
 
     def retrieve(self, request):
+        guides = self.published(request.profile_id, request.locale)
+        query = unicodedata.normalize("NFKC", request.question).casefold()
+        # A door/closing passage does not answer charging instructions, even when
+        # the door guide is currently selected or the question mentions a door.
+        if _CHARGING_QUERY.search(query) and not any(g["topic"] == "charging" for g in guides):
+            return []
         matches = self.search(request.profile_id, request.locale, request.question)
+        door_question = bool(_DOOR_QUERY.search(query))
+        if door_question:
+            matches = [g for g in guides if _door_guide(g)] + [g for g in matches if g["topic"] != "door"]
+        else:
+            # Common English words (e.g. 'do' inside 'door') must not route an
+            # unrelated question to the only available manual passage.
+            matches = [g for g in matches if g["topic"] != "door"]
         if request.guide_context.guide_id:
-            context = next((g for g in self.published(request.profile_id, request.locale)
-                            if g["guide_id"] == request.guide_context.guide_id), None)
+            context = next((g for g in guides if g["guide_id"] == request.guide_context.guide_id
+                            and (g["topic"] != "door" or (_door_guide(g)
+                                 and (door_question or _DOOR_FOLLOWUP.fullmatch(query.strip()))))), None)
             if context and context not in matches:
                 matches.insert(0, context)
         return matches[:5]

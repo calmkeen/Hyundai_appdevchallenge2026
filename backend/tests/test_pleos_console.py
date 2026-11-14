@@ -24,6 +24,7 @@ def endpoint():
         ready = True
         accelerator = True
         fail_heartbeat = False
+        close_delay = 0.0
         lease_seconds = 0.14
         lock = threading.Lock()
 
@@ -54,6 +55,8 @@ def endpoint():
                 else:
                     state.clients[client] = time.monotonic()
                     state.heartbeats.append(time.monotonic())
+            if query.get("closing") == ["1"]:
+                time.sleep(state.close_delay)
             self.reply({"ok": True})
 
         def do_GET(self):
@@ -179,3 +182,42 @@ def test_context_failure_still_stops_heartbeat_and_closes_lease(endpoint):
 def test_non_loopback_console_is_rejected_without_network():
     with pytest.raises(ValueError, match="loopback"):
         console.PleosConsoleSession("http://example.test:8088")
+
+
+def test_slow_close_can_finish_after_heartbeat_stops_without_expanding_heartbeat_deadline(endpoint):
+    state, url = endpoint
+    state.close_delay = 0.35  # Console DDS teardown can outlast heartbeat HTTP timeout.
+    session = lease(url)
+    with session:
+        session.wait_ready(timeout=0.5, poll_interval=0.02)
+    assert session.heartbeat_timeout == 0.2
+    assert state.closed == ["test-client"] and not state.clients
+    assert session.diagnostics()["heartbeat_running"] is False
+    assert session.diagnostics()["close_error"] is None
+
+
+def test_initial_heartbeat_failure_recovers_inside_readiness_deadline(endpoint):
+    state, url = endpoint
+    state.fail_heartbeat = True
+    timer = threading.Timer(0.1, lambda: setattr(state, "fail_heartbeat", False))
+    timer.start()
+    try:
+        with lease(url) as session:
+            with pytest.raises(console.ConsoleHeartbeatError):
+                session.request("/vehicle/body")
+            session.wait_ready(timeout=0.7, poll_interval=0.02)
+            assert session.diagnostics()["heartbeat_failures"] >= 1
+            assert session.diagnostics()["heartbeat_error"] is None
+    finally:
+        timer.join(timeout=1)
+    assert state.closed == ["test-client"]
+
+
+def test_initial_heartbeat_failure_never_claims_ready_if_server_stays_unavailable(endpoint):
+    state, url = endpoint
+    state.fail_heartbeat = True
+    with lease(url) as session:
+        with pytest.raises(console.ConsoleReadinessTimeout):
+            session.wait_ready(timeout=0.1, poll_interval=0.02)
+        assert session.diagnostics()["readiness"] is None
+    assert state.closed == ["test-client"]
