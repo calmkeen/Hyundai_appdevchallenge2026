@@ -6,14 +6,15 @@
 
 | 구분 | 명령/환경 | 결과 |
 | --- | --- | --- |
-| 서버 회귀 | `.venv/bin/python -m pytest backend/tests -q` | 최신 133개 통과. 이전 117개 + 공식 콘텐츠/LIVE API/규칙/초기화 보존 16개. AnyIO deprecation warning 1개 |
+| 서버/도구 회귀 | `.venv/bin/python -m pytest backend/tests -q` | 최신 140개 통과. 기존133 + Console heartbeat/readiness 로컬 HTTP7개. AnyIO deprecation warning 1개 |
 | 가이드 카탈로그 | `.venv/bin/python scripts/import_guides.py check --json` | VALID, 공식 문 안내 3언어 PUBLISHED + DRAFT 1개 = 4개 레코드 |
 | 공식 매뉴얼 자료 | 포털 연식/시장/DocID 대조, HTML 및 PDF 인쇄 2-7/4-21 시각 대조, ko/en/ja 독립 의미 검토 | 한국시장 NE1/2024 범위 확인. AI 보조 검토이며 OEM/인간 전문가 검수 아님 |
 | 상태-가이드 규칙 | `scripts/check_contracts.py` | 1개 OPEN/ROW_1_LEFT 규칙의 스키마·프로필/판본·언어별 게시 가이드/관련 property 통과 |
 | GitHub Actions | develop `bfb548b`, run `43566021842` | 실제 원격 success. 계약/UI 자원·가이드 카탈로그·백엔드 회귀 단계 모두 성공. 최초 runner context 오류 수정 후 확인 |
 | Android 단위 | `:app:testDemoDebugUnitTest` | 최신 42개 통과 (이전31 + 실제SDK 상태별 가이드 정책11), 실패/오류/건너뜀0 |
-| SDK 공식 가이드 core | `PleosOfficialGuideTest`, run03 / 앱118b9c86… / 테스트2cc2ef14… | 1개·43.685초 성공. GET0→OPEN/CLOSED callback→공식 안내/재조회→실제 UX→해제·최종Park0CLOSED복구 |
-| 시각 오프셋 개선 앱 | 앱e9ab702d… / 정상 런처 실제adb screencap | 빌드·설치SHA·물리표시·SDK GET0/callback0 확인. 추가 OPEN 전체재시험은 Console/DDS503 준비 실패로 미완료 |
+| 최신 SDK 공식 가이드 전체 | `PleosOfficialGuideTest`, run05 / 앱e9ab702d… / 테스트2cc2ef14… | 1개·19.188초 성공. 실제 설치SHA·GET0→OPEN/CLOSED callback/차량표시→공식 안내/재조회→실제 UX→해제·최종Park0CLOSED복구 |
+| 이전 SDK 공식 가이드 core | run03 / 앱118b9c86… / 테스트2cc2ef14… | 1개·43.685초 성공. 후속 e9 APK는 위 run05에서 직접 재시험 완료 |
+| Console 실제 회귀 | 전용 AVD 비활성→독립heartbeat/준비확인 | 같은 속도/페달0 요청503→200, 6초 주 작업 대기 중7회heartbeat/준비flag유지. run05 종료 뒤thread종료/lease종료오류없음 |
 | 시험 환경 실패 보존 | run01/02/04 및 추가 renderer 후보 | 설치90초timeout, host lease503은도구보완후run03성공. 이후AVD PackageManager/Integrity timeout/DDS inactive503은성공으로보고하지않음 |
 | Mock 기기 회귀 | API 35 / 1280×800 / `CarCueFlowTest` | 5개 통과, 원본 개폐 프레임 픽셀 차이·안전벨트 미연결·세 언어·기존 흐름 |
 | 실제 APK 연속 촬영 | API 35 / `NativeShowcaseTest` | 1개 통과, 20개 실제 화면·개폐·세 언어 전환 |
@@ -40,7 +41,7 @@
 
 ## 최신: 공식 SDK 문 안내 연결 · 2026-11-14
 
-실제 SDK core 전체 흐름은 `9639181`/앱118b9c86…/테스트2cc2ef14…에서 43.685초 통과했다. 시각 오프셋 추가본 e9ab702d…는 정상 런처 물리 표시와 SDK GET0까지 확인했으며 OPEN 전체 재시험은 AVD Console503으로 미완료다. 정확한 해시·이전 APK 파일의 부재·물리 캡처와 Window 캡처·실패 범위는 `SDK_OFFICIAL_GUIDE_VALIDATION.md`를 따른다. 기존 소개 영상은 아래 이전 APK의 기록으로 보존한다.
+최신 앱e9ab702d…/테스트2cc2ef14…로 run05가 19.188초 통과했다. Console 독립 heartbeat와 DDS 준비 확인을 보완해 이전503 미완료 범위를 해소했다. 실제 SDK 문 개폐·차량 픽셀 변경/복귀·공식 안내/출처·재조회·주행 제한/복귀·구독 해제와 최종 Console 상태 복구까지 확인했다. 정상 런처 물리 표시도 같은 APK SHA에 연결했다. 상세는 `PLEOS_CONSOLE_RECOVERY.md`, 이전 APK 이력은 `SDK_OFFICIAL_GUIDE_VALIDATION.md`를 따른다. 기존 소개 영상은 아래 이전 APK의 기록으로 보존한다.
 
 ## 이전: 전체 기능을 같은 SDK 앱에서 촬영 · 2026-11-14
 

@@ -2,6 +2,8 @@
 
 2026-11-14. 공식 자료 등록은 `feature/ioniq5-official-door-content`, 앱 연결과 기기 시험은 `feature/sdk-contextual-door-guide`에서 분리했다. Mock 화면을 추가한 작업이 아니다. 전용 AVD의 실제 SDK 수신과 실차 검증은 구분한다.
 
+**최신 결과:** `feature/pleos-console-readiness`에서 Console heartbeat/준비 확인을 보완한 뒤 최신 앱 `e9ab702d…`의 전체 SDK 시험 run05가 **19.188초 통과**했다. 문 개폐·차량 표시·공식 안내·재조회·주행 제한/복귀·해제와 최종 Console 복구까지 확인했다. 아래 run04 미완료 기록은 당시 이력이며 현재는 해소됐다. 상세 원인·재현·증거는 `PLEOS_CONSOLE_RECOVERY.md`를 따른다.
+
 ## 구현한 데이터 흐름
 
 1. 사용자가 `ioniq5-ne1-2024-kr`(2024 한국시장 아이오닉 5)을 선택한다. 이 선택은 매뉴얼 적용 범위를 정하며 SDK의 차종/VIN 인증이 아니다.
@@ -56,26 +58,27 @@ adb -s emulator-5584 shell monkey -p com.carcue.app -c android.intent.category.L
 
 Compose 1.6.6은 drawing이 꺼져 있을 때 캡처 동안만 켰다가 복원하는 코드 경로가 있고, [Android 공개 HardwareRenderer API](https://developer.android.com/reference/android/graphics/HardwareRenderer#isDrawingEnabled())도 테스트 중심 emulator에서 drawing이 꺼질 수 있다고 설명한다. 이것만으로 이번 원인이 ComposeRule였다고 단정하지 않는다. 읽기 전용 `debug.hwui.drawing_enabled`는 빈 값이었으며 초기 기본값 true 경로와 실행 중 프로세스의 override는 별개다. 정상 런처, 테스트 중 drawing 관측, 물리 캡처, 영상 QA를 나눠 기록한다. 프로덕션 Manifest/TaskView를 추측 변경하지 않았다.
 
-추가 렌더링 측정용 test APK 후보 `311262c9…`는 빌드/읽기 전용 검토를 통과했으나 설치에서 `INSTALL_FAILED_VERIFICATION_FAILURE: Integrity verification timed out`이 발생했다. 검증 설정을 끄거나 우회하지 않았다. 실험 코드와 후보는 QA에 보존하고 활성 테스트에서 제외했다. 이미 정상 설치된 핵심 검증용 `2cc2ef14…`와 같은 소스로 복원했지만, 이후 재시험은 아래 Console 준비 단계에서 중단됐다. 빌드만 통과한 렌더링 실험을 기기에서 검증한 것으로 보고하지 않는다.
+추가 렌더링 측정용 test APK 후보 `311262c9…`는 빌드/읽기 전용 검토를 통과했으나 설치에서 `INSTALL_FAILED_VERIFICATION_FAILURE: Integrity verification timed out`이 발생했다. 검증 설정을 끄거나 우회하지 않았다. 실험 코드와 후보는 QA에 보존하고 활성 테스트에서 제외했다. 이미 정상 설치된 핵심 검증용 `2cc2ef14…`와 같은 소스로 복원했고, run04는 Console 준비 단계에서 중단됐지만 후속 run05는 완료했다. 빌드만 통과한 렌더링 실험을 기기에서 검증한 것으로 보고하지 않는다.
 
 녹화는 선택적인 `--record` 옵션이다. 영상 시작/수집/앱 가시성은 SDK core 결과와 구분하며, 검정 또는 다른 앱이 찍힌 MP4를 CarCue 소개 영상으로 제공하지 않는다. 기능·출처·UX·구독 해제·최종 콘솔 복구의 완료 조건은 그대로 유지한다.
 
 ## 결과 기록
 
-공식 콘텐츠를 포함한 APK/test APK 빌드와 계약·155개 UI 문구·게시 카탈로그 검사를 통과했다. 순수 정책/파일 캐시/요청 순서/상태 연결의 JVM 테스트는 42개, 서버 회귀는 133개다.
+공식 콘텐츠를 포함한 APK/test APK 빌드와 계약·155개 UI 문구·게시 카탈로그 검사를 통과했다. 순수 정책/파일 캐시/요청 순서/상태 연결의 JVM 테스트는 42개다. 서버/도구 회귀는 Console 7개를 추가해 최신 140개다.
 
 | 범위 | 실제 결과와 증거 |
 | --- | --- |
+| 최신 APK 전체 흐름 | 앱e9ab702d…/테스트2cc2ef14…, run05 **19.188초 OK**. 실제 설치 SHA·SDK/차량/가이드/주행 제한/해제·최종 Console 복구까지 통과 |
 | 공식 SDK 전체 흐름 | 소스 `9639181`, `official-guide-20261114-sdk-e2e-03`의 instrumentation 1개, **43.685초 OK**. 설치 앱/테스트 SHA를 대조했고 최종 콘솔 Park·속도0·문 CLOSED 복구도 확인 |
 | 시각화/안내 | 실제 GET CLOSED → OPEN callback 및 차량 픽셀 변경 → 공식 가이드·판본·두 원문 링크 → CLOSED callback 및 최초 이미지와 SHA 일치 → 명시 재조회 GET CLOSED |
 | UX/수명주기 | 실제 Drive/속도20에 UX 제한 callback, 안내 차단 및 제한 중 진입 거절 → Park 복귀 → 이용 종료·동일 Listener unregister·SDK release |
-| 최신 시각 개선본 | 소스 `82a32b9`, 앱 `e9ab702d…`. 빌드·설치 SHA·정상 런처의 물리 앱 표시·실제 SDK Capability/GET0/callback0 확인. **OPEN부터의 전체 재시험은 미완료** |
-| 미완료 원인 | `official-guide-20261114-sdk-e2e-04`는 instrumentation 전 Virtual Console HTTP503 `emulator_inactive`/DDS 미준비로 실패. 최신 앱의 전체 통과나 crash/ANR 부재로 보고하지 않음 |
+| 이전 시각 개선본 부분 확인 | 소스 `82a32b9`, 앱 `e9ab702d…`. 당시 빌드·설치 SHA·정상 런처의 물리 앱 표시·실제 SDK Capability/GET0/callback0 확인. OPEN부터의 미완료 범위는 후속 run05에서 해소 |
+| 이전 준비 실패 | `official-guide-20261114-sdk-e2e-04`는 instrumentation 전 Virtual Console HTTP503 `emulator_inactive`/DDS 미준비로 실패. 해당 시도를 성공이나 crash/ANR 부재로 바꿔 기록하지 않음 |
 
 전체 흐름 통과본의 앱 SHA256은 `118b9c86bc249921820e83c05d4ccf646698e33a708f73bb0a8a825f522e3e8c`, 테스트는 `2cc2ef14e0681aa33c196298a28b615c947c237691e5438d11cdac0a64ad5a33`다. 증거는 `output/qa/pleos-official-guide/official-guide-20261114-sdk-e2e-03/validation-result.json`, `instrumentation.txt`, `sdk-events.txt`, `run-status.json`이다. 앱 Window 캡처는 `official-guide-open.png`, `driving-guide-blocked.png`, 차량 개폐 PNG에 남겼다. 같은 실행의 MP4는 앱 표시 QA를 통과하지 못해 소개 영상으로 사용하지 않았다.
 
-현재 전달 APK `output/apk/carcue-pleos-official-guide-debug.apk`의 SHA256은 `e9ab702dc191294372d9e7a8dce9216394f3b440825cbf892ffea5867a66ee97`다. 전체 흐름 통과 소스와 생산 코드·콘텐츠를 비교했을 때 차이는 시각 포맷 두 곳의 UTC 오프셋 추가뿐이며 SDK·가이드 정책·공식 자료는 동일하다. 이것은 최신 바이너리의 전체 기기 통과를 대신하지 않는다. 이전 `118b9c86…` APK 파일은 후속 빌드로 교체돼 현재 전달하지 않으며, 별도 경로의 동일 기준 소스 재빌드 `48171624…`도 해시가 달라 검증본으로 제공하지 않았다. 로그/캡처 원본은 유지한다.
+현재 전달 APK `output/apk/carcue-pleos-official-guide-debug.apk`의 SHA256은 `e9ab702dc191294372d9e7a8dce9216394f3b440825cbf892ffea5867a66ee97`이며 run05에서 실제 설치본과 대조해 전체 기기 시험을 통과했다. run03과 생산 코드·콘텐츠 차이는 시각 포맷 두 곳의 UTC 오프셋 추가뿐이며, 소스 비교에 그치지 않고 이 바이너리를 직접 재시험했다. 이전 `118b9c86…` APK 파일은 후속 빌드로 교체돼 현재 전달하지 않으며, 별도 경로의 동일 기준 소스 재빌드 `48171624…`도 해시가 달라 검증본으로 제공하지 않았다. 로그/캡처 원본은 유지한다.
 
-최신 앱의 정상 런처 증거는 `output/qa/pleos-official-guide/normal-launch-20261114-01/`의 `installed-app.json`, `normal-launch-smoke.json`, `physical-normal-launch.png`다. 추가 실패·렌더링 후보는 각각 실행 폴더에 보존한다. 작업 전 정지 상태였던 전용 AVD는 종료 명령 성공·프로세스 종료·ADB 목록 제거를 확인해 다시 정지했다. 사용자 데이터/스냅샷 파일과 검증 설정은 유지했다. 최종 warmup의 SDK 해제 호출은 미확인이며 VM 종료에 따른 리소스 정리로만 기록했다(`normal-session-preflight-20261114-01/vm-cleanup.json`).
+이전 부분 검증의 정상 런처 증거는 `output/qa/pleos-official-guide/normal-launch-20261114-01/`의 `installed-app.json`, `normal-launch-smoke.json`, `physical-normal-launch.png`다. 추가 실패·렌더링 후보는 각각 실행 폴더에 보존한다. 당시 작업 전 정지 상태였던 전용 AVD는 종료 명령 성공·프로세스 종료·ADB 목록 제거를 확인해 다시 정지했다. 사용자 데이터/스냅샷 파일과 검증 설정은 유지했다. 이전 `normal-session-preflight-20261114-01` 당시 warmup의 SDK 해제 호출은 미확인이며 VM 종료에 따른 정리로만 기록했다(`normal-session-preflight-20261114-01/vm-cleanup.json`). 후속 run05는 SDK unregister/release를 직접 확인했고 새 정상 런처 증거와 함께 `PLEOS_CONSOLE_RECOVERY.md`에 기록했다.
 
 시험 증거는 `output/qa/pleos-official-guide/<run-id>/`와 앱의 실행별 QA 폴더에 새로 기록한다. 실행별 QA 보존 경로와 원본 영상·사용자 데이터는 유지하며 `pm clear`, `logcat clear`, wipe-data를 사용하지 않는다. Gradle 빌드 출력 APK는 후속 빌드에서 교체되므로 별도 보존 여부와 설치 해시를 위와 같이 구분한다. 수집 로그는 문·UX·수명주기의 허용된 이벤트로 제한해 VIN 등 원시 차량정보를 저장하지 않는다.
