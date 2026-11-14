@@ -319,7 +319,14 @@ def create_app(db_path=None, catalog=None, provider=None, mode=None):
             authorize(request.session_id, authorization, request.profile_id)
             old = cached(request.session_id, request.request_id, fingerprint)
             if old:
-                if request.content_kind in {"GUIDE", "ANSWER"} and old.get("status") == "TRANSLATED":
+                if request.content_kind == "QUESTION" and not (
+                        mode == "LIVE" and getattr(provider, "enable_draft_question_translation", True)):
+                    # An opt-in draft may predate the current deployment's
+                    # deferral. Replaying its ID must respect today's policy,
+                    # without translating again or changing its fingerprint.
+                    old = unavailable_translation(request)
+                    save(request.session_id, request.request_id, fingerprint, old)
+                elif request.content_kind in {"GUIDE", "ANSWER"} and old.get("status") == "TRANSLATED":
                     current = stored_translation(request)
                     expected = {**unavailable_translation(request), **(current or {}), "status": "TRANSLATED"}
                     if current is None or old != expected:
