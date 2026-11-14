@@ -14,6 +14,7 @@ CarCue는 낯선 차량의 상태와 사용법을 자신의 언어로 확인하�
 - [검증 결과](Docs/VALIDATION_REPORT.md)
 - [최신 개발 순서](Docs/DEVELOPMENT_ORDER.md)
 - [Git Flow 작업 규칙](Docs/05-git-flow.md) · [작업별 개발 기록](Docs/DEVELOPMENT_LOG.md)
+- [기본 CI와 검증 범위](Docs/CI.md)
 - [화면 명세](Docs/SCREEN_SPEC.md) · [API 계약](Docs/DATA_API_SPEC.md) · [완료 기준](Docs/ACCEPTANCE.md)
 
 `android/`는 네이티브 Compose 앱, `backend/`는 서버, `content/`는 프로필·언어·가이드 데이터입니다. 기본 카탈로그는 미검수 개발 프로필이며 공개 가능한 차량 매뉴얼은 아직 없습니다. `contracts/guide.template.json`은 게시하지 않습니다. OpenAI 키는 서버 환경변수에만 설정합니다.
