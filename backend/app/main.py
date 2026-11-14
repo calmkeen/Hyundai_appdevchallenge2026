@@ -14,6 +14,7 @@ from .answer_policy import answer_units, validate_answer
 from .models import AskRequest, SessionRequest, TranslateRequest
 from .provider import create_provider
 from .storage import Store
+from .translation_terms import load_question_terms, validate_target_terms
 
 NO_SOURCE_MESSAGES = {
     "ko-KR": "이 차량의 검수된 자료에서 확인하지 못했어요. 차량 정보를 다시 확인해 주세요.",
@@ -43,6 +44,13 @@ def create_app(db_path=None, catalog=None, provider=None, mode=None):
     provider = provider or create_provider()
     if hasattr(provider, "source_locales"):
         provider.source_locales = tuple(item["locale"] for item in catalog.locales if item.get("ui_status", "PLANNED") != "PLANNED")
+    # The resource is reviewed against shipped source content. Runtime scope is
+    # checked again against this app's catalog/profile, including injected ones.
+    question_terms = load_question_terms()
+    def lookup_terms(profile_id, source, target, text):
+        return question_terms.lookup(catalog.profile(profile_id), source, target, text)
+    if hasattr(provider, "term_lookup"):
+        provider.term_lookup = lookup_terms
     mode = mode or os.getenv("CARCUE_MODE", "MOCK")
     if mode not in ("LIVE", "MOCK"):
         raise ValueError("CARCUE_MODE must be LIVE or MOCK")
@@ -268,6 +276,8 @@ def create_app(db_path=None, catalog=None, provider=None, mode=None):
                                       ai_provider="STORED_GUIDE")
             elif mode == "LIVE":
                 try:
+                    match = lookup_terms(request.profile_id, request.source_locale, request.target_locale, request.text)
+                    result["glossary_version"] = match["version"] if match else None
                     output = await provider.translate(request)
                     processing_locale(output.source_locale)
                     if request.source_locale != "auto" and output.source_locale != request.source_locale:
@@ -276,6 +286,7 @@ def create_app(db_path=None, catalog=None, provider=None, mode=None):
                     tokens = lambda text: re.findall(r"\d+(?:[.,]\d+)?|%|kPa|PSI|kWh|km|°C", text)
                     if sorted(tokens(request.text)) != sorted(tokens(output.translated_text)):
                         raise ValueError("TRANSLATION_NUMBERS_CHANGED")
+                    validate_target_terms(match, output.translated_text)
                     result.update(status="TRANSLATED", source_locale=output.source_locale, translated_text=output.translated_text,
                                   ai_provider=getattr(provider, "kind", "UNKNOWN"), ai_model=getattr(provider, "model", None))
                 except Exception:
