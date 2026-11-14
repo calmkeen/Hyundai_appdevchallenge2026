@@ -1,5 +1,7 @@
 # CarCue 실행과 개발
 
+2026-11-15 다국어·차량 UX·이용 종료의 현재 검증 경로는 [SDK_SESSION_VALIDATION.md](SDK_SESSION_VALIDATION.md), 새 소개 영상 도구는 [SDK_LIVE_INTRO.md](SDK_LIVE_INTRO.md)를 따른다. 이전 Mock/SDK 영상 재현 명령은 아래 이력으로 보존한다. 새 검증 도구는 기존 앱/AVD userdata나 로그를 초기화하지 않는다.
+
 최신 원문/공식지원·3언어왕복·실제SDK/주행중거절 재현은 `OFFICIAL_RESOURCE_APP_VALIDATION.md`를 따른다. 무료Ollama서버는 `LOCAL_AI_INTEGRATION.md`, UX연결의복구/한계는 `UX_CONNECTION_RECOVERY.md`에 있다. 기획·완료현황은 `Docs/`에 유지하며 유료AI와 생성질문번역 기본보류는 그대로다.
 
 ## 구조
@@ -145,7 +147,7 @@ SDK와 테스트 APK를 전용 AVD에 설치한 뒤 저장소 루트에서 실�
 
 실제 UX 제한 시뮬레이션 재현 도구는 `scripts/validate_pleos_ux.py`다. 기본 serial은 emulator-5584이며 테스트 전용이다. 주차 상태로 복구한 뒤 종료한다.
 
-## 실제 APK의 다국어 Mock 영상 녹화
+## 이전: 실제 APK의 다국어 Mock 영상 녹화
 
 부팅된 테스트 AVD `CarCue_UI35`에서 다음을 실행한다. 지정한 demo APK를 설치하고 **해당 테스트 앱의 데이터만 초기화**한다. 연결된 대상이 emulator인지 확인하며 실기기는 거부한다.
 
@@ -159,9 +161,9 @@ python3 scripts/record_mock_languages.py
 
 기능당 2초의 이미지·3D 포함 편집본은 `python3 scripts/render_mock_short.py`로 만든다. 구성과 원본 구분은 `VIDEO_STORYBOARD.md`, 시간·소스·확대 영역은 `video-short.json`에서 관리한다. 이전 `carcue-mock-visuals-3d.mp4`는 32초 편집본, `carcue-mock-short.mp4`는 이전 28초 편집본, `carcue-mock-languages.mp4`는 무편집 녹화다. 3D 차량 구간은 기존 `carcue-pleos-sdk.mp4`가 필요하며 Pleos 에뮬레이터 시스템 UI로 출처를 표시한다.
 
-## 실제 실행 원본 촬영: 앱 안의 시각 요소와 연속 실행
+## 이전: 실제 실행 원본 촬영: 앱 안의 시각 요소와 연속 실행
 
-현재 기준은 실제 APK 내부의 3D·사진 기능을 사용한다. 위의 영상 합성 도구는 이전 결과 재현용이다. 구현은 `NATIVE_VISUALS.md`를 따른다. demo와 기기 테스트 APK를 빌드한 뒤 테스트 AVD가 부팅된 상태에서 실행한다.
+당시 기준은 실제 APK 내부의 3D·사진 기능을 사용했다. 이 명령은 이전 결과 재현용이다. 현재 시각 요소는 `NATIVE_VISUALS.md`, 최신 촬영은 `SDK_LIVE_INTRO.md`를 따른다. 아래 명령은 당시 demo와 기기 테스트 APK 및 테스트 AVD를 전제로 한다.
 
 ```bash
 python3 scripts/record_native_showcase.py
@@ -169,7 +171,7 @@ python3 scripts/record_native_showcase.py
 
 `NativeShowcaseTest`가 실제 버튼과 드래그로 기능을 진행하고 각 화면을 2초 유지한다. 호스트가 테스트 AVD의 demo 앱 데이터를 초기화하고 설치 APK 해시를 대조한 뒤, 하나의 `screenrecord` 원본을 `output/qa/carcue-native-run.mp4`에 저장한다. 같은 이름의 JSON과 `native-showcase-instrumentation.txt`에서 실행 증거를 확인한다. 별도 사진 장면이나 Pleos 시스템 UI 삽입은 하지 않는다.
 
-## 앱 소개 영상 제작
+## 이전: 앱 소개 영상 제작
 
 원본 실행 녹화를 보존한 상태에서 `python3 scripts/render_app_intro.py`로 소개 영상을 만든다. 결과는 `output/qa/carcue-app-intro.mp4`이며 32초·1920×1080·30fps다. 실제 기능 화면에 제목·설명·시작·마무리·외부 무료 배경음악을 더한다. 기획은 `APP_INTRO_VIDEO.md`, 편집 구성은 `app-intro.json`을 따른다. 영상의 Mock 표시와 AI 준비 중 표시를 유지한다.
 
