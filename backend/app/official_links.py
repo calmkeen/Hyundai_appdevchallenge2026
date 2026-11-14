@@ -5,6 +5,7 @@ availability guarantee. Resolution rechecks the current profile and publication
 scope; UI language never changes the vehicle's sales market.
 """
 import json
+import re
 from datetime import datetime
 from pathlib import Path
 
@@ -15,6 +16,18 @@ from .guide_policy import ValidationIssue, _valid_https_url
 
 _SCHEMA = json.loads((Path(__file__).resolve().parents[2] / "contracts/support-contact.schema.json").read_text())
 _VALIDATOR = Draft202012Validator(_SCHEMA)
+_ACTION_SCHEMA = json.loads((Path(__file__).resolve().parents[2] / "contracts/ask-response.schema.json").read_text())
+_TARGET_SCHEMA = _ACTION_SCHEMA["properties"]["actions"]["items"]["allOf"][0]["then"]["properties"]["target_id"]
+_TARGET_PATTERN = re.compile(_TARGET_SCHEMA["pattern"])
+
+
+def _registered_action_id(value):
+    # Publication source IDs predate the stricter action target contract. Keep
+    # their content intact, but never emit an out-of-contract execution target.
+    # fullmatch also excludes a final newline, unlike a plain regex '$' search.
+    return (isinstance(value, str)
+            and _TARGET_SCHEMA["minLength"] <= len(value) <= _TARGET_SCHEMA["maxLength"]
+            and _TARGET_PATTERN.fullmatch(value) is not None)
 
 
 def validate_support_contacts(profile, locales):
@@ -34,6 +47,8 @@ def validate_support_contacts(profile, locales):
         if contact["id"] in ids:
             issues.append(ValidationIssue("DUPLICATE_SUPPORT_ID", prefix + "/id", "Support IDs must be unique within a profile."))
         ids.add(contact["id"])
+        if not _registered_action_id(contact["id"]):
+            issues.append(ValidationIssue("INVALID_SUPPORT_ID", prefix + "/id", "Support ID must satisfy the complete action target format."))
         if (profile.get("verification_status") != "VERIFIED"
                 or any(not isinstance(profile.get(field), str) or not profile[field].strip()
                        for field in ("profile_id", "manual_set_id", "manual_version"))):
@@ -76,7 +91,7 @@ def resolve_manual(guides, profile, target_id):
     Callers supply publication-validated guides. Legacy raw-URL step actions are
     deliberately ignored. Conflicting metadata for an ID is ambiguous and closed.
     """
-    if not profile or profile.get("verification_status") != "VERIFIED":
+    if not _registered_action_id(target_id) or not profile or profile.get("verification_status") != "VERIFIED":
         return None
     matches = []
     for guide in guides:

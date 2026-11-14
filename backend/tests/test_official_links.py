@@ -55,7 +55,7 @@ def test_actual_registry_has_one_kr_website_and_keeps_demo_profiles_unverified()
 
 
 @pytest.mark.parametrize("field,value", [
-    ("kind", "PHONE"), ("id", URL), ("title", "  "),
+    ("kind", "PHONE"), ("id", URL), ("id", "valid-id\n"), ("title", "  "),
     ("market_code", "JP"), ("source_locale", "not-registered"),
     ("verification_status", "UNVERIFIED"), ("reviewed_at", "not-a-date"),
     ("reviewed_at", "2026-11-14T12:45:09"),
@@ -180,3 +180,27 @@ def test_duplicate_profile_identity_cannot_offer_a_support_action():
     catalog.profiles.append(copy.deepcopy(catalog.profile(PROFILE)))
     assert catalog.support_contacts(PROFILE) == []
     assert catalog.support(PROFILE, SUPPORT) is None
+
+
+@pytest.mark.parametrize("source_id", ["source with space", "https://example.test/source", "x" * 129, "source\nid", "source-id\n"])
+def test_publication_valid_source_id_outside_action_contract_cannot_become_manual_target(source_id):
+    catalog, provider = Catalog(), ReviewedUnitFixture()
+    guide = next(item for item in catalog.guides if item.get("guide_id") == "ioniq5-door-open-check" and item["locale"] == "ko-KR")
+    previous = guide["sources"][0]["source_id"]
+    guide["sources"][0]["source_id"] = source_id
+    for step in guide["steps"]:
+        step["source_ids"] = [source_id if ref == previous else ref for ref in step["source_ids"]]
+    assert catalog.published(PROFILE, "ko-KR") == [guide]  # Preserve the broader publication contract.
+    assert catalog.manual_source(PROFILE, "ko-KR", source_id) is None
+    app = create_app(db_path=":memory:", mode="LIVE", catalog=catalog, provider=provider)
+    with TestClient(app) as client:
+        session = client.post("/v1/sessions", json={"profile_id": PROFILE, "locale": "ko-KR"}).json()
+        result = client.post("/v1/ask", json={"request_id": "legacy-source-id", "session_id": session["session_id"],
+            "profile_id": PROFILE, "locale": "ko-KR", "question": "문을 닫기 전에 무엇을 확인하나요?"},
+            headers={"Authorization": "Bearer " + session["token"]}).json()
+        assert result["status"] == "ANSWERED" and provider.calls == 1
+        assert source_id in [citation["source_id"] for citation in result["citations"]]
+        manual_targets = [action["target_id"] for action in result["actions"] if action["kind"] == "OPEN_MANUAL"]
+        assert manual_targets == [guide["sources"][1]["source_id"]]
+        assert {"kind": "OPEN_SUPPORT", "target_id": SUPPORT} in result["actions"]
+        jsonschema.validate(result, json.loads((ROOT / "contracts/ask-response.schema.json").read_text()))

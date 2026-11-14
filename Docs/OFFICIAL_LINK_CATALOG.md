@@ -33,6 +33,8 @@
 
 서버가 반환하는 `OPEN_SUPPORT.target_id`는 등록 contact ID다. `OPEN_MANUAL.target_id`는 검증된 citation의 `source_id`다. 모델은 URL/action을 생성하지 않는다. 서버는 현재 검색·게시 범위와 출처 메타데이터를 다시 대조한 뒤 action을 조립한다. 같은 호스트에 있다는 이유만으로 다른 차량·시장 URL을 허용하지 않는다.
 
+기존 게시 계약의 source ID는 action 대상보다 넓은 문자열을 허용한다. resolver는 응답 계약의 ASCII ID 형식·최대 128자를 다시 검사해 실행 대상에 부적합한 ID를 차단한다. 기존 원문·citation을 고치거나 다른 링크로 대체하지 않는다. 현재 등록된 3언어 source ID는 이 경계를 통과한다.
+
 - `ANSWERED`: 기존 관련 가이드/상태 재조회와 함께, 실제 인용한 등록 출처 및 프로필의 공식 지원을 제공한다.
 - `NO_RELIABLE_SOURCE` / `NEED_MORE_INFO`: 등록 지원만 추가한다. 관계없는 문 안내를 질문의 근거로 만들지 않는다.
 - `TEMPORARILY_UNAVAILABLE`: 기존 오류 동작과 빈 action을 유지한다.
@@ -46,3 +48,5 @@ Android 실행부는 누른 순간의 세션·프로필/판본·등록 대상·�
 `backend/tests/test_official_links.py`는 실제 등록 카탈로그와 명시적 provider 대역으로 다음을 검증한다: 3언어에서 동일 KR 대상 유지, canonical citation ID/action, 미지원 질문의 모델 무호출 지원 경로, 잘못된 시장/검증 상태/언어/URL/검토시각·중복 식별자 차단, raw URL target 거절, 판본·프로필 불일치와 변경된 citation 거절, 게시 legacy 보존. 외부 사이트·차량·모델을 호출하는 시험은 아니다.
 
 검증 결과: `scripts/check_contracts.py` 통과(지원 WEBSITE 1개·기존 상태 규칙 1개·기준선 UI 177자원). `python -m pytest backend/tests -q`는 신규 40개를 포함한 **410개 통과 / 29.56초**다. 실제 전체 출력은 ignored QA의 `catalog/backend-tests-01.txt`에 보존했다. 앱의 정상 외부 실행·실제 Pleos UX 차단·복귀는 이 문서의 서버 대역 시험만으로 완료라고 계산하지 않는다.
+
+독립 리뷰 뒤 action ID 형식 경계를 보완했다. 관련 회귀 **46개 통과**, 전체 **416개 통과 / 6.17초**, 계약 재검사 통과다. 게시 자체에는 유효한 공백·URL·129자·중간/끝 개행 source ID로도 응답이 action 계약을 지키며, 현재 3언어 공식 자료의 대상은 유지됨을 검증했다. 후속 전체 출력은 `catalog/backend-tests-02.txt`다. 초기 결과와 원본 수집 자료는 보존한다.
