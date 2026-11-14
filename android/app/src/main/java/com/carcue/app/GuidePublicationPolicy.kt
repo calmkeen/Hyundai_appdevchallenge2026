@@ -27,7 +27,7 @@ internal data class PublishedGuideRecord(
     fun toGuide() = Guide(id, title, body, steps.map { it.title to it.body },
         sources.map { "${it.title} · ${it.section}" to it.url }, locale,
         steps.map { it.id }, steps.map { it.officialCautions }, manualSetId, sourceVersion, profileIds,
-        publicationVerified = true) // Called only after the publication gate accepts this record.
+        publicationVerified = true, officialSources = sources.map { OfficialSource(it.id, it.url, sourceLocale) }) // Called only after the publication gate accepts this record.
 }
 
 internal data class PublishedGuideIdentity(val id: String, val locale: String, val manualSetId: String, val sourceVersion: String)

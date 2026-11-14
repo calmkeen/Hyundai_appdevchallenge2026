@@ -22,6 +22,7 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
     private val repository: VehicleRepository = PlatformVehicleRepository(application)
     private val uxMonitor: UxMonitor = createUxMonitor(application)
     private val api = CarCueApi()
+    private val resourceOpener = OfficialResourceOpener(application)
     private val deletion = AppDeletionRecovery.get(application)
     private val guideRequests = GuideRequestGate()
     private val mutable = MutableStateFlow(UiState(reading = Reading(source = source), deletionPending = deletion.pending.value))
@@ -99,7 +100,7 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
         if (content.languages.none { it.tag == tag }) return
         cancelRequest()
         assistantRequests.clear()
-        mutable.update { it.copy(locale = tag, page = GuideSelectionPolicy.destination(languageReturn, it.selectedGuide), assistantRetry = AssistantRetry.NONE) }
+        mutable.update { it.copy(locale = tag, page = GuideSelectionPolicy.destination(languageReturn, it.selectedGuide), externalResource = null, assistantRetry = AssistantRetry.NONE) }
         if (!mutable.value.sessionStarted) {
             mutable.update { it.copy(sessionStarted = true) }; startVehicle()
         }
@@ -145,6 +146,35 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
         } else repository.scenario(name)
     }
     fun clearError() { mutable.update { it.copy(error = null) } }
+    fun officialActionScope(state: UiState) = content.officialResources.scope(state)
+    fun openGuideSource(scope: OfficialActionScope, guideId: String, sourceId: String) {
+        openResource(content.officialResources.guideSource(mutable.value, scope, guideId, sourceId))
+    }
+    fun openAnswerSource(scope: OfficialActionScope, requestId: String, sourceId: String) {
+        openResource(content.officialResources.citation(mutable.value, scope, requestId, sourceId))
+    }
+    fun openSupport(scope: OfficialActionScope, id: String) {
+        openResource(content.officialResources.support(mutable.value, scope, id))
+    }
+    fun openAssistantResource(scope: OfficialActionScope, requestId: String, kind: String, id: String) {
+        val current = mutable.value
+        if (current.page != Page.ASK || current.answerRequestId != requestId || (kind to id) !in current.actions) {
+            openResource(null); return
+        }
+        when (kind) {
+            "OPEN_MANUAL" -> openAnswerSource(scope, requestId, id)
+            "OPEN_SUPPORT" -> openSupport(scope, id)
+        }
+    }
+    private fun openResource(resource: ExternalResource?) {
+        if (resource == null || !active) {
+            mutable.update { it.copy(error = if (restricted()) "PARK_REQUIRED" else "RESOURCE_UNAVAILABLE", externalResource = null) }
+            return
+        }
+        val result = resourceOpener.open(resource)
+        mutable.update { it.copy(externalResource = ExternalResourceNotice(resource, result, resourceOpener.lastRoute), error = null) }
+        event("OFFICIAL_RESOURCE $result ${resourceOpener.lastRoute} ${resource.id}")
+    }
     fun deepLink(uri: Uri?) {
         if (uri == null) return
         if (uri.scheme != "carcue" || uri.host != "guide" || uri.path !in listOf(null, "", "/")) {
@@ -166,7 +196,7 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
             mutable.update { it.copy(error = "GUIDE_UNAVAILABLE") }
             return
         }
-        mutable.update { it.copy(selectedGuide = selected, guideStep = 0) }
+        mutable.update { it.copy(selectedGuide = selected, guideStep = 0, externalResource = null) }
         go(Page.GUIDE)
     }
     fun relatedDoorGuide(now: Instant = Instant.now()): Guide? = content.relatedDoorGuide(mutable.value, now)
@@ -233,9 +263,10 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
             } else assistantGuideContext)
         val resend = retry && current.assistantRetry == AssistantRetry.RESEND
         mutable.update { it.copy(busy = true, error = null, answer = if (!translate) "" else it.answer,
-            answerStatus = if (!translate) "" else it.answerStatus, followUpQuestion = if (!translate) "" else it.followUpQuestion,
+            answerStatus = if (!translate) "" else it.answerStatus, answerRequestId = if (!translate) "" else it.answerRequestId, followUpQuestion = if (!translate) "" else it.followUpQuestion,
             assistantRetry = AssistantRetry.NONE,
             citations = if (!translate) emptyList() else it.citations,
+            officialCitations = if (!translate) emptyList() else it.officialCitations, externalResource = null,
             actions = if (!translate) emptyList() else it.actions,
             translation = if (translate) "" else it.translation, translationOriginal = if (translate) "" else it.translationOriginal) }
         requestJob = viewModelScope.launch {
@@ -281,12 +312,17 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
                 else {
                     val c = result.getJSONArray("citations")
                     val citations = (0 until c.length()).map { c.getJSONObject(it).let { s -> s.getString("title") to s.getString("url") } }
+                    val officialCitations = (0 until c.length()).map { c.getJSONObject(it).let { s ->
+                        OfficialCitation(s.getString("source_id"), s.getString("guide_id"), s.getString("profile_id"),
+                            s.getString("manual_set_id"), s.getString("source_version"), s.getString("url")) } }
                     val a = result.getJSONArray("actions")
                     val actions = (0 until a.length()).map { a.getJSONObject(it).let { action -> action.getString("kind") to action.optString("target_id").takeUnless { id -> id == "null" } } }
                     mutable.update { it.copy(busy = false, serverConnection = "CONNECTED", answer = if (outcome.error == "SERVER_RESPONSE_INVALID") "" else result.getString("answer"), answerMode = mode,
                         answerLocale = result.getString("locale"), answerStatus = status,
+                        answerRequestId = if (outcome.error == "SERVER_RESPONSE_INVALID") "" else snapshot.requestId,
                         followUpQuestion = if (status == "NEED_MORE_INFO") result.optString("follow_up_question").takeUnless { q -> q == "null" } ?: "" else "",
                         answerProvider = provider, answerModel = model, citations = if (outcome.error == "SERVER_RESPONSE_INVALID") emptyList() else citations,
+                        officialCitations = if (outcome.error == "SERVER_RESPONSE_INVALID") emptyList() else officialCitations,
                         actions = if (outcome.error == "SERVER_RESPONSE_INVALID") emptyList() else actions,
                         error = outcome.error, assistantRetry = outcome.retry) }
                 }
@@ -296,7 +332,7 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
                     if (e is ApiFailure && AssistantResponsePolicy.expired(e.status, e.code)) forgetRemoteSession()
                     val outcome = if (e is ApiFailure) AssistantResponsePolicy.http(e.status, e.code)
                         else AssistantOutcome("SERVER_UNAVAILABLE", AssistantRetry.RESEND)
-                    mutable.update { it.copy(busy = false, serverConnection = "UNAVAILABLE", answer = "", followUpQuestion = "", citations = emptyList(), actions = emptyList(),
+                    mutable.update { it.copy(busy = false, serverConnection = "UNAVAILABLE", answer = "", answerRequestId = "", followUpQuestion = "", citations = emptyList(), officialCitations = emptyList(), actions = emptyList(),
                         translationOriginal = if (translate) input else it.translationOriginal,
                         error = outcome.error, assistantRetry = outcome.retry) }
                 }
@@ -315,7 +351,7 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
         remote = null
         deletion.finishActive()
         assistantRequests.clear(); assistantGuideContext = null
-        mutable.value = UiState(reading = Reading(source = source), ux = mutable.value.ux, internetAvailable = mutable.value.internetAvailable, deletionPending = deletion.pending.value)
+        mutable.value = UiState(sessionEpoch = generation, reading = Reading(source = source), ux = mutable.value.ux, internetAvailable = mutable.value.internetAvailable, deletionPending = deletion.pending.value)
     }
     fun endSession() { clearSession() }
     fun retryPendingDeletions() { deletion.retry() }

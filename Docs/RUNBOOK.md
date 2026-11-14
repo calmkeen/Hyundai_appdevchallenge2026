@@ -1,5 +1,7 @@
 # CarCue 실행과 개발
 
+최신 원문/공식지원·3언어왕복·실제SDK/주행중거절 재현은 `OFFICIAL_RESOURCE_APP_VALIDATION.md`를 따른다. 무료Ollama서버는 `LOCAL_AI_INTEGRATION.md`, UX연결의복구/한계는 `UX_CONNECTION_RECOVERY.md`에 있다. 기획·완료현황은 `Docs/`에 유지하며 유료AI와 생성질문번역 기본보류는 그대로다.
+
 ## 구조
 
 `android/` Compose 차량 앱, `backend/` FastAPI, `content/` 데이터, `contracts/` 인계 Schema, `assets/` 원본 시각 자산, `reference/` 원본 제안서다. 기획 문서는 `Docs/`에서 관리한다.

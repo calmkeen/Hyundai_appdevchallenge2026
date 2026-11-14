@@ -58,3 +58,14 @@ AVD의 실제 SDK 수신과 실차를 구분하며 새 Mock 차량/가이드 시
 위 작업은 구현 중이며 아래 완료 기록 전에는 통과로 계산하지 않는다. 기존 앱 데이터·캐시·AVD와 무료 AI 정책을 보존한다. SDK는 전용 AVD의 실제 API이며 실차 시험과 구분한다. 네트워크 시험은 CarCue 서버 프로세스 중단·재시작이며 차량 SDK나 인터넷 전체 장애의 재현으로 확대하지 않는다.
 
 OF-001 구현 `e816d61`, 철회 navigation 보완 `684556c`/`e7c58ad`, SE-001 구현 `54bab55`를 보존했다. 통합 JVM84·QA run04 13+3단계(57.131/6.889초)·실제 로컬 모델1회·DB각1→0, 기본 앱 SDK20.285초를 확인했다. 최종테스트·문서 커밋 후 develop에 no-ff 통합하고 작업별 feature와 develop을 원격 반영한다. 원격 반영과 CI는 실제 SHA/결과로 따로 확인한다.
+
+
+## 공식 원문·고객지원·UX 연결 복구 · 2026-11-14
+
+| 작업 | 브랜치 | 구현·검증 |
+| --- | --- | --- |
+| LK-001 공식 지원 등록 | `feature/official-support-catalog` | `d6f0e52` + `2c15c99`. firecrawl_local 실제공식본문확인·KR WEBSITE1개·등록IDaction·출처/시장/판본검증. 서버416 |
+| UX-001 연결 소유권·복구 | `feature/ux-service-recovery` | `04e7b7f`. 실제DISCONNECTED 관측 뒤 epoch/attempt분리·freshGET·bounded3회·stop정리. 정책10합성회귀와 최종실제앱 정상왕복/주행제한검증 구분 |
+| LK-002 실제 앱 외부 연결 | `feature/official-resource-actions` | typed source/citation·답변고유request binding·latest세션/UXguard·공식AVD debug브라우저호환·결과/경로구분. 통합JVM110·링크8회76.488초·SDK9단계20.564초 |
+
+기존코드·게시가이드·이미지·음원·영상·main과 모든실패증거를 보존한다. 유료 AI/생성질문번역 보류를 유지했다. 최종 무료AI호출의 출처/action실행과 질문의 완전한 의미적합성을 구분하며 상세는 `OFFICIAL_RESOURCE_APP_VALIDATION.md`를 따른다. 작업별검증·커밋 후 develop에 no-ff 통합하고 feature/develop을 원격반영하며 실제 remoteSHA와 CI결과를 확인한다.

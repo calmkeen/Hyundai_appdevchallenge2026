@@ -75,3 +75,8 @@ App07의 8PNG 독립 검토는 일본어 일시불가 배너·원문 유지·새
 개발자 실험만 서버에 `--enable-draft-question-translation`을 추가한다. strict 생성 번역 3건 성공을 요구하는 앱 시나리오는 `--reviewed-manual-only`를 빼고, 거절 UI까지 허용하는 실험은 대신 `--allow-question-rejection`을 사용한다. 실험은 생성 번역 품질 통과를 뜻하지 않는다. 대상 용어 guard도 용어 누락만 부분 확인하며 전체 의미를 보증하지 않는다.
 
 백엔드 **370개 통과 / 9.65초**의 근거는 `output/qa/live-ai-20261114/backend-question-deferral-tests-20261114T100213Z.log`다. 기존 AnyIO 경고 1건이 남는다. Android JVM 52개·SDK 회귀·앱 통합 검증은 각각 별도 범위다. 이미지는 Compose Window capture이므로 물리 디스플레이 합성·screenrecord 가시성의 통과 근거가 아니다. 실제 차량 시험·SDK 자동차종 식별은 하지 않았고 단일 문 값으로 잠금·모든 개구부·주행 안전을 추정하지 않는다.
+
+
+## 후속 원문 연결 run06의 의미 검토 · 2026-11-14
+
+`official-resources-20261114-06`에서 실제 무료Qwen3:4b1회/19.246초·등록출처/후속버튼·SDK8회왕복은 통과했다. 단, 현재 가이드step2에서 ‘문을 닫기 전에 무엇을 확인해야 하나요?’를 물었을 때 ‘출발 전 닫힘/계기판 확인’ 단위를 선택해 step1끼임주의를 포함하지 않았다. 원문밖생성/부정역전은 관측되지 않았지만 이 질문의 완전한의미적합성PASS로 세지 않는다. 현재단계와다른질문의관련성/필수주의문 보장은 후속범위다. 원기록과 독립17PNG검토는 `OFFICIAL_RESOURCE_APP_VALIDATION.md`와 해당run의 visual-review.json을 따른다. 질문/증거를 바꾸거나 유료모델로자동대체하지 않았다.

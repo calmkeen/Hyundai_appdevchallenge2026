@@ -2,6 +2,12 @@
 
 2026-11-14. 실차, 공식 전용 AVD의 실제 SDK, 일반 AVD의 Mock, 외부 AI 대역을 구분한다.
 
+## 공식 원문·지원·UX 연결 · 2026-11-14
+
+최신 APK `9d947d11…`로 실제 앱 원문/지원 **8회 왕복76.488초**, fresh SDK GET1→9·가이드2단계 유지·실제 무료 모델1회를 확인했다. 같은 설치본의 SDK **20.564초/9단계**는 문 개폐/차량 이미지/가이드/재조회/Drive에서원문·지원dispatch0/Park복귀/해제를 통과했다. JVM110·서버416·UI185문구/계약이 통과했다. 실차와 Mock 대역, AVD Browser2 debug호환, 페이지 로딩과 질문 의미 적합성 한계를 `OFFICIAL_RESOURCE_APP_VALIDATION.md`에 구분했다.
+
+실패 run01~05를 보존했다. 초기 foreground/SystemUI 실패 뒤 데이터 보존 cold boot, DEFAULT 없는 stock브라우저호환, app-task재선택, UX연결복구를 단계별로 보완했다. 최종8회 실행 성공은 자유질문 전체정확성 통과를 의미하지 않는다. 원격게시와 CI는 실제 commit/SHA로 별도 확인한다.
+
 ## 오프라인 안내·종료 복구 · 2026-11-14
 
 최종 전용 QA 설치의 run04는 **57.131초 + 새 프로세스 6.889초**, 총16단계 통과다. 실제 Pleos SDK 문 GET/OPEN·CLOSED callback, KO/EN/JA 동봉·서버 안내와 EN 캐시, 서버 중단 시 AI 실패·저장 안내 연결, 정상 생성 세션의 오프라인 종료→프로세스 재시작→동일 SQLite 서버 복구→실제 DELETE 확인과 sessions/results/history 각1→0을 검증했다. 모델은 무료 로컬 Ollama/Qwen3를1회 실제 호출했고 유료 AI·생성 질문 번역은 보류했다.
