@@ -195,6 +195,65 @@ def local_assets(root, plan, apk=None):
     return music, audio, assets
 
 
+def reviewed_windows(root, path, manifest_path, manifest, cuts):
+    """Use two visually reviewed real callback transitions; never alter native evidence."""
+    review = read_json(path)
+    require(review.get("schema_version") == 1 and review.get("kind") == "SDK_CALLBACK_TRANSITION"
+            and review.get("source_manifest_sha256") == sha(manifest_path)
+            and review.get("source_video_sha256") == manifest["video_sha256"]
+            and review.get("recorded_pixels_only") is True and review.get("no_generated_frames") is True,
+            "BOUND_RECORDED_TRANSITION_REVIEW_REQUIRED")
+    windows = review.get("windows", [])
+    require(len(windows) == 2 and {w.get("scene_id") for w in windows} == {"door-open", "door-restored"},
+            "ONLY_TWO_DOOR_TRANSITION_WINDOWS_ALLOWED")
+    result = copy.deepcopy(cuts)
+    for window in windows:
+        row = next(s for s in manifest["scenes"] if s["scene_id"] == window["scene_id"])
+        recorded = datetime.fromisoformat(row["recorded_at"].replace("Z", "+00:00"))
+        received = datetime.fromisoformat(row["received_at"].replace("Z", "+00:00"))
+        age = (recorded - received).total_seconds()
+        estimate = (row["device_ms"] - manifest["recording_started_device_ms"]) / 1000 - age
+        start = window.get("start_seconds")
+        require(0 <= age <= 5 and number(start) and start >= 0 and abs(start - estimate) <= 2
+                and window.get("duration_seconds") == 2 and window.get("visual_transition_verified") is True,
+                "REVIEWED_NEAR_CALLBACK_TWO_SECOND_WINDOW_REQUIRED")
+        frames = window.get("reviewed_frames", [])
+        require(len(frames) >= 3 and len({f.get("seconds") for f in frames}) >= 3,
+                "THREE_DISTINCT_RECORDED_TRANSITION_FRAMES_REQUIRED")
+        for frame in frames:
+            png = existing(root, frame.get("path"))
+            require(number(frame.get("seconds")) and start <= frame["seconds"] < start + 2
+                    and png_size(png) == [2560, 1440] and sha(png) == frame.get("sha256"),
+                    "BOUND_FULL_SIZE_TRANSITION_PIXELS_REQUIRED")
+        cut = next(c for c in result if c["scene_id"] == window["scene_id"])
+        cut.update(start=start, window_kind="SDK_CALLBACK_TRANSITION", original_hold_start_seconds=cut["start"],
+                   estimated_callback_seconds=estimate,
+                   timing_limit="Wallclock/monotonic alignment is approximate; source pixels independently reviewed.")
+    scene_windows = review.get("verified_scene_windows", [])
+    require(len(scene_windows) <= 1, "ONLY_OPTIONAL_SEATBELT_FRAME_WINDOW_ALLOWED")
+    for window in scene_windows:
+        require(window.get("scene_id") == "seatbelt" and window.get("source_page") == "STATUS"
+                and window.get("visual_scene_verified") is True and window.get("duration_seconds") == 2,
+                "ONLY_REVIEWED_SEATBELT_STATUS_WINDOW_ALLOWED")
+        cut = next(c for c in result if c["scene_id"] == "seatbelt")
+        start = window.get("start_seconds")
+        require(number(start) and start >= 0 and abs(start - cut["start"]) <= 3,
+                "SEATBELT_WINDOW_MUST_REMAIN_NEAR_NATIVE_MARKER")
+        frames = window.get("reviewed_frames", [])
+        require(len(frames) >= 3 and len({f.get("seconds") for f in frames}) >= 3,
+                "THREE_DISTINCT_SEATBELT_SCENE_FRAMES_REQUIRED")
+        for frame in frames:
+            png = existing(root, frame.get("path"))
+            require(number(frame.get("seconds")) and start <= frame["seconds"] < start + 2
+                    and png_size(png) == [2560, 1440] and sha(png) == frame.get("sha256"),
+                    "BOUND_FULL_SIZE_SEATBELT_SCENE_PIXELS_REQUIRED")
+        cut.update(start=start, window_kind="FRAME_VERIFIED_SCENE_WINDOW", original_hold_start_seconds=cut["start"],
+                   timing_limit="Native marker to encoded-frame boundary differs; independently reviewed recorded pixels select the same STATUS scene.")
+    require(all(a["start"] + 2 <= b["start"] for a, b in zip(result, result[1:])),
+            "REVIEWED_SOURCE_WINDOWS_MUST_NOT_OVERLAP")
+    return result
+
+
 def execute(command, cwd, log=None, timeout=180):
     result = subprocess.run([str(p) for p in command], cwd=cwd, capture_output=True, text=True, timeout=timeout)
     if log is not None:
@@ -218,6 +277,7 @@ def main():
     parser.add_argument("--output-dir", type=Path, help="Parent under workspace output/qa; run ID is appended")
     parser.add_argument("--run-id")
     parser.add_argument("--audio-reference", type=Path, help="Previous 34-second intro for exact decoded-PCM comparison")
+    parser.add_argument("--source-window-review", type=Path, help="Hash-bound independent pixel review for two actual door transitions")
     parser.add_argument("--check-plan", action="store_true")
     parser.add_argument("--check-only", action="store_true")
     args = parser.parse_args()
@@ -231,6 +291,9 @@ def main():
     require(args.manifest is not None, "ACTUAL_RECORDING_MANIFEST_REQUIRED")
     manifest_path = existing(root, str(args.manifest))
     manifest, cuts, video, apk = validate_recording(root, manifest_path, plan)
+    window_review = existing(root, str(args.source_window_review)) if args.source_window_review else None
+    if window_review is not None:
+        cuts = reviewed_windows(root, window_review, manifest_path, manifest, cuts)
     music, audio, assets = local_assets(root, plan, apk)
     if args.check_only:
         print(json.dumps({"input_evidence_valid": True, "rendered": False, "manifest_sha256": sha(manifest_path),
@@ -248,6 +311,8 @@ def main():
              "run_id": args.run_id, "started_at": datetime.now(timezone.utc).isoformat(),
              "source_manifest": str(manifest_path), "source_manifest_sha256": sha(manifest_path),
              "source_video_sha256": sha(video), "plan_sha256": sha(plan_path)}
+    if window_review is not None:
+        state.update(source_window_review=str(window_review), source_window_review_sha256=sha(window_review))
     try:
         binary = out / "render-sdk-intro"
         cache = out / "swift-module-cache"
