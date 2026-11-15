@@ -66,6 +66,7 @@ data class UiState(
     val answerProvider: AiProvider = AiProvider.UNKNOWN,
     val answerModel: String? = null,
     val assistantRetry: AssistantRetry = AssistantRetry.NONE,
+    val assistantCooldownSeconds: Long = 0,
     val lastAiRequestId: String = "",
     val actions: List<Pair<String, String?>> = emptyList(),
     val citations: List<Pair<String, String>> = emptyList(),

@@ -30,6 +30,24 @@ class AssistantRequestPolicyTest {
         assertEquals("fresh reading", next.payload)
     }
 
+    @Test fun rateLimitWaitDoesNotReplaceTheRequestAndManualResendRetainsItsExactBody() {
+        var elapsed = 0L
+        val scope = AssistantCooldownScope(1, intent.profileId, intent.locale)
+        val gate = AssistantCooldown { elapsed }
+        val requests = requests()
+        val original = requests.prepare(intent, "session", false) { "$it|OPEN|original SDK timestamp" }
+        gate.start(scope, 60_000)
+        assertTrue(gate.remainingSeconds(scope) > 0)
+        elapsed = 59_999
+        assertTrue(gate.remainingSeconds(scope) > 0)
+        elapsed = 60_000
+        assertEquals(0L, gate.remainingSeconds(scope))
+        val resend = requests.prepare(intent, "session", true) { error("429 retry must not rebuild the body") }
+        assertSame(original, resend)
+        assertEquals(original.requestId, resend.requestId)
+        assertEquals(original.payload, resend.payload)
+    }
+
     @Test fun changedLanguageContextInputOrSessionNeverReusesAnOldRequestId() {
         val changed = listOf(intent.copy(locale = "en"), intent.copy(input = "A different question"),
             intent.copy(guide = AssistantGuideContext("guide", "step-2")), intent.copy(profileId = "other-profile"),

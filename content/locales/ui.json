@@ -953,5 +953,15 @@
     "ko-KR": "이 번역 결과의 언어: {locale}",
     "en": "This translation is in: {locale}",
     "ja-JP": "この翻訳結果の言語: {locale}"
+  },
+  "ui_ai_retry_wait": {
+    "ko-KR": "요청이 많아요. {seconds}초 후 다시 보낼 수 있어요.",
+    "en": "Too many requests. You can send again in {seconds} seconds.",
+    "ja-JP": "リクエストが多いため、{seconds}秒後に再送信できます。"
+  },
+  "ui_ai_request_limit": {
+    "ko-KR": "요청 한도에 도달했어요. 대기 시간이 끝나면 다시 보내 주세요.",
+    "en": "Request limit reached. Please send again after the wait.",
+    "ja-JP": "リクエストの上限に達しました。待機時間が過ぎてから再送信してください。"
   }
 }

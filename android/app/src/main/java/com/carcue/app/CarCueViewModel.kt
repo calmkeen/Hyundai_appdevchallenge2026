@@ -31,6 +31,8 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
     @Volatile private var generation = 0
     private var requestJob: Job? = null
     private val assistantRequests = AssistantRequests()
+    private val assistantCooldown = AssistantCooldown { android.os.SystemClock.elapsedRealtime() }
+    private var cooldownJob: Job? = null
     private var assistantGuideContext: AssistantGuideContext? = null
     private var returnPages = AssistantReturnPages()
     private var active = false
@@ -98,6 +100,7 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
     fun chooseLanguage(tag: String, scope: AssistantActionScope = assistantActionScope(mutable.value)) {
         if (content.languages.none { it.tag == tag }) return
         if (!AssistantBoundaryPolicy.canChooseLanguage(mutable.value, scope, active)) { rejectAssistantAction(scope); return }
+        if (tag != mutable.value.locale) clearAssistantCooldown()
         cancelRequest()
         assistantRequests.clear()
         mutable.update { AssistantBoundaryPolicy.languageChanged(it, tag).copy(
@@ -272,6 +275,11 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
         if (input.isBlank() || input.length > (if (translate) 3000 else 2000) || current.busy || !current.sessionStarted) return
         if (!AssistantBoundaryPolicy.canSend(current, scope, active, translate)) { rejectAssistantAction(scope); return }
         if (!consent) { mutable.update { it.copy(error = "CONSENT_REQUIRED") }; return }
+        val waitSeconds = assistantCooldown.remainingSeconds(cooldownScope(current))
+        if (waitSeconds > 0) {
+            mutable.update { it.copy(error = "HTTP_429", assistantCooldownSeconds = waitSeconds) }
+            return
+        }
         val profile = current.profile ?: return
         val ticket = generation
         val op = ++operation
@@ -285,7 +293,7 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
         val resend = retry && current.assistantRetry == AssistantRetry.RESEND
         mutable.update { it.copy(busy = true, error = null, answer = if (!translate) "" else it.answer,
             answerStatus = if (!translate) "" else it.answerStatus, answerRequestId = if (!translate) "" else it.answerRequestId, followUpQuestion = if (!translate) "" else it.followUpQuestion,
-            assistantRetry = AssistantRetry.NONE,
+            assistantRetry = AssistantRetry.NONE, assistantCooldownSeconds = 0,
             citations = if (!translate) emptyList() else it.citations,
             officialCitations = if (!translate) emptyList() else it.officialCitations, externalResource = null,
             actions = if (!translate) emptyList() else it.actions,
@@ -363,7 +371,8 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
                     if (e is ApiFailure && AssistantResponsePolicy.expired(e.status, e.code)) forgetRemoteSession()
                     val outcome = if (e is ApiFailure) AssistantResponsePolicy.http(e.status, e.code)
                         else AssistantOutcome("SERVER_UNAVAILABLE", AssistantRetry.RESEND)
-                    mutable.update { it.copy(busy = false, serverConnection = "UNAVAILABLE", answer = "", answerRequestId = "", followUpQuestion = "", citations = emptyList(), officialCitations = emptyList(), actions = emptyList(),
+                    if (e is ApiFailure && e.status == 429) startAssistantCooldown(e.retryAfterMillis ?: RetryAfterPolicy.FALLBACK_MILLIS)
+                    mutable.update { it.copy(busy = false, serverConnection = if (e is ApiFailure && e.status == 429) "HTTP_429" else "UNAVAILABLE", answer = "", answerRequestId = "", followUpQuestion = "", citations = emptyList(), officialCitations = emptyList(), actions = emptyList(),
                         translationOriginal = if (translate) input else it.translationOriginal,
                         error = outcome.error, assistantRetry = outcome.retry) }
                 }
@@ -376,9 +385,30 @@ class CarCueViewModel(application: Application) : AndroidViewModel(application) 
         deletion.finishActive()
         mutable.update { it.copy(deletionPending = deletion.pending.value) }
     }
+    private fun cooldownScope(state: UiState) = AssistantCooldownScope(state.sessionEpoch, state.profile?.id, state.locale)
+    private fun startAssistantCooldown(delayMillis: Long) {
+        cooldownJob?.cancel()
+        val scope = cooldownScope(mutable.value)
+        val remaining = assistantCooldown.start(scope, delayMillis)
+        mutable.update { it.copy(assistantCooldownSeconds = remaining) }
+        if (remaining == 0L) return
+        cooldownJob = viewModelScope.launch {
+            while (isActive) {
+                delay(1000)
+                if (scope != cooldownScope(mutable.value)) return@launch
+                val seconds = assistantCooldown.remainingSeconds(scope)
+                mutable.update { it.copy(assistantCooldownSeconds = seconds) }
+                if (seconds == 0L) break
+            }
+        }
+    }
+    private fun clearAssistantCooldown() {
+        cooldownJob?.cancel(); cooldownJob = null; assistantCooldown.clear()
+        mutable.update { it.copy(assistantCooldownSeconds = 0, error = if (it.error == "HTTP_429") null else it.error) }
+    }
     fun cancelRequest() { operation++; requestJob?.cancel(); requestJob = null; mutable.update { it.copy(busy = false) } }
     private fun clearSession() {
-        generation++; guideRequests.invalidate(); cancelRequest(); stopVehicle()
+        generation++; guideRequests.invalidate(); cancelRequest(); clearAssistantCooldown(); stopVehicle()
         remote = null
         deletion.finishActive()
         assistantRequests.clear(); assistantGuideContext = null
