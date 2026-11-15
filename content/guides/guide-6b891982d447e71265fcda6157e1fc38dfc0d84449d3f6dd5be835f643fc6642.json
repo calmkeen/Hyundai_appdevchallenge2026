@@ -1,0 +1,97 @@
+{
+  "guide_id": "ioniq5-cluster-display-check",
+  "profile_ids": [
+    "ioniq5-ne1-2024-kr"
+  ],
+  "manual_set_id": "hyundai-ioniq5-ne1-2024-kr",
+  "source_version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+  "topic": "display_indicators",
+  "title": "Cluster brightness and EV indicators",
+  "body": "Park safely, then check the vehicle screen and cluster directly. This guide covers brightness, READY, service and power-down indicators only. CarCue neither reads these indicator sensors nor controls brightness, and does not diagnose faults or determine whether driving is safe.",
+  "locale": "en",
+  "source_locale": "ko-KR",
+  "glossary_version": "carcue-ioniq5-display-v1",
+  "lifecycle": "PUBLISHED",
+  "translation_review_status": "REVIEWED",
+  "sources": [
+    {
+      "source_id": "hyundai-ne1-2024-kr-cluster-brightness",
+      "title": "Hyundai IONIQ 5 2024 - Korean owner manual",
+      "url": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/id4d773b8d07c.html",
+      "version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+      "section": "클러스터 조명 밝기 조절 · 인쇄 4-3 / PDF 149",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "source_id": "hyundai-ne1-2024-kr-ev-ready-service-powerdown",
+      "title": "Hyundai IONIQ 5 2024 - Korean owner manual",
+      "url": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/id44e0749ede7.html",
+      "version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+      "section": "클러스터 경고등 및 표시등 > 주행 가능 표시등·서비스 경고등·파워다운 표시등 · 인쇄 0-48 / PDF 54",
+      "verification_status": "VERIFIED"
+    }
+  ],
+  "steps": [
+    {
+      "step_id": "adjust-cluster-brightness",
+      "order": 1,
+      "title": "Adjust brightness while parked",
+      "body": "With the vehicle ON, open Settings > Display > Screen brightness on its infotainment system. Adjust manually or select automatic day/night brightness, which follows ambient light. Cluster and infotainment brightness change together. With the position lights on, interior switch lighting is also adjusted.",
+      "image_asset_id": null,
+      "official_cautions": [],
+      "source_ids": [
+        "hyundai-ne1-2024-kr-cluster-brightness"
+      ],
+      "related_properties": [],
+      "actions": [
+        {
+          "kind": "OPEN_MANUAL",
+          "target_id": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/id4d773b8d07c.html"
+        }
+      ]
+    },
+    {
+      "step_id": "check-ready-and-service",
+      "order": 2,
+      "title": "Distinguish READY from the service warning",
+      "body": "READY lights after startup when driving preparation is complete. Off means normal driving is unavailable; flashing means emergency operation. The service warning lights with ON, then goes out after 3 seconds.",
+      "image_asset_id": null,
+      "official_cautions": [
+        "If READY is off or flashing after startup, have a nearby Hyundai High-tech Center or Bluehands inspect and service the vehicle.",
+        "If the service warning lights while driving or stays on after startup, have a nearby Hyundai High-tech Center or Bluehands inspect and service the vehicle."
+      ],
+      "source_ids": [
+        "hyundai-ne1-2024-kr-ev-ready-service-powerdown"
+      ],
+      "related_properties": [],
+      "actions": [
+        {
+          "kind": "OPEN_MANUAL",
+          "target_id": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/id44e0749ede7.html"
+        }
+      ]
+    },
+    {
+      "step_id": "check-powerdown-cautions",
+      "order": 3,
+      "title": "Check the power-down cautions",
+      "body": "Power-down indicates output restriction to protect high-power components. It may appear with very low charge or falling voltage in the high-voltage battery, or high drive-system temperature. The manual does not describe power-down alone as a fault.",
+      "image_asset_id": null,
+      "official_cautions": [
+        "If power-down and the service warning light together, have a Hyundai High-tech Center or Bluehands inspect the vehicle.",
+        "Do not accelerate sharply or make a sudden start while power-down is lit.",
+        "Restricted output can make climbing a slope difficult or allow the vehicle to roll back on a slope."
+      ],
+      "source_ids": [
+        "hyundai-ne1-2024-kr-ev-ready-service-powerdown"
+      ],
+      "related_properties": [],
+      "actions": [
+        {
+          "kind": "OPEN_MANUAL",
+          "target_id": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/id44e0749ede7.html"
+        }
+      ]
+    }
+  ]
+}
