@@ -144,3 +144,7 @@ OF-001 구현 `e816d61`, 철회 navigation 보완 `684556c`/`e7c58ad`, SE-001 �
 ## README 소개 영상과 main 안내 · 2026-11-15
 
 `feature/readme-intro-video`는 기존34초 영상/포스터/크레딧의 바이트 동일 공개 사본을 develop README에서 연결한다. 원본/제출 APK/기획서/서명키는 보존하고 실제SDK AVD의 기존debug촬영과 새release를 구분한다. 음악 attribution과 파일SHA를 유지한다. `feature/main-readme-navigation`은 main에서 README 한 파일만 작성해 현재개발은develop이라는 문구와 영상·실행 문서를 절대URL로 연결한다. main에 전체develop 앱코드를 병합하지 않는다. 원본4파일 SHA, README링크·내용·main변경범위, 실제GitHub표시와원격SHA를 검증하고 작업브랜치/develop/main을각각push한다. 기존 고정제출release는 변경하지 않는다.
+
+## 영상 전환 결함 수정 · 2026-11-15
+
+`feature/video-render-cleanup`에서 영상만 수정했다. 이전선별스틸검수가놓친전환구간의실제디코딩70초록프레임/14검은플래시를확인하고, 기존원본·렌더러·장면구성·BGM을보존한독립불투명합성경로로재렌더했다. 새영상1020CFR프레임전부디코딩·모든전환/5fps컨택트시트검토·PCM5997600바이트exact·실제원본PTS매핑840개검증이통과했다. 공개영상경로는수정본으로갱신하고기존ZIP/기획서/APK/고정release는변경하지않는다. 상세재현과한계는`VIDEO_RENDER_CLEANUP.md`. 실제SDK/모델/유료AI/AVD호출0.
