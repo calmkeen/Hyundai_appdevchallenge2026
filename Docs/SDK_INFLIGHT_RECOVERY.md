@@ -120,6 +120,38 @@ run12 뒤에는 ADB shell 지연과 실제 CarService 미등록도 관측했다.
 
 test-only 관측 보완 커밋 `0bc1e79`도 실제 원격 SHA 일치와 [CI success](https://github.com/calmkeen/Hyundai_appdevchallenge2026/actions/runs/43680336520)를 확인했다(backend475/UI191). CI는 실제 AVD/모델 호출을 실행하지 않으며 새 AVD 허용 확장의 실제 기기 검증과 구분한다.
 
+## 초기 AVD의 실제 준비 실패와 기준선 복귀
+
+`runtime-fresh-sdk-recovery-01`은 4분34초에 boot 완료와 Console HTTP200을 확인했다. 그러나 실제 stock display는 흰색이었고, user0/10의 실제 RUNNING_UNLOCKED와 별개로 SystemUI가 재시작하며 keyguard가 USER_NULL로 reset됐다. `CarUserService.User0Unlocked` 캐시 필드 하나를 새 필수 gate로 추가하거나 PIN 필요의 근거로 사용하지 않았다. 실제 keyguard·CarService·SDK/UX 조건은 유지했다.
+
+이어 `runtime-fresh-hostgpu-01`은 host GPU·창 표시·공식 2560×1440으로 전환했으나 stock display가 검정이었고 SystemUI의 ANR/APP_CRASH_EXCEPTION 및 u0 CarService 종료가 관측됐다. 두 APK 설치는 성공했지만 설치 경로 조회15초·정상 MainActivity 실행30초·screencap10초와 별도 SystemUI crashbuffer12초 읽기가 시간 초과했다. 따라서 설치 성공을 실제 정상 실행·SDK·AI 성공으로 확대하지 않는다. 프로필/AI/native run14는 시작하지 않았다.
+
+추가 대조에서 새 config의 `tag.id=android-automotive`는 공식 image metadata와 일치하지만 기존 config의 `pleos_car_emulator`와 달랐다. 데이터만 분리하는 비교에 변수를 더했으므로 다음 정상 종료 후 원래 태그로 통일한다. 태그가 이번 장애의 단독 원인이라는 근거는 없다. 후속 후보는 실제 SDK 수신이 있던 noaudio/host 기준선의 원래2core·창/2560·HardwareDecoder 기본ON·Vulkan off로 복귀하고, `-show-kernel`로 부팅 증거를 추가한다. 기존 userdata·보안 설정·실제 SDK/AI 값을 변경하지 않는다.
+
+bootstrap06은 stop 뒤 thread 종료는 확인했지만 closing ReadTimeout과 exit1이었고, 같은 client의 한 번 재시도도 ACK를 확인하지 못했다. 이를 정상 종료로 바꾸지 않았다. bootstrap07을 새 namespace의 monotonic3600초 worker로 분리했다. 해당 실패 이력과 최종 통과 실행의 자체 lease/worker 정리는 구분한다.
+
+## 검증 도구 통합과 후속 작업
+
+작업 브랜치 `feature/sdk-inflight-recovery`의 `37b26c7`은 [CI success](https://github.com/calmkeen/Hyundai_appdevchallenge2026/actions/runs/43682172834)이며 backend475개/UI191개다. 이 검증 도구·정확한 미완료 기록을 `develop`에 no-ff 통합한 `71cd181`도 실제 원격 SHA 일치와 [CI success](https://github.com/calmkeen/Hyundai_appdevchallenge2026/actions/runs/43683711639)를 확인했다. develop과 작업 브랜치의 tree는 일치하고 main은 `ba28cdb` 그대로다. 앱 기능 코드는 이 복구 작업에서 바꾸지 않았다.
+
+실제 SDK 세 경계는 여전히 미완료다. 후속 AVD 부팅 진단·기기 실행 증거는 `71cd181`에서 분리한 `feature/pleos-runtime-diagnostics`에서 이어간다. 검증 도구의 통합을 단계6의 실제 기기 완료로 해석하지 않는다.
+
+## 부하를 낮춘 호스트에서 필요한 재시험
+
+`runtime-fresh-host-baseline-01`은 정상 종료 뒤 태그 한 줄만 기존 Pleos 값으로 통일하고, 2core/host GPU/창/2560·기본 HardwareDecoder ON·noaudio·Vulkan off로 복귀했다. kernel 로그는 마지막 EOF까지 2,360행을 보존했고 민감값 가능 행2개를 생략했다. vendor property 설정의 SELinux 거절 등 플랫폼 메시지는 보존했으며 SELinux·보안·watchdog 설정을 바꾸지 않았다. 8분 준비에서도 ADB/boot gate를 충족하지 못했고, 다음 native run14·프로필·AI는 시작하지 않았다. 마지막 `adb emu kill`은 ACK timeout이었지만 이후 launcher의 **실제 exit0**과 PID 부재를 확인했다. 신호를 다른 PID에 보내지 않았다.
+
+호스트에서 load average45~66, 활성 상태 보기의 16GB RAM 중 약14GB 사용·swap24.93~26.92GB와 CPU idle0~2%를 관측했다. 에뮬레이터와 진단용 활성 상태 보기를 종료한 뒤에도 별도 Mach host aggregate 1.503초 표본은 **user48.419%/system51.581%/idle0%**였다. `host-cpu-after-emulator-stop.json`이 근거다. libproc의 보정된 표본에서는 QEMU/Java/Gradle/Kotlin 이름군 잔존이 없고 Ollama와 node군 CPU도 작았다. 권한 등으로 읽지 못한 프로세스와 과거 QEMU 부하는 판정하지 않는다. 전체 부하의 단독 원인이나 Mac 재시동의 해결 효과까지 증명한 것은 아니다.
+
+다른 앱의 작업을 임의 종료하거나 OS 설정을 변경하지 않았다. CPU·메모리 여유가 있는 호스트 상태를 확보한 뒤 동일한 실제 SDK/UX/무료 provider 조건으로 새 실행이 필요하다. 기존 실패 결과를 합쳐 통과시키거나 SDK/모델/주행 제한을 대역으로 바꾸지 않는다. **언어와 Drive는 일부 실행에서 실제 처리 중 타이밍 및 완료 뒤2초 억제를 확인했지만 전체 실행은 실패했고, 처리 중 이용 종료는 미실행**이다. 정상 종료 버튼의 기존 showcase 성공은 이 잔여 시험을 대체하지 않는다.
+
+최종 정리는 `runtime-cleanup-after-host-pressure.json`을 따른다. AVD actual exit0·ADB 목록 비움, DB sessions/results/history `0/0/0`, 원본 config/ini8개 SHA 보존과 모델 미적재를 확인했다. LIVE 서버/Ollama는 유지한다. helper07은 thread 종료·actual exit1이며 closing ConnectError/ACK 미확인, heartbeat 등록 성공0회였다. 이 실패를 ACK 성공이나 전체 무오류 정리로 표시하지 않는다.
+
+## 실제 연동과 대역
+
+- **실제 경로:** 기능 APK5ef560ba…의 Pleos SDK/CarUX, 실제 로컬 HTTP·SQLite, Ollama/qwen3:4b를 사용했다. 이번 서버 audit14개는 모두 `provider_kind=OLLAMA_LOCAL`이다. 실패한 실행의 호출도 포함하므로 이를 세 경계 완료로 합산하지 않는다. 차량 입력은 전용 AVD의 호스트 Console fixture이며 실차 시험은 아니다.
+- **Mock/합성 회귀:** demo flavor 차량 데이터, CI의 MOCK 서버·provider HTTP fixture 및 JVM의 합성 경계 정책은 실제 SDK/모델 시험과 구분한다. 실제 SDK 실패를 이 대역으로 대체하지 않았다.
+- **보류/미연결:** 유료 AI와 자동 전환·생성 QUESTION 번역은 보류한다. ANSWER/GUIDE는 같은 판본의 저장 검토 번역이다. 벨트 센서는 미연결, 차량 시각화는 SDK 문 값에 연결한 사전 렌더 프레임이며 새 실시간3D SDK를 연결한 것이 아니다.
+
 ## 처리 중 handler 검증과 일반 UI 검증의 구분
 
 처리 중 세 케이스는 **실제 SDK·실제 무료 provider와 생산 handler의 통합 검증**이다. 언어는 main thread에서 `language()`를 실행한 뒤 현재 action scope로 `chooseLanguage("en", scope)`를 호출한다. 종료는 Settings 화면 이동이 먼저 요청을 취소하지 않도록 pending 상태에서 `endSession()` 자체를 호출해 epoch 증가와 실제 DELETE 경계를 검사한다. Drive는 실제 플랫폼 UX callback을 그대로 사용한다. 상태를 직접 쓰거나 handler의 세션·scope·UX 검사를 생략하지 않는다.
@@ -149,4 +181,4 @@ test-only 관측 보완 커밋 `0bc1e79`도 실제 원격 SHA 일치와 [CI succ
 
 ## 최종 결과
 
-**미완료 — run01~13은 전체 FAIL이며 세 실제 in-flight handler 경계의 전체 통과 증거 대기.** 언어·Drive의 부분 증명과 진단용 캡처를 합쳐 최종 성공으로 취급하지 않는다. 별도 공식 37.2.12 runtime의 실제 SDK 회신·준비 및 후속 시험 결과를 확인한 뒤 갱신한다. 기존 실패·복구·삭제 원본은 보존한다. 작업 브랜치의 checkpoint `02947ed` 원격/CI success와 현재 후속 소스의 실제 기기 검증 상태도 구분한다.
+**미완료 — run01~13은 전체 FAIL이며 세 실제 in-flight handler 경계의 전체 통과 증거 대기.** 언어·Drive의 부분 증명과 진단용 캡처를 합쳐 최종 성공으로 취급하지 않는다. 원본과 분리한 AVD의 실제 SDK 회신·준비 및 후속 시험 결과를 확인한 뒤 갱신한다. 기존 실패·복구·삭제 원본은 보존한다. develop `71cd181`의 원격/CI success와 실제 기기 검증 상태도 구분한다.
