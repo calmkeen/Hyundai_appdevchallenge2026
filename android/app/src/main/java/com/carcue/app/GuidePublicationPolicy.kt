@@ -27,7 +27,8 @@ internal data class PublishedGuideRecord(
     fun toGuide() = Guide(id, title, body, steps.map { it.title to it.body },
         sources.map { "${it.title} · ${it.section}" to it.url }, locale,
         steps.map { it.id }, steps.map { it.officialCautions }, manualSetId, sourceVersion, profileIds,
-        publicationVerified = true, officialSources = sources.map { OfficialSource(it.id, it.url, sourceLocale) }) // Called only after the publication gate accepts this record.
+        publicationVerified = true, officialSources = sources.map { OfficialSource(it.id, it.url, sourceLocale) },
+        topic = topic, relatedProperties = steps.flatMap { it.relatedProperties }.toSet()) // Called only after the publication gate accepts this record.
 }
 
 internal data class PublishedGuideIdentity(val id: String, val locale: String, val manualSetId: String, val sourceVersion: String)
@@ -59,6 +60,7 @@ internal data class PublishedGuideStep(
     val body: String,
     val officialCautions: List<String>,
     val sourceIds: List<String>,
+    val relatedProperties: List<String> = emptyList(),
 )
 
 internal class GuidePublicationPolicy(

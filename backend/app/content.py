@@ -17,6 +17,25 @@ _DOOR_QUERY = re.compile(
     re.IGNORECASE,
 )
 _CHARGING_QUERY = re.compile(r"\bcharg(?:e|es|ed|ing|er|ers)\b|충전|充電|チャージ", re.IGNORECASE)
+_TOPIC_QUERIES = {
+    "door": _DOOR_QUERY,
+    "charging": _CHARGING_QUERY,
+    "seats_mirrors": re.compile(r"\b(?:seats?|mirrors?)\b|좌석|시트|거울|미러|シート|座席|ミラー|鏡", re.IGNORECASE),
+    "display_indicators": re.compile(r"(?<![a-z0-9])(?:cluster|dashboard|display|indicators?|telltales?|ready)(?![a-z0-9])|power[ -]?down|"
+        r"계기판|클러스터|표시등|경고등|밝기|화면|출력\s*제한|パワーダウン|メーター|表示灯|警告灯|明るさ|画面|ディスプレイ", re.IGNORECASE),
+}
+_CHARGE_PORT_DOOR = re.compile(r"charg\w*\s+port\s+door|충전\s*(?:구\s*(?:도어|문)|도어)|充電(?:口|ポート)(?:の)?(?:ドア|扉)", re.IGNORECASE)
+_OUTSIDE_TOPIC_SCOPE = {
+    "charging": re.compile(r"(?<![a-z0-9])(?:dc|iccb|v2l|chademo|ccs)(?![a-z0-9])|\b(?:fast|rapid|portable|emergency)\b|"
+        r"(?<![a-z0-9])(?:phones?|smartphones?|usb|wireless|12\s*v)(?![a-z0-9])|"
+        r"급속|휴대용|휴대폰|휴대전화|스마트폰|무선|비상\s*(?:분리|해제)|강제\s*분리|"
+        r"急速|携帯|スマホ|スマートフォン|ワイヤレス|無線|ポータブル|非常|緊急", re.IGNORECASE),
+    "seats_mirrors": re.compile(r"(?<![a-z0-9])(?:dsm|memory|relaxation|reverse|camera)(?![a-z0-9])|seat[ -]?belts?|"
+        r"rear\s+seats?|child\s+seats?|메모리|릴렉|카메라|후진|디지털|안전벨트|뒷좌석|카시트|유아|"
+        r"デジタル|カメラ|メモリ|リラック|後退|バック|後席|チャイルド|シートベルト", re.IGNORECASE),
+    "display_indicators": re.compile(r"(?<![a-z0-9])(?:abs|tpms|brake|airbag|esc)(?![a-z0-9])|브레이크|제동|타이어|공기압|에어백|"
+        r"ブレーキ|タイヤ|空気圧|エアバッグ", re.IGNORECASE),
+}
 # Full-match only: a selected door guide may resolve a short referential
 # follow-up, never supply sources for an arbitrary different question.
 _DOOR_FOLLOWUP = re.compile(
@@ -114,22 +133,28 @@ class Catalog:
     def retrieve(self, request):
         guides = self.published(request.profile_id, request.locale)
         query = unicodedata.normalize("NFKC", request.question).casefold()
-        # A door/closing passage does not answer charging instructions, even when
-        # the door guide is currently selected or the question mentions a door.
-        if _CHARGING_QUERY.search(query) and not any(g["topic"] == "charging" for g in guides):
+        topics = {topic for topic, pattern in _TOPIC_QUERIES.items() if pattern.search(query)}
+        if "charging" in topics and _CHARGE_PORT_DOOR.search(query):
+            topics.discard("door")
+        # One complete reviewed topic cannot answer a compound cross-topic question.
+        if len(topics) > 1:
             return []
-        matches = self.search(request.profile_id, request.locale, request.question)
-        door_question = bool(_DOOR_QUERY.search(query))
-        if door_question:
-            matches = [g for g in guides if _door_guide(g)] + [g for g in matches if g["topic"] != "door"]
+        selected_topic = next(iter(topics), None)
+        if selected_topic in _OUTSIDE_TOPIC_SCOPE and _OUTSIDE_TOPIC_SCOPE[selected_topic].search(query):
+            return []
+        if selected_topic:
+            matches = [g for g in guides if g["topic"] == selected_topic
+                       and (selected_topic != "door" or _door_guide(g))]
         else:
-            # Common English words (e.g. 'do' inside 'door') must not route an
-            # unrelated question to the only available manual passage.
-            matches = [g for g in matches if g["topic"] != "door"]
+            # Preserve legacy search for other topics. These four published
+            # scopes require an explicit topic or a short contextual follow-up.
+            matches = [g for g in self.search(request.profile_id, request.locale, request.question)
+                       if g["topic"] not in _TOPIC_QUERIES]
         if request.guide_context.guide_id:
             context = next((g for g in guides if g["guide_id"] == request.guide_context.guide_id
-                            and (g["topic"] != "door" or (_door_guide(g)
-                                 and (door_question or _DOOR_FOLLOWUP.fullmatch(query.strip()))))), None)
+                            and (g["topic"] != "door" or _door_guide(g))
+                            and ((selected_topic is not None and g["topic"] == selected_topic)
+                                 or (selected_topic is None and _DOOR_FOLLOWUP.fullmatch(query.strip())))), None)
             if context and context not in matches:
                 matches.insert(0, context)
         return matches[:5]
