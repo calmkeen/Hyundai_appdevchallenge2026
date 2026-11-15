@@ -1,5 +1,7 @@
 # AI 답변 주의문 보완 검증
 
+2026-11-15 추가9개 사용안내의검증은 `GUIDE_EXPANSION_VALIDATION.md`에분리한다. 그작업은실제모델0/저장번역HTTP36건이며, 아래‘실제API9개’는당시문안내3문맥×3언어의역사적검증이다. 두실행과바이너리를혼동하지않는다.
+
 2026-11-14~15 (KST). 작업은 `feature/ai-complete-caution-answers`(정책/회귀)와 `feature/ai-caution-validation`(실제 호출/앱 검증/Docs)로 나눴다. 유료 AI와 자동 전환, 생성 QUESTION 번역의 기본 보류를 유지한다. 구현 정책은 [AI_CAUTION_POLICY.md](AI_CAUTION_POLICY.md)를 따른다.
 
 ## 문제와 보완

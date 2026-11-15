@@ -1,5 +1,13 @@
 # CarCue 실행과 개발
 
+2026-11-15 추가9개 공식 사용 안내와 실제 HTTP/저장 번역 검증은 `GUIDE_EXPANSION_VALIDATION.md`를 따른다. 최신개발본은4주제·3언어 게시12개를 포함한다. **구 제출 APK는 고정release의 backend/content와 짝으로 실행**하며 최신개발 서버와 혼용하지 않는다. 새 세 주제는 센서 미연결 수동 안내이며 AVD 재시험·실제 새 모델 선택은 보류했다.
+
+```bash
+# 신규 자체 loopback 서버/DB만 사용. 공급자DISABLED, 실제모델/AVD 기동0.
+.venv/bin/python scripts/validate_manual_guides.py \
+  --output-dir output/qa/guide-expansion-NEXT/http-live-01
+```
+
 2026-11-15 다국어·차량 UX·이용 종료의 표준 시연은 [SDK_SESSION_VALIDATION.md](SDK_SESSION_VALIDATION.md), 추가 in-flight 시험·AVD 복구의 최신 상태는 [SDK_INFLIGHT_RECOVERY.md](SDK_INFLIGHT_RECOVERY.md), 새 소개 영상 도구는 [SDK_LIVE_INTRO.md](SDK_LIVE_INTRO.md)를 따른다. 이전 Mock/SDK 영상 재현 명령은 아래 이력으로 보존한다. 새 검증 도구는 기존 앱/AVD userdata나 로그를 초기화하지 않는다.
 
 최신 원문/공식지원·3언어왕복·실제SDK/주행중거절 재현은 `OFFICIAL_RESOURCE_APP_VALIDATION.md`를 따른다. 무료Ollama서버는 `LOCAL_AI_INTEGRATION.md`, UX연결의복구/한계는 `UX_CONNECTION_RECOVERY.md`에 있다. 기획·완료현황은 `Docs/`에 유지하며 유료AI와 생성질문번역 기본보류는 그대로다.

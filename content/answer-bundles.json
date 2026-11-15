@@ -57,6 +57,245 @@
       "review_method": "Deterministic assembly of the existing AI-assisted reviewed CarCue summaries and explicit caution summaries; no new translation or verbatim OEM prohibition claim",
       "human_certified_review": false,
       "oem_approved": false
+    },
+    {
+      "policy_id": "ioniq5-ac-charging-check-complete-v1",
+      "guide_id": "ioniq5-ac-charging-check",
+      "profile_ids": [
+        "ioniq5-ne1-2024-kr"
+      ],
+      "manual_set_id": "hyundai-ioniq5-ne1-2024-kr",
+      "source_version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+      "topic": "charging",
+      "unit_suffix": ":manual-bundle:v1",
+      "source_ids": [
+        "hyundai-ne1-2024-kr-charge-precautions",
+        "hyundai-ne1-2024-kr-charge-general",
+        "hyundai-ne1-2024-kr-ac-charge-start",
+        "hyundai-ne1-2024-kr-charge-label-stop"
+      ],
+      "locales": [
+        "ko-KR",
+        "en",
+        "ja-JP"
+      ],
+      "required_steps": [
+        {
+          "step_id": "check-charge-site",
+          "order": 1,
+          "source_ids": [
+            "hyundai-ne1-2024-kr-charge-precautions",
+            "hyundai-ne1-2024-kr-charge-label-stop",
+            "hyundai-ne1-2024-kr-ac-charge-start",
+            "hyundai-ne1-2024-kr-charge-general"
+          ]
+        },
+        {
+          "step_id": "park-and-check-connection",
+          "order": 2,
+          "source_ids": [
+            "hyundai-ne1-2024-kr-charge-precautions",
+            "hyundai-ne1-2024-kr-charge-general",
+            "hyundai-ne1-2024-kr-ac-charge-start"
+          ]
+        },
+        {
+          "step_id": "check-charge-start",
+          "order": 3,
+          "source_ids": [
+            "hyundai-ne1-2024-kr-ac-charge-start",
+            "hyundai-ne1-2024-kr-charge-label-stop"
+          ]
+        }
+      ],
+      "required_caution_step_ids": [
+        "check-charge-site",
+        "park-and-check-connection",
+        "check-charge-start"
+      ],
+      "records": [
+        {
+          "locale": "ko-KR",
+          "payload_sha256": "35d9e027228226de7a1b2d86695776b8274f4f06d668534ff100082613879c0b",
+          "bundle_sha256": "8c73464b8bb0242422b2ae28c9981d2ea7b180231e35f7f7309517cbff53fbba"
+        },
+        {
+          "locale": "en",
+          "payload_sha256": "be768732cde0bb448315d54c880320ac1ccab8836deffae632ece82f89f5bb03",
+          "bundle_sha256": "4abe1b1168a4981fc413191ebc548cc7b79b07a54de35a008a80991a07b2ea34"
+        },
+        {
+          "locale": "ja-JP",
+          "payload_sha256": "6bcbf96b6a72b59482d5991b478aba728e8f7afe879148f0b5404bd01abf277e",
+          "bundle_sha256": "66a29b8bee18e4c608c0ab75f5a7520718d8b26718c418700ab078640310cdb4"
+        }
+      ],
+      "content_basis": "PUBLISHED_CARCUE_REVIEWED_SUMMARIES",
+      "review_method": "Deterministic assembly of the published CarCue summaries and reviewed KO/EN/JA translations, including every step title, body and explicit caution summary; no new translation, verbatim OEM prohibition claim or OEM approval",
+      "human_certified_review": false,
+      "oem_approved": false
+    },
+    {
+      "policy_id": "ioniq5-seat-mirror-before-driving-complete-v1",
+      "guide_id": "ioniq5-seat-mirror-before-driving",
+      "profile_ids": [
+        "ioniq5-ne1-2024-kr"
+      ],
+      "manual_set_id": "hyundai-ioniq5-ne1-2024-kr",
+      "source_version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+      "topic": "seats_mirrors",
+      "unit_suffix": ":manual-bundle:v1",
+      "source_ids": [
+        "hyundai-ne1-2024-kr-driving-posture",
+        "hyundai-ne1-2024-kr-seat-safety",
+        "hyundai-ne1-2024-kr-front-seat",
+        "hyundai-ne1-2024-kr-inside-mirror",
+        "hyundai-ne1-2024-kr-outside-mirror"
+      ],
+      "locales": [
+        "ko-KR",
+        "en",
+        "ja-JP"
+      ],
+      "required_steps": [
+        {
+          "step_id": "park-and-clear",
+          "order": 1,
+          "source_ids": [
+            "hyundai-ne1-2024-kr-driving-posture",
+            "hyundai-ne1-2024-kr-seat-safety",
+            "hyundai-ne1-2024-kr-front-seat",
+            "hyundai-ne1-2024-kr-outside-mirror"
+          ]
+        },
+        {
+          "step_id": "adjust-driver-seat",
+          "order": 2,
+          "source_ids": [
+            "hyundai-ne1-2024-kr-seat-safety",
+            "hyundai-ne1-2024-kr-front-seat"
+          ]
+        },
+        {
+          "step_id": "check-posture-headrest",
+          "order": 3,
+          "source_ids": [
+            "hyundai-ne1-2024-kr-driving-posture",
+            "hyundai-ne1-2024-kr-seat-safety",
+            "hyundai-ne1-2024-kr-front-seat"
+          ]
+        },
+        {
+          "step_id": "adjust-interior-mirror",
+          "order": 4,
+          "source_ids": [
+            "hyundai-ne1-2024-kr-inside-mirror"
+          ]
+        },
+        {
+          "step_id": "adjust-exterior-mirrors",
+          "order": 5,
+          "source_ids": [
+            "hyundai-ne1-2024-kr-outside-mirror"
+          ]
+        }
+      ],
+      "required_caution_step_ids": [
+        "park-and-clear",
+        "adjust-driver-seat",
+        "check-posture-headrest",
+        "adjust-interior-mirror",
+        "adjust-exterior-mirrors"
+      ],
+      "records": [
+        {
+          "locale": "ko-KR",
+          "payload_sha256": "384a86a8afb997e590de06e001f791ddb6aeed9db1086967b0bd42c96d8af0aa",
+          "bundle_sha256": "6b3f369a9f472018d55b4f255eddf7d746f3f7dc015c93d758da23aec5df7597"
+        },
+        {
+          "locale": "en",
+          "payload_sha256": "d3a9063073134d75ec8224a9fbb956a1d97020cad4dcc06b62eb74bca702e9b8",
+          "bundle_sha256": "55c3f6e2579797a888d2f6db856b76b60e74adb99160f1c79a8bb796ad9bce8f"
+        },
+        {
+          "locale": "ja-JP",
+          "payload_sha256": "06759ceaaf611088606ca3b3ecb206a815a9024f42a93adc53e2498ed6eee4ac",
+          "bundle_sha256": "11795f8ebcb19f15be8e01876b704f2c9c452da0a8db582b46a927cdaa41c95e"
+        }
+      ],
+      "content_basis": "PUBLISHED_CARCUE_REVIEWED_SUMMARIES",
+      "review_method": "Deterministic assembly of the published CarCue summaries and reviewed KO/EN/JA translations, including every step title, body and explicit caution summary; no new translation, verbatim OEM prohibition claim or OEM approval",
+      "human_certified_review": false,
+      "oem_approved": false
+    },
+    {
+      "policy_id": "ioniq5-cluster-display-check-complete-v1",
+      "guide_id": "ioniq5-cluster-display-check",
+      "profile_ids": [
+        "ioniq5-ne1-2024-kr"
+      ],
+      "manual_set_id": "hyundai-ioniq5-ne1-2024-kr",
+      "source_version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+      "topic": "display_indicators",
+      "unit_suffix": ":manual-bundle:v1",
+      "source_ids": [
+        "hyundai-ne1-2024-kr-cluster-brightness",
+        "hyundai-ne1-2024-kr-ev-ready-service-powerdown"
+      ],
+      "locales": [
+        "ko-KR",
+        "en",
+        "ja-JP"
+      ],
+      "required_steps": [
+        {
+          "step_id": "adjust-cluster-brightness",
+          "order": 1,
+          "source_ids": [
+            "hyundai-ne1-2024-kr-cluster-brightness"
+          ]
+        },
+        {
+          "step_id": "check-ready-and-service",
+          "order": 2,
+          "source_ids": [
+            "hyundai-ne1-2024-kr-ev-ready-service-powerdown"
+          ]
+        },
+        {
+          "step_id": "check-powerdown-cautions",
+          "order": 3,
+          "source_ids": [
+            "hyundai-ne1-2024-kr-ev-ready-service-powerdown"
+          ]
+        }
+      ],
+      "required_caution_step_ids": [
+        "check-ready-and-service",
+        "check-powerdown-cautions"
+      ],
+      "records": [
+        {
+          "locale": "ko-KR",
+          "payload_sha256": "2b5d4b745163afdc7b307925d10456603048435e2bcb7a4f3171da6b6872c74e",
+          "bundle_sha256": "be386fd55e1e3c7b8d765967a46362834bf5680f41a8a0d10bd81562dac0d72e"
+        },
+        {
+          "locale": "en",
+          "payload_sha256": "ff492ee6cc2ed5ed7bc7b555d54a9f56c1f2dddbed1890088878e8c61c6ec66c",
+          "bundle_sha256": "591ead8c9d3cb49a917ad3132cf7e806315e4e735e45b3e3e1a3af483e9f9c78"
+        },
+        {
+          "locale": "ja-JP",
+          "payload_sha256": "a10e7192379c9e842fc37ce4deea66cd8a1128295c8f6de810efb6f075a3987a",
+          "bundle_sha256": "09b9d9bebace738a7cfccc75fc33793f2aae41ee942951666cc89a4096973331"
+        }
+      ],
+      "content_basis": "PUBLISHED_CARCUE_REVIEWED_SUMMARIES",
+      "review_method": "Deterministic assembly of the published CarCue summaries and reviewed KO/EN/JA translations, including every step title, body and explicit caution summary; no new translation, verbatim OEM prohibition claim or OEM approval",
+      "human_certified_review": false,
+      "oem_approved": false
     }
   ]
 }

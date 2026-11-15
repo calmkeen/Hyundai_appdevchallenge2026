@@ -2,6 +2,21 @@
 
 2026-11-14부터 기능·검증·Docs를 작업별 feature 브랜치와 커밋으로 관리한다. 실제 결과와 원격 반영 여부를 분리한다. 운영 규칙은 `05-git-flow.md`다.
 
+## 공식 기본 사용 안내 9개 · 2026-11-15
+
+사용자가 충전·좌석/거울·화면/표시등의3주제×KO/EN/JA를 공식 매뉴얼로 검토·개발하도록 요청했다. AVD 재시험·유료 AI와 기존 제출 APK/영상 변경은 보류했다.
+
+| 작업 | 브랜치 | 구현·검증 |
+| --- | --- | --- |
+| GD-005 AC 충전 | `feature/ioniq5-charging-guide` | `d15ca8e`. 공식 AC 시작 전·시작 확인3언어,3단계10주의. 독립 의미 대조·게시 검사7개·주제 회귀43 통과 |
+| GD-006 좌석/일반미러 | `feature/ioniq5-seats-mirrors-guide` | `44a6a27`.5단계21주의·3언어, 조절 전 정차/부정/신체 부위/수동전동/미러거리 대조. 동일 게시·회귀 통과 |
+| GD-007 클러스터 | `feature/ioniq5-display-guide` | `a8226c6`.3단계3언어, 밝기 정상 설명은본문/READY·서비스·파워다운주의 보존. 동일 게시·회귀 통과 |
+| GD-008 공통 연결 | `feature/guide-expansion-integration` | `18dd6de` topic/실제door binding 분리, `1927cbc`/`d3ef3e6` 합성·기존door fixture독립화, `072c321` 새9개 전체답변핀/범위검증. 전체606·UI194/4정책 통과 |
+
+초안·독립 수정 요청·최종 대조를 QA에 보존하고 게시3개씩만 각content/guides에 추가했다. 신규센서/제어는없으며 기존문3JSON과closing-bundle은그대로다. 카탈로그13개(게시12/초안1)·실제HTTP9조회/36저장번역/9범위밖거절·DB0/0/0을 확인했다. actual모델/SDK/AVD0, 기존서버재시작0이다. 실제/Mock·남은기기시험은 `GUIDE_EXPANSION_VALIDATION.md`를 따른다.
+
+세주제 feature의 원격SHA와 Basic/Android CI 성공을 확인했다. 최종통합 feature와develop도 push후정확SHA·CI로 별도확인한다. main과고정release는변경하지않고 기존APK5ef/영상638/PDF3a9/ZIP79의네해시를재확인했다. 구제출APK는고정release의서버/content와짝으로재현한다.
+
 ## 1차 제출 준비 · 2026-11-15
 
 사용자가 오늘 밤 APK·영상·GitHub·기획서를 메일로 제출하며, 최종 전달 위치와 발송 방법은 저녁에 알려주기로 했다. AVD 재시험은 뒤로 미루고, 단계6의 남은 429 응답 처리와 단계7의 재현 가능한 납품을 진행한다. 유료 AI/생성 질문 번역 보류·기존 원본·main을 유지한다.

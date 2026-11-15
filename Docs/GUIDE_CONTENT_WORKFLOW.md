@@ -1,6 +1,6 @@
 # 검수 가이드 등록과 조회
 
-2026-11-14. `feature/reviewed-guide-import`에서 등록 도구를 추가했고, `feature/ioniq5-official-door-content`에서 공식 2024 한국시장 아이오닉 5 문 안내를 등록했다. 현재는 문 안내 1개·3언어의 PUBLISHED 레코드와 기존 DRAFT 템플릿이 있다. 기존 두 개발 프로필은 UNVERIFIED로 보존한다. 실제 자료 검토 범위와 AI 보조 검토의 한계는 `MANUAL_REVIEW_IONIQ5_2024_KR.md`를 따른다.
+2026-11-15. 기존 문 안내에 AC 완속 충전·좌석/일반미러·클러스터 안내를 각3언어로 추가했다. 현재 PUBLISHED12개와 기존 DRAFT 템플릿1개다. 공식자료/번역 검토와 실제SDK수신·모델시험을 구분하며 `GUIDE_EXPANSION_VALIDATION.md`를 따른다. 등록 도구와 문 안내의 최초 작업은 아래 절차와 `MANUAL_REVIEW_IONIQ5_2024_KR.md`에 보존한다. 기존 두 개발 프로필은 UNVERIFIED다.
 
 ## 검사와 등록
 
