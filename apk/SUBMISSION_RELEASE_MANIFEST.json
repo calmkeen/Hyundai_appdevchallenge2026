@@ -1,0 +1,152 @@
+{
+  "schema_version": 1,
+  "artifact_kind": "SIGNED_PLEOS_SUBMISSION_RELEASE_APK",
+  "created_date": "2026-11-15",
+  "delivery_status": "BUILT_AND_STATICALLY_VERIFIED_NOT_SUBMITTED",
+  "source_commit": "7d492c1aa3daf4d2dcf436b4dd89222835094bd2",
+  "source_clean_at_build_start": true,
+  "source_commit_embedded_in_apk": false,
+  "embedded_vcs_status": "NO_SUPPORTED_VCS_FOUND (Git worktree); this manifest pins the external source commit.",
+  "source_production_paths": [
+    "android",
+    "content",
+    "backend/app",
+    "backend/requirements.txt",
+    "backend/requirements.lock.txt",
+    "contracts"
+  ],
+  "apk": {
+    "path": "apk/CarCue_release.apk",
+    "filename": "CarCue_release.apk",
+    "filename_status": "PROVISIONAL_PROJECT_NAME_AWAITING_CONFIRMED_TEAM_OR_PARTICIPANT",
+    "official_filename_rule": "팀명_앱이름_release.apk",
+    "sha256": "b5060db99072ae67af28a161304cc27e8e202ee282d11aa96803dbb977ff377f",
+    "bytes": 32560321,
+    "signer_certificate_sha256": "c945dc5eed5903ddd06efd51455c0d96239af5f11bc329fcd6b5381c99bf95e3",
+    "debug_certificate": false,
+    "package": "com.carcue.app",
+    "version_code": 2,
+    "version_name": "0.1.1-rc1",
+    "min_sdk": 28,
+    "target_sdk": 35,
+    "debuggable": false,
+    "is_mock": false
+  },
+  "build": {
+    "gradle": "8.10.2",
+    "agp": "8.8.2",
+    "jdk": "Temurin 17.0.21+9",
+    "build_tools": "35.0.0",
+    "tasks": [
+      ":app:assemblePleosRelease",
+      ":app:testPleosReleaseUnitTest",
+      ":app:lintPleosRelease"
+    ],
+    "final_build_offline": true,
+    "heap_mb": 768,
+    "max_workers": 1,
+    "release_signing_required": true,
+    "private_key_in_git_or_apk": false,
+    "pleos_dependency": {
+      "coordinate": "ai.pleos.playground:Vehicle:2.3.2",
+      "aar_sha256": "e11fdfe498cad3ecc0d5a2a6992b0c4a4d135195f1455018127bc069fd5ef937"
+    },
+    "reproduce_command": "python3 scripts/build_submission_release.py --signing-properties .tooling/signing/carcue-release.properties --submission-avd --server-url http://10.0.2.2:8001 --checks",
+    "fresh_dependency_note": "Use --online if the Gradle dependency cache is empty."
+  },
+  "network": {
+    "submission_avd_profile": true,
+    "server_url": "http://10.0.2.2:8001",
+    "cleartext_default": false,
+    "cleartext_allowed_hosts": [
+      "10.0.2.2"
+    ],
+    "domain_exception_is_not_port_limited": true,
+    "ordinary_release_default": "Explicit HTTPS URL; AVD profile disabled; all cleartext denied",
+    "external_backend_deployed": false,
+    "backend_model_default": "DISABLED"
+  },
+  "validation": {
+    "apk_inspection": {
+      "path": "apk/APK_VERIFICATION.json",
+      "sha256": "e52ea53c1d8251ad26f695dec7ce2db0d8b56d9a789a1c397b30ce71f32c3f0a",
+      "passed": true
+    },
+    "configuration_guards": {
+      "path": "apk/CONFIGURATION_GUARD_CHECKS.json",
+      "sha256": "1e7af44b4bab541ae86f24f00cf69e0e3acab84db34c84950fd34dd52f30670d",
+      "passed": true
+    },
+    "unit_tests": {
+      "tests": 148,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suites": 14,
+      "final_gradle_task": "UP-TO-DATE",
+      "execution_note": "148 tests executed successfully before the manifest-only lint correction; final source reused the unchanged JVM test inputs."
+    },
+    "lint": {
+      "passed": true,
+      "errors": 0,
+      "warnings": 16,
+      "issue_ids": [
+        "ApplySharedPref",
+        "DataExtractionRules",
+        "GradleDependency",
+        "MissingApplicationIcon",
+        "ModifierParameter",
+        "PrivateApi",
+        "UnusedResources"
+      ]
+    },
+    "build_and_exported_apk_bytes_identical": true,
+    "local_evidence_directory": "output/apk/submission-release-20261115",
+    "local_log_sha256": {
+      "final-assemble-and-checks.log": "c637dbe7604e10783848d2c58c4cd19f281bc6fb0b3e14290a3f69eddc2688e1",
+      "missing-signing-final.log": "bd71a229fc16a2e69446d343b9340d55ce8bafac9d641ab62fa045da103fcb2d",
+      "http-without-submission-profile.log": "0e2211364c01e6efaacc6e45c9ed427490f427ad82b699d6faa25318b10ea6be",
+      "other-http-host-denied.log": "0e2211364c01e6efaacc6e45c9ed427490f427ad82b699d6faa25318b10ea6be",
+      "ordinary-release-https-configuration.log": "0313b176663269165c8e0ef7c7a753a0ff0c7cd0e02cbd36eea1f182292d8239"
+    }
+  },
+  "bundled_content": {
+    "published_guides": 12,
+    "topics": 4,
+    "languages": [
+      "ko-KR",
+      "en",
+      "ja-JP"
+    ],
+    "all_guide_json_bytes_match_source": true,
+    "new_topics_sensor_connected": false
+  },
+  "runtime": {
+    "installed": false,
+    "avd_executed": false,
+    "physical_vehicle_tested": false,
+    "paid_ai_called": false,
+    "model_called": false,
+    "stock_avd_browser_route_enabled": true,
+    "stock_avd_browser_runtime_tested": false,
+    "deferred": [
+      "New release install and Pleos AVD regression",
+      "In-flight language/Drive/end-session boundaries",
+      "429 device screen",
+      "New-topic source navigation and free-model selection"
+    ]
+  },
+  "preserved_baseline": {
+    "apk": {
+      "path": "output/apk/carcue-pleos-session-boundaries-debug.apk",
+      "sha256": "5ef560ba1a24e3ce206aeeb6f4f336018b6e8a182bec7214aabc5dd4a261479f"
+    },
+    "video": {
+      "path": "output/qa/sdk-live-intro/live-sdk-intro-20261115-03/carcue-sdk-live-intro.mp4",
+      "sha256": "638c1f54d3e29ddba3212154c118267bcfc8be21a3dda0ad004066f3e600e18d"
+    },
+    "sha256_rechecked_unchanged": true,
+    "video_is_same_binary_as_new_apk": false,
+    "strict_legacy_packager_modified": false
+  }
+}

@@ -10,7 +10,11 @@ local.properties
 .env.*
 *.aar
 *.apk
+!/apk/CarCue_release.apk
 *.aab
+*keystore.properties
+*signing.properties
+*release.properties
 .tooling/
 .handoff/
 .venv/

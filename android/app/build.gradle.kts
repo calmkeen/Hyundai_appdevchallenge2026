@@ -1,7 +1,52 @@
+import java.net.URI
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
+}
+
+// Release credentials live outside source control. Missing credentials must never
+// produce an unsigned release or fall back to the Android debug certificate.
+val releasePropertiesPath = providers.environmentVariable("CARCUE_RELEASE_SIGNING_PROPERTIES")
+    .orElse(providers.gradleProperty("carcueReleaseSigningProperties"))
+val releaseProperties = Properties().apply {
+    releasePropertiesPath.orNull?.let { path ->
+        val source = rootProject.file(path)
+        require(source.isFile) { "Release signing properties file is missing" }
+        source.inputStream().use { load(it) }
+    }
+}
+fun releaseSecret(environmentName: String, propertyName: String): String? =
+    providers.environmentVariable(environmentName).orNull?.takeIf { it.isNotBlank() }
+        ?: releaseProperties.getProperty(propertyName)?.takeIf { it.isNotBlank() }
+
+val releaseStoreFile = releaseSecret("CARCUE_RELEASE_STORE_FILE", "storeFile")
+val releaseStorePassword = releaseSecret("CARCUE_RELEASE_STORE_PASSWORD", "storePassword")
+val releaseKeyAlias = releaseSecret("CARCUE_RELEASE_KEY_ALIAS", "keyAlias")
+val releaseKeyPassword = releaseSecret("CARCUE_RELEASE_KEY_PASSWORD", "keyPassword")
+val submissionAvd = providers.gradleProperty("carcueSubmissionAvd").map {
+    require(it == "true" || it == "false") { "carcueSubmissionAvd must be true or false" }
+    it == "true"
+}.getOrElse(false)
+val releaseServerUrl = providers.gradleProperty("carcueServerUrl").getOrElse(if (submissionAvd) "http://10.0.2.2:8001" else "")
+val validateReleaseConfiguration = tasks.register("validateReleaseConfiguration") {
+    doLast {
+        require(listOf(releaseStoreFile, releaseStorePassword, releaseKeyAlias, releaseKeyPassword)
+            .all { !it.isNullOrBlank() }) {
+            "Release signing is required: set CARCUE_RELEASE_SIGNING_PROPERTIES or all CARCUE_RELEASE_* credentials"
+        }
+        require(rootProject.file(releaseStoreFile!!).isFile) { "Release keystore is missing" }
+        val endpoint = URI(releaseServerUrl)
+        require(endpoint.host != null && endpoint.rawUserInfo == null && endpoint.rawQuery == null && endpoint.rawFragment == null
+            && (endpoint.scheme == "https" || (submissionAvd && endpoint.scheme == "http" && endpoint.host == "10.0.2.2"))) {
+            "Release backend requires an explicit HTTPS URL; carcueSubmissionAvd=true permits only the 10.0.2.2 HTTP exception"
+        }
+    }
+}
+tasks.configureEach {
+    if (name.matches(Regex("pre.*ReleaseBuild"))) dependsOn(validateReleaseConfiguration)
 }
 android {
     namespace = "com.carcue.app"
@@ -13,11 +58,30 @@ android {
         }
         minSdk = 28
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 2
+        versionName = "0.1.1-rc1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "SERVER_URL", "\"${providers.gradleProperty("carcueServerUrl").getOrElse("http://10.0.2.2:8000")}\"")
         buildConfigField("long", "STATE_TTL_MS", "60000L")
+        buildConfigField("boolean", "ALLOW_STOCK_AVD_BROWSER", "false")
+    }
+    signingConfigs {
+        create("release") {
+            storeFile = releaseStoreFile?.let { rootProject.file(it) }
+            storePassword = releaseStorePassword
+            keyAlias = releaseKeyAlias
+            keyPassword = releaseKeyPassword
+        }
+    }
+    buildTypes {
+        getByName("release") {
+            isDebuggable = false
+            signingConfig = signingConfigs.getByName("release")
+            buildConfigField("boolean", "ALLOW_STOCK_AVD_BROWSER", submissionAvd.toString())
+            buildConfigField("String", "SERVER_URL", "\"${releaseServerUrl.replace("\\", "\\\\").replace("\"", "\\\"")}\"")
+            manifestPlaceholders["carcueNetworkSecurityConfig"] = if (submissionAvd)
+                "@xml/submission_network_security_config" else "@xml/release_network_security_config"
+        }
     }
     flavorDimensions += "vehicle"
     productFlavors {

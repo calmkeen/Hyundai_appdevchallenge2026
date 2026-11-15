@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "passed": true,
+  "apk_sha256": "b5060db99072ae67af28a161304cc27e8e202ee282d11aa96803dbb977ff377f",
+  "apk_bytes": 32560321,
+  "signer_certificate_sha256": "c945dc5eed5903ddd06efd51455c0d96239af5f11bc329fcd6b5381c99bf95e3",
+  "package": "com.carcue.app",
+  "version_code": 2,
+  "version_name": "0.1.1-rc1",
+  "min_sdk": 28,
+  "target_sdk": 35,
+  "debuggable": false,
+  "build_config": {
+    "ALLOW_STOCK_AVD_BROWSER": true,
+    "APPLICATION_ID": "com.carcue.app",
+    "BUILD_TYPE": "release",
+    "DEBUG": false,
+    "FLAVOR": "pleos",
+    "IS_MOCK": false,
+    "SERVER_URL": "http://10.0.2.2:8001",
+    "STATE_TTL_MS": 60000,
+    "VERSION_CODE": 2,
+    "VERSION_NAME": "0.1.1-rc1"
+  },
+  "pleos_vehicle_class_defined": true,
+  "bundled_published_guides": 12,
+  "private_files_found": false,
+  "network_cleartext_default": false,
+  "network_cleartext_hosts": [
+    "10.0.2.2"
+  ],
+  "installed": false,
+  "avd_executed": false,
+  "physical_vehicle_tested": false,
+  "paid_ai_called": false,
+  "model_called": false
+}

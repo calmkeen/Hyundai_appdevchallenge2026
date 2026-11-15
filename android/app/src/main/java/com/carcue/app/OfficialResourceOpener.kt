@@ -27,9 +27,10 @@ internal class OfficialResourceOpener(private val context: Context) {
 
     private fun openStockAvdBrowser(intent: Intent): ExternalOpenResult {
         // The official API34 image's Browser2 is exported but its VIEW filter lacks DEFAULT.
-        // Only SDK debug builds may use this image-specific route; never substitute a downloaded browser.
-        if (!BuildConfig.DEBUG || BuildConfig.IS_MOCK || android.os.Build.VERSION.SDK_INT != 34 ||
-            android.os.Build.HARDWARE != "ranchu") return ExternalOpenResult.NO_HANDLER
+        // SDK debug or the explicitly selected submission AVD profile only; never download a browser.
+        if (!stockAvdBrowserAllowed(BuildConfig.DEBUG, BuildConfig.ALLOW_STOCK_AVD_BROWSER,
+                BuildConfig.IS_MOCK, android.os.Build.VERSION.SDK_INT, android.os.Build.HARDWARE))
+            return ExternalOpenResult.NO_HANDLER
         val component = ComponentName("org.chromium.webview_shell", "org.chromium.webview_shell.WebViewBrowserActivity")
         val info = try {
             @Suppress("DEPRECATION")
