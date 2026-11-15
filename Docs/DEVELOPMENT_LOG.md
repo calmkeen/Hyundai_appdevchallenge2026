@@ -140,3 +140,7 @@ OF-001 구현 `e816d61`, 철회 navigation 보완 `684556c`/`e7c58ad`, SE-001 �
 | 제출 후보 통합 | `feature/submission-candidate-integration` | 팀명 calmkeen의 공식APK명, 개인정보 비공개, README/양식/manifest 일치, APK 정적검사 CI 추가, 제품입력 diff·원본4파일SHA 보존 검증 |
 
 기존 main과 `release/0.1-first-draft`를 보존하고 새 `release/0.1.1-first-submission`을 분리한다. 서명키·개인정보는 Git/APK에 넣지 않는다. 새로운 release의 설치/AVD/모델 시험과 유료 AI는 실행하지 않았다. 과거34초 실제 SDK 영상과 새release를 동일 바이너리로 표시하지 않는다. 완료 작업은 no-ff develop 통합 후 feature/develop/새release를 push하고 실제 remote SHA와 CI를 따로 확인한다.
+
+## README 소개 영상과 main 안내 · 2026-11-15
+
+`feature/readme-intro-video`는 기존34초 영상/포스터/크레딧의 바이트 동일 공개 사본을 develop README에서 연결한다. 원본/제출 APK/기획서/서명키는 보존하고 실제SDK AVD의 기존debug촬영과 새release를 구분한다. 음악 attribution과 파일SHA를 유지한다. `feature/main-readme-navigation`은 main에서 README 한 파일만 작성해 현재개발은develop이라는 문구와 영상·실행 문서를 절대URL로 연결한다. main에 전체develop 앱코드를 병합하지 않는다. 원본4파일 SHA, README링크·내용·main변경범위, 실제GitHub표시와원격SHA를 검증하고 작업브랜치/develop/main을각각push한다. 기존 고정제출release는 변경하지 않는다.
