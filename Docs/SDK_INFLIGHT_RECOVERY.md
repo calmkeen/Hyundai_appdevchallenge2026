@@ -110,6 +110,16 @@ run12 뒤에는 ADB shell 지연과 실제 CarService 미등록도 관측했다.
 
 37.2.12의 첫 준비는 13:50:24 KST에 통과했지만, 후속 재확인에서는 ADB/CarService가 응답하지 않고 Console active도 false였다. 이 사이 host 벽시계와 worker monotonic의 경과 차이가 나타났다. `pmset`의 최소 이벤트 확인 결과 **13:50:26에 Clamshell Sleep**, 이후 DarkWake/Maintenance Sleep 반복과 14:06:10 Wake가 있었다. 현재 덮개 열림(`AppleClamshellState=No`)과 기존 caffeinate의 idle display/system sleep 억제는 별도로 확인했다. 이 잠자기 교란 뒤의 재확인을 버전 호환 불가 증거로 쓰지 않고, 동일 runtime을 정상 종료/재시작한 뒤 다시 검사한다. OS 수면·잠금·보안 설정은 바꾸지 않았다. 근거는 `host-sleep-wake-events.json`, `host-current-lid-state.json`, `host-sleep-assertions.json`이다. 수집은 관련 시각/허용된 원인 태그/자체 assertion만 보존하며 전체 사용자 로그를 저장하지 않는다.
 
+잠자기 뒤 같은 37.2.12의 정상 재부팅과 원래 37.2.13의 `HardwareDecoder` 비활성화 후보도 기존 userdata에서 CarService/keyguard 준비를 충족하지 못했다. 이 둘은 run14 계측 시작 전의 **준비 실패**이며 모델 호출0이다. 후자의 실제 Vulkan/HardwareDecoder off는 시작 로그에서 확인했다. `HardwareDecoder`는 guest의 AVC/VPX codec offload 광고와 관련되며 Apple VideoToolBox만을 의미하지 않는다. 이 옵션을 단독 원인/해결책으로 확정하지 않는다. 각 VM은 정상 종료 ACK/exit0·ADB 장치 부재를 확인하고 다음 후보로 전환했다.
+
+## 원본과 분리한 초기 AVD
+
+새 `CarCue_Pleos21_SdkRecovery`는 같은 공식 Pleos API34 ARM64 system image와 **factory userdata.img**에서 초기 데이터를 생성한다. 기존 LocalAI의 userdata·캐시·암호화 키·SDcard·snapshot을 참조하거나 복사하지 않는다. 설정 작성 전후 기존 AVD config/parent.ini 8개의 SHA와 factory userdata SHA `711c38ee1f7de2225023b8bcdcbfb168023af70dd156d0758a88a7f9ae5f8fe7`이 일치했다. 모든 private writable path는 새 `.tooling/avd/CarCue_Pleos21_SdkRecovery.avd/` 아래로 분리했다. `fresh-sdk-recovery-avd-preparation.json`과 `fresh-avd-host-guard-review.json`이 근거이며 실제 부팅·SDK 성공 여부와 별도다.
+
+관측기의 AVD 허용 목록은 기존 LocalAI와 새 SdkRecovery 두 이름 및 serial5584만이다. 실제 `ro.boot.qemu.avd_name`·API34·user10·SDK·UX·provider·타이밍 요구는 그대로 유지한다. 결과에 AVD 이름과 기존 보존 데이터/별도 factory 데이터 출처를 명시한다. 다른 AVD/serial은 허용하지 않으며, 잘못된 이름이 QA 폴더·기기/lease 접근 전에 거절되는 검사를 수행했다. 새 AVD의 시작은 `runtime-fresh-sdk-recovery-01/`에 분리하고 기기 검증 성공 전에는 완료로 올리지 않는다.
+
+test-only 관측 보완 커밋 `0bc1e79`도 실제 원격 SHA 일치와 [CI success](https://github.com/calmkeen/Hyundai_appdevchallenge2026/actions/runs/43680336520)를 확인했다(backend475/UI191). CI는 실제 AVD/모델 호출을 실행하지 않으며 새 AVD 허용 확장의 실제 기기 검증과 구분한다.
+
 ## 처리 중 handler 검증과 일반 UI 검증의 구분
 
 처리 중 세 케이스는 **실제 SDK·실제 무료 provider와 생산 handler의 통합 검증**이다. 언어는 main thread에서 `language()`를 실행한 뒤 현재 action scope로 `chooseLanguage("en", scope)`를 호출한다. 종료는 Settings 화면 이동이 먼저 요청을 취소하지 않도록 pending 상태에서 `endSession()` 자체를 호출해 epoch 증가와 실제 DELETE 경계를 검사한다. Drive는 실제 플랫폼 UX callback을 그대로 사용한다. 상태를 직접 쓰거나 handler의 세션·scope·UX 검사를 생략하지 않는다.

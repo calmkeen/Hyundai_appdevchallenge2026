@@ -187,7 +187,9 @@ def main():
     parser.add_argument("--media-tool-source", type=Path, default=ROOT / "scripts/render_sdk_intro.swift",
                         help="Approved new AVFoundation tool source; compiled only to the new QA directory for read-only video probing")
     args = parser.parse_args()
-    require(args.serial == "emulator-5584" and args.avd == "CarCue_Pleos21_LocalAI", "PRESERVED_AVD_REQUIRED")
+    require(args.serial == "emulator-5584" and args.avd in {
+        "CarCue_Pleos21_LocalAI", "CarCue_Pleos21_SdkRecovery"
+    }, "DEDICATED_PLEOS_AVD_REQUIRED")
     require(not args.record or args.mode == "showcase", "RECORD_SHOWCASE_ONLY")
     require(re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{0,63}", args.run_id) is not None, "SAFE_RUN_ID_REQUIRED")
     out = (args.output_dir / args.run_id).resolve()
@@ -197,6 +199,8 @@ def main():
     base = [str(args.adb.resolve()), "-s", args.serial]
     markers = "files/qa/" + args.run_id + "/sdk-session"
     report = {"passed": False, "functional_passed": False, "mode": args.mode, "run_id": args.run_id,
+        "avd_name": args.avd, "serial": args.serial,
+        "avd_data_origin": "EXISTING_PRESERVED_DATA" if args.avd == "CarCue_Pleos21_LocalAI" else "SEPARATE_FRESH_FACTORY_DATA",
         "started_at": datetime.now(timezone.utc).isoformat(), "cleanup_errors": [], "fixtures": [], "late_boundaries": {},
         "physical_vehicle_tested": False, "app_sdk_set_called": False, "paid_provider_called": False,
         "question_translation_calls": 0, "seatbelt_status_connected": False, "semantic_review_status": "PENDING_INDEPENDENT_REVIEW"}
