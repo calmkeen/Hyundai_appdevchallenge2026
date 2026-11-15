@@ -1,0 +1,97 @@
+{
+  "guide_id": "ioniq5-cluster-display-check",
+  "profile_ids": [
+    "ioniq5-ne1-2024-kr"
+  ],
+  "manual_set_id": "hyundai-ioniq5-ne1-2024-kr",
+  "source_version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+  "topic": "display_indicators",
+  "title": "メーターの明るさとEV表示の確認",
+  "body": "安全な場所に駐車してから、車両の画面とメーターを直接確認してください。この案内は明るさ設定とREADY・サービス・出力制限表示のみを扱います。CarCueはこれらのセンサーを読み取らず、明るさも操作しません。表示だけで故障原因や走行の安全性を判断しません。",
+  "locale": "ja-JP",
+  "source_locale": "ko-KR",
+  "glossary_version": "carcue-ioniq5-display-v1",
+  "lifecycle": "PUBLISHED",
+  "translation_review_status": "REVIEWED",
+  "sources": [
+    {
+      "source_id": "hyundai-ne1-2024-kr-cluster-brightness",
+      "title": "Hyundai IONIQ 5 2024 - Korean owner manual",
+      "url": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/id4d773b8d07c.html",
+      "version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+      "section": "클러스터 조명 밝기 조절 · 인쇄 4-3 / PDF 149",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "source_id": "hyundai-ne1-2024-kr-ev-ready-service-powerdown",
+      "title": "Hyundai IONIQ 5 2024 - Korean owner manual",
+      "url": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/id44e0749ede7.html",
+      "version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+      "section": "클러스터 경고등 및 표시등 > 주행 가능 표시등·서비스 경고등·파워다운 표시등 · 인쇄 0-48 / PDF 54",
+      "verification_status": "VERIFIED"
+    }
+  ],
+  "steps": [
+    {
+      "step_id": "adjust-cluster-brightness",
+      "order": 1,
+      "title": "駐車中に明るさを調整する",
+      "body": "車両の電源がONのとき、インフォテインメントの設定 > ディスプレイ > 画面の明るさを開きます。手動調整、または周囲の明るさに応じる昼夜の自動調整を選べます。 メーターとインフォテインメント画面の明るさは同時に変わります。車幅灯が点灯していると、室内スイッチの照明も一緒に調整されます。",
+      "image_asset_id": null,
+      "official_cautions": [],
+      "source_ids": [
+        "hyundai-ne1-2024-kr-cluster-brightness"
+      ],
+      "related_properties": [],
+      "actions": [
+        {
+          "kind": "OPEN_MANUAL",
+          "target_id": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/id4d773b8d07c.html"
+        }
+      ]
+    },
+    {
+      "step_id": "check-ready-and-service",
+      "order": 2,
+      "title": "READYとサービス警告を区別する",
+      "body": "READYは始動後、走行準備が整うと点灯します。消灯は通常走行ができない状態、点滅は非常運転状態です。サービス警告灯は電源ON時に点灯し、3秒後に消灯します。",
+      "image_asset_id": null,
+      "official_cautions": [
+        "始動後にREADYが消灯または点滅している場合は、近くのHyundai直営ハイテクセンターまたはBluehandsで点検・整備を受けてください。",
+        "サービス警告灯が走行中に点灯する、または始動後も消灯しない場合は、近くのHyundai直営ハイテクセンターまたはBluehandsで点検・整備を受けてください。"
+      ],
+      "source_ids": [
+        "hyundai-ne1-2024-kr-ev-ready-service-powerdown"
+      ],
+      "related_properties": [],
+      "actions": [
+        {
+          "kind": "OPEN_MANUAL",
+          "target_id": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/id44e0749ede7.html"
+        }
+      ]
+    },
+    {
+      "step_id": "check-powerdown-cautions",
+      "order": 3,
+      "title": "出力制限表示の注意を確認する",
+      "body": "出力制限表示は高電力部品を保護するための出力制限を示します。高電圧バッテリーの残量が非常に少ないときや電圧が低下しているとき、または駆動系の温度が高いときなどに点灯します。マニュアルでは、この表示だけの点灯は故障とは説明していません。",
+      "image_asset_id": null,
+      "official_cautions": [
+        "出力制限表示とサービス警告灯が同時に点灯した場合は、Hyundai直営ハイテクセンターまたはBluehandsで点検を受けてください。",
+        "出力制限表示の点灯中は、急加速や急発進をしないでください。",
+        "出力が制限されると坂道を登りにくくなったり、坂道で車両が後退したりするおそれがあります。"
+      ],
+      "source_ids": [
+        "hyundai-ne1-2024-kr-ev-ready-service-powerdown"
+      ],
+      "related_properties": [],
+      "actions": [
+        {
+          "kind": "OPEN_MANUAL",
+          "target_id": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/id44e0749ede7.html"
+        }
+      ]
+    }
+  ]
+}
