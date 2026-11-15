@@ -1,0 +1,182 @@
+{
+  "guide_id": "ioniq5-seat-mirror-before-driving",
+  "profile_ids": [
+    "ioniq5-ne1-2024-kr"
+  ],
+  "manual_set_id": "hyundai-ioniq5-ne1-2024-kr",
+  "source_version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+  "topic": "seats_mirrors",
+  "title": "Set seat and mirrors before driving",
+  "body": "Stop safely before seat/mirror adjustment. For DSM/DCM, memory, relaxation or reverse tilt, see their manuals. No latch, mirror-position or blind-spot sensor is connected.",
+  "locale": "en",
+  "source_locale": "ko-KR",
+  "glossary_version": "carcue-ioniq5-seat-mirror-v1",
+  "lifecycle": "PUBLISHED",
+  "translation_review_status": "REVIEWED",
+  "sources": [
+    {
+      "source_id": "hyundai-ne1-2024-kr-driving-posture",
+      "title": "Hyundai IONIQ 5 2024 — Korean owner manual",
+      "url": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/idb26b9ae7995.html",
+      "version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+      "section": "올바른 운전 자세 · 인쇄 2-3 / PDF 81",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "source_id": "hyundai-ne1-2024-kr-seat-safety",
+      "title": "Hyundai IONIQ 5 2024 — Korean owner manual",
+      "url": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/id81db5616e14.html",
+      "version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+      "section": "좌석 · 공통 경고 · 인쇄 3-2~3-5 / PDF 92~95",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "source_id": "hyundai-ne1-2024-kr-front-seat",
+      "title": "Hyundai IONIQ 5 2024 — Korean owner manual",
+      "url": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/idf49da880ae1.html",
+      "version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+      "section": "앞좌석 · 수동/전동 조절 및 헤드레스트 · 인쇄 3-6~3-13 / PDF 96~103",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "source_id": "hyundai-ne1-2024-kr-inside-mirror",
+      "title": "Hyundai IONIQ 5 2024 — Korean owner manual",
+      "url": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/id38ef2ccc415.html",
+      "version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+      "section": "실내 미러 · 인쇄 5-43 / PDF 217",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "source_id": "hyundai-ne1-2024-kr-outside-mirror",
+      "title": "Hyundai IONIQ 5 2024 — Korean owner manual",
+      "url": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/id754c73d5e23.html",
+      "version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+      "section": "실외 미러 · 각도와 접힘/펴짐 · 인쇄 5-44~5-45 / PDF 218~219",
+      "verification_status": "VERIFIED"
+    }
+  ],
+  "steps": [
+    {
+      "step_id": "park-and-clear",
+      "order": 1,
+      "title": "Stop and clear",
+      "body": "Before departure, clear seat travel and footwell. Check rear occupants and fitted controls.",
+      "image_asset_id": null,
+      "official_cautions": [
+        "Never adjust seats/mirrors or fold mirrors while driving: distraction risks a crash.",
+        "No objects under seats/feet: pedal blockage or injury. Do not reach into mechanisms.",
+        "No lighters on floor/between seats: movement may release gas and cause fire.",
+        "Never leave children alone; powered seats work even with power off."
+      ],
+      "source_ids": [
+        "hyundai-ne1-2024-kr-driving-posture",
+        "hyundai-ne1-2024-kr-seat-safety",
+        "hyundai-ne1-2024-kr-front-seat",
+        "hyundai-ne1-2024-kr-outside-mirror"
+      ],
+      "related_properties": [],
+      "actions": [
+        {
+          "kind": "OPEN_MANUAL",
+          "target_id": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/idf49da880ae1.html"
+        }
+      ]
+    },
+    {
+      "step_id": "adjust-driver-seat",
+      "order": 2,
+      "title": "Adjust seat",
+      "body": "Manual: lift front lever, slide, release and rock to check locking. For backrest, lean forward, lift outer lever, adjust, release; check lever return/locking. Powered: use position/backrest switch; release when set.",
+      "image_asset_id": null,
+      "official_cautions": [
+        "Keep hands clear of moving parts/under-seat mechanisms; beware rails/latches and rear occupants, especially children.",
+        "Clear backrest obstructions; verify seat/backrest locking.",
+        "Do not force powered switches or use two or more at once; release after adjustment to prevent motor/electrical damage.",
+        "Avoid powered adjustment with power off: battery drain.",
+        "If fitted, protect lumbar support from sharp items; stop when it cannot extend further."
+      ],
+      "source_ids": [
+        "hyundai-ne1-2024-kr-seat-safety",
+        "hyundai-ne1-2024-kr-front-seat"
+      ],
+      "related_properties": [],
+      "actions": [
+        {
+          "kind": "OPEN_MANUAL",
+          "target_id": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/idf49da880ae1.html"
+        }
+      ]
+    },
+    {
+      "step_id": "check-posture-headrest",
+      "order": 3,
+      "title": "Posture",
+      "body": "Sit fully back/upright: knee slightly bent at full brake; wrist at farthest wheel rim. Head-restraint centre at ear tops, close to head. Shoulder belt over chest; lap belt over pelvis.",
+      "image_asset_id": null,
+      "official_cautions": [
+        "Keep as far from wheel as control allows: airbag deployment too close can be fatal.",
+        "Do not recline too far or sit on folded seats: loss of belt protection or sliding under it, compressing abdomen/neck, risks serious injury or death.",
+        "Seat cushions may reduce friction: sliding under the belt in a crash/sudden stop can cause serious injury.",
+        "Never drive without head restraint or adjust it while driving. Avoid finger trapping at pole guides; attach no accessories.",
+        "Seat forward + backrest tilted forward may make head restraint hit nearby parts (e.g. sun visor)."
+      ],
+      "source_ids": [
+        "hyundai-ne1-2024-kr-driving-posture",
+        "hyundai-ne1-2024-kr-seat-safety",
+        "hyundai-ne1-2024-kr-front-seat"
+      ],
+      "related_properties": [],
+      "actions": [
+        {
+          "kind": "OPEN_MANUAL",
+          "target_id": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/idf49da880ae1.html"
+        }
+      ]
+    },
+    {
+      "step_id": "adjust-interior-mirror",
+      "order": 4,
+      "title": "Interior mirror",
+      "body": "Centre rear-window view. Day/night: set angle in day position before departure. If ECM, keep front/rear light sensors clear.",
+      "image_asset_id": null,
+      "official_cautions": [
+        "No items above seat height: blocked rear view and forward-thrown objects in a crash/sudden stop.",
+        "Do not modify/add wide mirror or remove/refit it: collision injury, damage or vibration.",
+        "Night position cuts glare but reduces mirror clarity."
+      ],
+      "source_ids": [
+        "hyundai-ne1-2024-kr-inside-mirror"
+      ],
+      "related_properties": [],
+      "actions": [
+        {
+          "kind": "OPEN_MANUAL",
+          "target_id": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/id38ef2ccc415.html"
+        }
+      ]
+    },
+    {
+      "step_id": "adjust-exterior-mirrors",
+      "order": 5,
+      "title": "Exterior mirrors",
+      "body": "At ACC/ON/running, select L(driver)/R(passenger) and use switch. Fold/unfold by button. Use interior mirror too for following-vehicle distance.",
+      "image_asset_id": null,
+      "official_cautions": [
+        "Convex mirrors: objects are much closer than they appear.",
+        "Release at limit: motor keeps running. Do not adjust angle/fold/unfold by hand.",
+        "If frozen, never force movement/folding or scrape ice. Use de-icer or thaw in a warm place.",
+        "Excess folding with power off can drain battery."
+      ],
+      "source_ids": [
+        "hyundai-ne1-2024-kr-outside-mirror"
+      ],
+      "related_properties": [],
+      "actions": [
+        {
+          "kind": "OPEN_MANUAL",
+          "target_id": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/id754c73d5e23.html"
+        }
+      ]
+    }
+  ]
+}

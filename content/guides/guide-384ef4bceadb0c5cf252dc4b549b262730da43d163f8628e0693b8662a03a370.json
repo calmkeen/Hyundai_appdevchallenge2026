@@ -1,0 +1,182 @@
+{
+  "guide_id": "ioniq5-seat-mirror-before-driving",
+  "profile_ids": [
+    "ioniq5-ne1-2024-kr"
+  ],
+  "manual_set_id": "hyundai-ioniq5-ne1-2024-kr",
+  "source_version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+  "topic": "seats_mirrors",
+  "title": "출발 전 운전석·미러 맞추기",
+  "body": "안전한 곳에 정차해 출발 전에 운전석과 일반 실내·실외 미러를 맞추세요. 좌석이나 미러를 주행 중 조절하지 마세요. 수동·전동 좌석과 미러 종류는 실제 차량에서 확인하세요. DSM·DCM, 메모리·릴렉션·후진 자동 조절은 이 기본 안내와 구분해 해당 원문을 확인하세요. 앱은 좌석 고정·미러 위치·사각지대 센서를 읽거나 안전 여부를 판정하지 않습니다.",
+  "locale": "ko-KR",
+  "source_locale": "ko-KR",
+  "glossary_version": null,
+  "lifecycle": "PUBLISHED",
+  "translation_review_status": "NOT_APPLICABLE",
+  "sources": [
+    {
+      "source_id": "hyundai-ne1-2024-kr-driving-posture",
+      "title": "Hyundai IONIQ 5 2024 — Korean owner manual",
+      "url": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/idb26b9ae7995.html",
+      "version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+      "section": "올바른 운전 자세 · 인쇄 2-3 / PDF 81",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "source_id": "hyundai-ne1-2024-kr-seat-safety",
+      "title": "Hyundai IONIQ 5 2024 — Korean owner manual",
+      "url": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/id81db5616e14.html",
+      "version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+      "section": "좌석 · 공통 경고 · 인쇄 3-2~3-5 / PDF 92~95",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "source_id": "hyundai-ne1-2024-kr-front-seat",
+      "title": "Hyundai IONIQ 5 2024 — Korean owner manual",
+      "url": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/idf49da880ae1.html",
+      "version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+      "section": "앞좌석 · 수동/전동 조절 및 헤드레스트 · 인쇄 3-6~3-13 / PDF 96~103",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "source_id": "hyundai-ne1-2024-kr-inside-mirror",
+      "title": "Hyundai IONIQ 5 2024 — Korean owner manual",
+      "url": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/id38ef2ccc415.html",
+      "version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+      "section": "실내 미러 · 인쇄 5-43 / PDF 217",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "source_id": "hyundai-ne1-2024-kr-outside-mirror",
+      "title": "Hyundai IONIQ 5 2024 — Korean owner manual",
+      "url": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/id754c73d5e23.html",
+      "version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+      "section": "실외 미러 · 각도와 접힘/펴짐 · 인쇄 5-44~5-45 / PDF 218~219",
+      "verification_status": "VERIFIED"
+    }
+  ],
+  "steps": [
+    {
+      "step_id": "park-and-clear",
+      "order": 1,
+      "title": "정차하고 움직이는 곳 비우기",
+      "body": "출발 전에 안전한 곳에 차를 세우고 좌석의 이동 공간, 뒷좌석 탑승자와 운전석 발 주변을 확인하세요. 실제 차량의 수동·전동 조절장치를 먼저 구분하세요.",
+      "image_asset_id": null,
+      "official_cautions": [
+        "주행 중에는 좌석이나 미러를 조절하지 말고 미러를 접지 마세요. 주의가 분산돼 사고가 날 수 있습니다.",
+        "좌석 밑이나 운전석 발 주변의 물건은 페달을 방해하거나 움직이며 사람을 다치게 할 수 있으므로 두지 마세요. 틈새의 물건을 꺼내려고 기계장치 안으로 손을 넣지 마세요.",
+        "바닥이나 좌석 사이에 라이터를 두지 마세요. 좌석 이동 때 가스가 새어 화재가 날 수 있습니다.",
+        "어린이를 차 안에 혼자 남겨 두지 마세요. 전동 좌석은 시동이 꺼져도 작동할 수 있습니다."
+      ],
+      "source_ids": [
+        "hyundai-ne1-2024-kr-driving-posture",
+        "hyundai-ne1-2024-kr-seat-safety",
+        "hyundai-ne1-2024-kr-front-seat",
+        "hyundai-ne1-2024-kr-outside-mirror"
+      ],
+      "related_properties": [],
+      "actions": [
+        {
+          "kind": "OPEN_MANUAL",
+          "target_id": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/idf49da880ae1.html"
+        }
+      ]
+    },
+    {
+      "step_id": "adjust-driver-seat",
+      "order": 2,
+      "title": "장착된 방식으로 운전석 조절하기",
+      "body": "수동식은 앞쪽 레버를 당긴 상태로 앞뒤 위치를 바꾸고 놓은 뒤 가볍게 흔들어 고정을 확인하세요. 등받이는 몸을 약간 앞으로 숙이고 바깥쪽 레버를 올려 조절한 뒤 레버 복귀와 고정을 확인하세요. 전동식은 해당 위치·등받이 스위치로 조절하고 원하는 위치에서 손을 떼세요.",
+      "image_asset_id": null,
+      "official_cautions": [
+        "좌석 밑이나 움직이는 부위에 손을 넣지 마세요. 손가락·손이 끼거나 레일·고정장치에 부딪혀 다칠 수 있습니다. 뒷좌석 탑승자와 특히 어린이를 살피세요.",
+        "등받이 움직임을 막는 물건을 치우고, 조절 후 좌석과 등받이가 확실히 고정됐는지 확인하세요.",
+        "전동 스위치에 과도한 힘을 주거나 두 개 이상을 동시에 조작하지 마세요. 조절이 끝나면 손을 떼세요. 모터·전기장치가 손상될 수 있습니다.",
+        "시동을 끈 상태에서는 전동 조절을 가급적 자제하세요. 배터리가 방전될 수 있습니다.",
+        "허리 지지대가 장착된 경우 날카로운 물건으로 손상시키지 말고, 더 나오지 않으면 작동을 멈추세요."
+      ],
+      "source_ids": [
+        "hyundai-ne1-2024-kr-seat-safety",
+        "hyundai-ne1-2024-kr-front-seat"
+      ],
+      "related_properties": [],
+      "actions": [
+        {
+          "kind": "OPEN_MANUAL",
+          "target_id": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/idf49da880ae1.html"
+        }
+      ]
+    },
+    {
+      "step_id": "check-posture-headrest",
+      "order": 3,
+      "title": "운전 자세와 헤드레스트 확인하기",
+      "body": "좌석 깊숙이 앉고 등받이를 세우세요. 브레이크 페달을 끝까지 밟았을 때 무릎이 조금 굽고 손목이 스티어링 휠의 가장 먼 곳에 닿는 자세로 맞추세요. 헤드레스트 중심은 귀 윗부분 높이에 맞추고 머리와 가깝게 하세요. 안전벨트의 어깨띠는 가슴, 골반띠는 골반을 지나도록 착용하세요.",
+      "image_asset_id": null,
+      "official_cautions": [
+        "운전에 지장이 없는 범위에서 스티어링 휠과 가능한 거리를 두세요. 너무 가까우면 에어백 작동 때 치명적인 부상을 입을 수 있습니다.",
+        "주행할 때 등받이를 지나치게 젖히거나 접힌 좌석에 앉지 마세요. 벨트가 제 역할을 못하거나 몸이 벨트 아래로 빠져 복부·목이 조여 심하게 다치거나 사망할 수 있습니다.",
+        "방석은 좌석과의 마찰을 줄여 급정차·충돌 때 몸이 벨트 아래로 미끄러지게 할 수 있으며, 심각한 부상을 일으킬 수 있습니다.",
+        "헤드레스트를 뺀 채 주행하거나 주행 중 조절하지 마세요. 조절 때 폴 가이드 사이 손가락 끼임을 주의하고 액세서리 등을 걸거나 붙이지 마세요.",
+        "좌석을 앞으로 당긴 상태에서 등받이를 앞으로 굽히면 헤드레스트가 선바이저 등 주변 부품과 부딪히거나 간섭할 수 있습니다."
+      ],
+      "source_ids": [
+        "hyundai-ne1-2024-kr-driving-posture",
+        "hyundai-ne1-2024-kr-seat-safety",
+        "hyundai-ne1-2024-kr-front-seat"
+      ],
+      "related_properties": [],
+      "actions": [
+        {
+          "kind": "OPEN_MANUAL",
+          "target_id": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/idf49da880ae1.html"
+        }
+      ]
+    },
+    {
+      "step_id": "adjust-interior-mirror",
+      "order": 4,
+      "title": "일반 실내 미러로 뒤쪽 시야 맞추기",
+      "body": "일반 실내 미러는 뒷유리로 들어오는 시야의 중앙이 보이게 맞추세요. 주·야 전환식은 출발 전 주간 위치에서 각도를 조절하세요. 실제 차량이 ECM이면 앞뒤 밝기 감지 센서를 가리지 마세요. DCM 화면형은 이 조작을 그대로 적용하지 말고 해당 원문을 확인하세요.",
+      "image_asset_id": null,
+      "official_cautions": [
+        "좌석보다 높은 물건으로 뒤쪽 시야를 막지 마세요. 급정차·충돌 때 앞으로 튀어나올 수도 있습니다.",
+        "실내 미러를 개조하거나 와이드 미러를 덧붙이지 말고 임의로 분리·재장착하지 마세요. 충돌 시 부상, 파손·진동 위험이 있습니다.",
+        "주·야 전환식의 야간 위치는 눈부심을 줄이지만 거울의 선명도도 낮아짐을 유의하세요."
+      ],
+      "source_ids": [
+        "hyundai-ne1-2024-kr-inside-mirror"
+      ],
+      "related_properties": [],
+      "actions": [
+        {
+          "kind": "OPEN_MANUAL",
+          "target_id": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/id38ef2ccc415.html"
+        }
+      ]
+    },
+    {
+      "step_id": "adjust-exterior-mirrors",
+      "order": 5,
+      "title": "일반 실외 미러 각도와 거리 차이 확인하기",
+      "body": "일반 실외 미러는 시동 ACC·ON 또는 시동이 걸린 상태에서 L(운전석)·R(동승석)을 선택하고 조절 스위치로 맞추세요. 접거나 펼 때는 장착된 접이 버튼을 사용하세요. 차선 변경 때 뒤차의 실제 거리는 실내 미러로도 확인하세요. DSM 카메라형에는 이 일반 미러 안내를 그대로 적용하지 마세요.",
+      "image_asset_id": null,
+      "official_cautions": [
+        "실외 미러는 볼록거울이므로 물체는 보이는 것보다 훨씬 가깝습니다.",
+        "최대 조절 각도에 도달해도 모터는 작동할 수 있으니 스위치를 계속 누르지 마세요. 손으로 각도를 바꾸거나 미러를 접고 펴지 마세요.",
+        "얼어 움직이지 않으면 억지로 조절하거나 접지 말고, 표면의 얼음을 긁지 마세요. 얼음 제거 스프레이를 쓰거나 따뜻한 곳으로 이동해 녹이세요.",
+        "시동이 꺼져도 접이 조작이 가능할 수 있으나 과도하게 조작하면 배터리가 방전될 수 있습니다."
+      ],
+      "source_ids": [
+        "hyundai-ne1-2024-kr-outside-mirror"
+      ],
+      "related_properties": [],
+      "actions": [
+        {
+          "kind": "OPEN_MANUAL",
+          "target_id": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/id754c73d5e23.html"
+        }
+      ]
+    }
+  ]
+}
