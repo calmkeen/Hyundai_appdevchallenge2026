@@ -1,0 +1,9 @@
+'A Kind Of Hope' by Scott Buckley - released under CC-BY 4.0. www.scottbuckley.com.au
+https://www.scottbuckley.com.au/library/a-kind-of-hope/
+https://creativecommons.org/licenses/by/4.0/
+Music: identical original MP3, 12s start, gain 0.32 and 0.8s/1.4s fades; include this credit in a published video description.
+
+All functional scenes: one current Pleos SDK APK/process continuous screenrecord on the dedicated AVD, not a physical vehicle.
+Actual free local Ollama/qwen3:4b selects reviewed complete answer units; server assembles stored source text and cautions. Saved ANSWER translation makes no additional model call.
+Selected 2024 Korean-market IONIQ 5 manual; profile is not SDK/VIN vehicle authentication. Not OEM or human-expert certification.
+Car and belt: user-specified Pleos rendered reference frames inside the app, not a live SDK 3D widget. Belt sensor is not connected. No redistribution license for Pleos visuals is asserted.

@@ -4,6 +4,16 @@
 
 차량 매뉴얼 범위 선택 → 한국어·영어·일본어 선택 → 현재 상태 확인 → 관련 사용 안내 → 질문·저장 번역 → 이용 종료로 이어집니다. 국내외 외국인 차량 이용자를 대상으로 하며 렌터카·관광객에 한정하지 않습니다. Kotlin/Compose 앱, FastAPI 서버, 검토된 안내 데이터로 구성한 시제품입니다.
 
+## 앱 소개 영상
+
+[![CarCue 앱 소개 영상 미리보기](media/intro/intro.png)](https://github.com/calmkeen/Hyundai_appdevchallenge2026/blob/develop/media/intro/carcue-sdk-intro.mp4)
+
+[소개 영상 보기 · 34초](https://github.com/calmkeen/Hyundai_appdevchallenge2026/blob/develop/media/intro/carcue-sdk-intro.mp4) · [MP4 원본 다운로드](https://github.com/calmkeen/Hyundai_appdevchallenge2026/raw/refs/heads/develop/media/intro/carcue-sdk-intro.mp4)
+
+한국어·영어·일본어 전환, 문 개폐에 따른 차량 시각화, 공식 안내, 무료 로컬 AI, 주행 제한과 이용 종료를 보여줍니다. 실제 Pleos SDK 전용 에뮬레이터에서 촬영한 기존 debug 검증본이며, 아래 새 Release APK와 다른 빌드입니다. 실차 촬영은 아니며 안전벨트 센서는 연결하지 않았습니다.
+
+음악: 'A Kind Of Hope' by Scott Buckley — released under CC-BY 4.0. [곡 출처](https://www.scottbuckley.com.au/library/a-kind-of-hope/) · [라이선스](https://creativecommons.org/licenses/by/4.0/) · [전체 크레딧·영상 출처](media/intro/CREDITS.txt)
+
 ## 제출 APK와 기획서
 
 - **서명 Release APK:** [apk/calmkeen_CarCue_release.apk](apk/calmkeen_CarCue_release.apk) — 실제 Pleos SDK를 사용하는 `pleos` 빌드입니다. APK의 해시·서명·빌드 소스와 재빌드 절차는 [Release APK 기록](Docs/SUBMISSION_RELEASE_APK.md)을 따릅니다.

@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "app": "CarCue",
+  "duration_seconds": 34,
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "files": [
+    {
+      "path": "carcue-sdk-intro.mp4",
+      "bytes": 10540119,
+      "sha256": "638c1f54d3e29ddba3212154c118267bcfc8be21a3dda0ad004066f3e600e18d"
+    },
+    {
+      "path": "intro.png",
+      "bytes": 386483,
+      "sha256": "d71fbf15e4e1808987c3887351cfdaac02434c560b49a0aeb0c32b3004a3097d"
+    },
+    {
+      "path": "CREDITS.txt",
+      "bytes": 943,
+      "sha256": "bb6bc3021e214f0aafc17e4f5831677d1d0c179c246c8481155c6715a00af67c"
+    }
+  ],
+  "recorded_apk_sha256": "5ef560ba1a24e3ce206aeeb6f4f336018b6e8a182bec7214aabc5dd4a261479f",
+  "sdk_version": "2.3.2",
+  "source": "REAL_PLEOS_SDK_AVD_PREVIOUS_DEBUG_RECORDING",
+  "physical_vehicle_tested": false,
+  "same_binary_as_submission_release": false,
+  "seatbelt_sensor_connected": false,
+  "originals_preserved": true,
+  "public_readme_publication_requested": true,
+  "pleos_visual_redistribution_permission_confirmed": false
+}
