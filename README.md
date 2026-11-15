@@ -6,9 +6,9 @@
 
 ## 앱 소개 영상
 
-[![CarCue 앱 소개 영상 미리보기](media/intro/intro.png)](https://github.com/calmkeen/Hyundai_appdevchallenge2026/blob/develop/media/intro/carcue-sdk-intro.mp4)
+[![CarCue 앱 소개 영상 미리보기](media/intro/intro.png)](https://github.com/calmkeen/Hyundai_appdevchallenge2026/raw/refs/heads/develop/media/intro/carcue-sdk-intro.mp4)
 
-[소개 영상 보기 · 34초](https://github.com/calmkeen/Hyundai_appdevchallenge2026/blob/develop/media/intro/carcue-sdk-intro.mp4) · [MP4 원본 다운로드](https://github.com/calmkeen/Hyundai_appdevchallenge2026/raw/refs/heads/develop/media/intro/carcue-sdk-intro.mp4)
+[34초 소개 영상 MP4 다운로드](https://github.com/calmkeen/Hyundai_appdevchallenge2026/raw/refs/heads/develop/media/intro/carcue-sdk-intro.mp4) — 썸네일을 눌러도 원본 MP4를 다운로드합니다.
 
 한국어·영어·일본어 전환, 문 개폐에 따른 차량 시각화, 공식 안내, 무료 로컬 AI, 주행 제한과 이용 종료를 보여줍니다. 실제 Pleos SDK 전용 에뮬레이터에서 촬영한 기존 debug 검증본이며, 아래 새 Release APK와 다른 빌드입니다. 실차 촬영은 아니며 안전벨트 센서는 연결하지 않았습니다.
 
