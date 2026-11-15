@@ -149,7 +149,7 @@ def test_pdf_edit_requires_fresh_matching_visual_review(candidate):
 
 @pytest.mark.parametrize("relative", ["android/app/src/main/Feature.kt",
     "android/app/src/pleosDebug/AndroidManifest.xml", "android/app/src/debug/AndroidManifest.xml",
-    "android/gradle/wrapper/gradle-wrapper.properties"])
+    "android/gradle/wrapper/gradle-wrapper.properties", "backend/requirements.txt"])
 def test_product_change_cannot_masquerade_as_validated_source_but_old_ref_stays_usable(candidate, relative):
     root, config = candidate
     changed = root / relative

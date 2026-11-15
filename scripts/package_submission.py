@@ -20,7 +20,7 @@ from pathlib import Path, PurePosixPath
 ROOT = Path(__file__).resolve().parents[1]
 PRODUCTION_PATHS = (
     "android", "content",
-    "backend/app", "backend/requirements.lock.txt", "contracts",
+    "backend/app", "backend/requirements.txt", "backend/requirements.lock.txt", "contracts",
 )
 REQUIRED_ASSETS = {"apk", "video", "proposal", "credits"}
 REQUIRED_EVIDENCE = {"sdk_showcase", "native_review", "video_render", "video_review", "proposal_review"}
@@ -286,7 +286,7 @@ def main():
             manifest, _ = check_candidate(ROOT, config, args.source_ref)
         print(json.dumps({"passed": True, "candidate_id": manifest["candidate_id"],
                           "source_commit": manifest["source_commit"], "delivery_status": manifest["delivery_status"]}))
-    except (CandidateError, OSError, ValueError, zipfile.BadZipFile) as exc:
+    except (CandidateError, OSError, ValueError, zipfile.BadZipFile, subprocess.SubprocessError) as exc:
         print(json.dumps({"passed": False, "error": str(exc)}))
         return 1
     return 0
