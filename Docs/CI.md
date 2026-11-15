@@ -42,3 +42,39 @@ SDK 연결 develop `547da78`의 [원격 실행](https://github.com/calmkeen/Hyun
 최신 기능의 원격 CI는 해당 develop push 후 별도 확인한다. 이전 develop `eac1986` 실행43576062421의 성공을 이번 코드의 실행으로 확대하지 않는다.
 
 오프라인·종료 복구 단계는 UI177 자원/콘텐츠·서버370 회귀를 같은 CI에서 검사한다. Android JVM84·실제 AVD16단계·기본앱SDK8단계는 로컬 별도 실행이며 GitHub runner에서 SDK/모델을 실행하지 않는다. `OFFLINE_SESSION_VALIDATION.md` 참조.
+
+## Android 재현 빌드 · 2026-11-15
+
+`.github/workflows/android-ci.yml`을 기존 Basic validation과 별도로 추가했다. 기존 계약·콘텐츠·백엔드 워크플로와 의존성은 변경하지 않는다. Android workflow도 같은 PR/push 대상과 수동 실행을 사용하며 저장소 읽기 권한만 요청한다.
+
+| 작업 | 실행 조건 | 검증 범위 | 산출물 |
+|---|---|---|---|
+| Demo JVM tests and MOCK APK | PR/push/수동 실행 | `testDemoDebugUnitTest`와 `assembleDemoDebug` | `carcue-demo-MOCK-<commit>` 및 JVM XML/HTML 보고서 |
+| Pleos APK compile only | 수동 실행에서 `compile_pleos=true` | 공개 Maven의 Vehicle 2.3.2로 `assemblePleosDebug` | `carcue-pleos-COMPILE_ONLY-<commit>` |
+
+기본 자동 CI의 Android 범위는 **Demo-only**다. Pleos Maven의 인증 없는 접근은 이번 로컬 환경에서 DNS 확인에 실패해 검증하지 못했다. 따라서 Pleos compile-only는 기본 비활성인 명시적 수동 작업으로 제공한다. 키나 계정·GitHub secret을 추가하지 않는다. 접근 실패 또는 컴파일 오류가 발생하면 해당 작업은 실패하며 `continue-on-error`로 숨기지 않는다. 수동 작업이 실제 성공하기 전에는 Pleos 컴파일 통과로 보고하지 않는다.
+
+환경은 `ubuntu-24.04`, Temurin Java 17, 저장소 Gradle wrapper **8.10.2**, Android **API 35 / build-tools 35.0.0**이다. 저장소의 AGP 8.8.2/Kotlin 2.0.0/앱·SDK 의존성은 유지한다. `setup-gradle`의 wrapper 검증과 Gradle 캐시를 사용하며 `setup-java`의 별도 Gradle 캐시는 중복 사용하지 않는다. SDK/AVD 이미지·개인 Gradle 캐시·유료 AI 키·Ollama 모델은 CI 입력이 아니다.
+
+```bash
+# GitHub runner에서 실행. 호스트 부하 때문에 이번 로컬 작업에서는 실행하지 않았다.
+cd android
+./gradlew --no-daemon --max-workers=2 \
+  -PcarcueServerUrl=http://10.0.2.2:8000 \
+  :app:testDemoDebugUnitTest :app:assembleDemoDebug
+
+# 명시적으로 선택한 수동 Pleos compile-only 작업
+./gradlew --no-daemon --max-workers=2 \
+  -PpleosSdkVersion=2.3.2 -PcarcueServerUrl=http://10.0.2.2:8000 \
+  :app:assemblePleosDebug
+```
+
+`scripts/package_android_ci.py`는 runner의 aapt2로 실제 APK package/version/compile·target SDK를 검사한 뒤 이름을 붙인다. Demo는 `com.carcue.app.demo`와 `-mock` 버전명, Pleos는 `com.carcue.app`를 요구한다. 산출물에는 APK, `artifact.json`, `SHA256SUMS.txt`가 포함되며 commit/run ID와 검증 범위를 기록한다. artifact 이름에는 재실행 attempt도 붙여 충돌을 피한다. 보존 기간은 7일이다. JVM 실패 시에도 만들어진 테스트 보고서는 업로드한다. APK는 runner의 일회성 debug 서명이며 배포용 서명키를 사용하지 않는다.
+
+**MOCK APK는 차량 데이터가 Mock인 demo flavor이며, AI 실행까지 검증했다는 뜻이 아니다.** APK의 서버 URL은 기존 기본 개발 주소 `http://10.0.2.2:8000`이고 CI가 서버나 AI를 기동하지 않는다. Pleos COMPILE_ONLY APK도 실제 SDK 수신·문 상태 변화·Car UX·실제 모델·실차 시험 통과를 뜻하지 않는다. 설치 APK를 이용한 실제 AVD 증거와 세 응답 경계 미완료 상태는 별도 문서대로 유지한다.
+
+이번 변경은 로컬 YAML 구조/AST 검사, 메타데이터 합격·거절 7개 확인과 기존 Pleos APK의 aapt2 정적 메타데이터 읽기를 통과했다. 로컬 Gradle·AVD·모델은 실행하지 않았다. 새 원격 실행의 실제 JVM 개수·빌드/업로드 성공 여부는 해당 commit의 Actions 결과를 확인해 기록해야 하며, 이전 로컬 JVM127/백엔드475 또는 과거 CI 성공을 새 작업의 성공으로 확대하지 않는다.
+
+공식 근거: [setup-java v5](https://github.com/actions/setup-java/tree/v5), [Gradle actions v5](https://github.com/gradle/actions/releases/tag/v5.0.0), [setup-gradle 문서](https://github.com/gradle/actions/blob/v5/docs/setup-gradle.md), [upload-artifact v7.0.2](https://github.com/actions/upload-artifact/releases/tag/v7.0.2), [Ubuntu 24.04 Android 도구](https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2404-Readme.md#android), [sdkmanager](https://developer.android.com/tools/sdkmanager), [Gradle 8.10.2 Java 호환성](https://docs.gradle.org/8.10.2/userguide/compatibility.html). Java/Gradle action v5는 호환성을 확인해 선택한 버전이며 최신 major라는 뜻은 아니다.
+
+공식 문서 조회는 사용자 설정의 로컬 Firecrawl을 먼저 확인했다. 로컬 스택이 꺼져 있어 서비스를 추가 기동하지 않고 내장 웹 도구로 위 공식 문서만 확인했으며 Cloud Firecrawl은 사용하지 않았다.
