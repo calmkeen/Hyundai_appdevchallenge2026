@@ -2,6 +2,10 @@
 
 2026-11-15 (KST). 실차, 공식 전용 AVD의 실제 SDK, 일반 AVD의 Mock, 외부 AI 대역을 구분한다.
 
+## 최신 시험 복구·원격 검증
+
+선행 작업 feature4개와 develop `736dc95`는 실제 원격 SHA 일치 및 CI5개 success를 확인했다. 후속 `feature/sdk-inflight-recovery` checkpoint `02947ed`도 원격 반영·CI success(run `43676020770`)이며 서버 회귀 **475개**, UI191개·가이드4레코드 검사가 통과했다. 추가 7개는 실제 파일·thread 기반 audit 관측 회귀다. CI는 MOCK 설정이며 실제 SDK·모델 검증과 구분한다. 실제 AVD 복구·기기 시험의 실패 원본과 최신 결과는 [SDK_INFLIGHT_RECOVERY.md](SDK_INFLIGHT_RECOVERY.md)를 따른다.
+
 ## 최신: 다국어·SDK·종료 시연과 소개 영상 · 2026-11-15
 
 프런트 경계 구현 `78bd767`은 UI/답변/번역 원문·대상 언어, 맥락별 동의와 응답 적용, 가이드 → ASK → 번역 → ASK → 같은 단계 복귀를 분리한다. `d6be741`은 생성 QUESTION 번역이 기본 보류일 때 과거 opt-in 성공 캐시도 재생하지 않도록 한다. backend **468개**, Android JVM **127개**, 계약과 세 언어 UI **191개** 자원 검사 및 Pleos 앱/테스트 빌드를 통과했다. 합성 정책·provider HTTP 대역 회귀를 실제 SDK/모델 시험으로 계산하지 않는다.
@@ -56,7 +60,7 @@ run01 성공 및 run02 Console 준비 실패/run03 후반 진입 실패/같은�
 
 | 구분 | 명령/환경 | 결과 |
 | --- | --- | --- |
-| 서버/도구 회귀 | `.venv/bin/python -m pytest backend/tests -q` | 최신 468개 통과. 생성 QUESTION 보류의 같은 DB 재시작/과거 캐시 차단 포함. 실제 모델 호출과 대역 회귀 구분 |
+| 서버/도구 회귀 | `.venv/bin/python -m pytest backend/tests -q` | checkpoint02947ed CI475개 통과. 생성 QUESTION 보류의 같은 DB 재시작/과거 캐시 차단 및 audit 관측7개 포함. 실제 모델 호출과 대역 회귀 구분 |
 | 가이드 카탈로그 | `.venv/bin/python scripts/import_guides.py check --json` | VALID, 공식 문 안내 3언어 PUBLISHED + DRAFT 1개 = 4개 레코드 |
 | 공식 매뉴얼 자료 | 포털 연식/시장/DocID 대조, HTML 및 PDF 인쇄 2-7/4-21 시각 대조, ko/en/ja 독립 의미 검토 | 한국시장 NE1/2024 범위 확인. AI 보조 검토이며 OEM/인간 전문가 검수 아님 |
 | 상태-가이드 규칙 | `scripts/check_contracts.py` | 1개 OPEN/ROW_1_LEFT 규칙의 스키마·프로필/판본·언어별 게시 가이드/관련 property 통과 |

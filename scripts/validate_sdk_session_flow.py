@@ -10,6 +10,7 @@ import sqlite3
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 import uuid
 from datetime import datetime, timezone
@@ -29,6 +30,10 @@ PACKAGE = "com.carcue.app"
 PROFILE = "ioniq5-ne1-2024-kr"
 GUIDE = "ioniq5-door-open-check"
 MODEL_DIGEST = "359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7"
+SDK_FAILURE_EVENT = re.compile(
+    r"(PLEOS:(?:PERMISSION_DENIED|INITIALIZE_FAILED|CAPABILITY_FAILED|AREA_UNSUPPORTED|"
+    r"READ_TIMEOUT|GET_FAILED|CALLBACK_FAILED|LISTENER_REGISTRATION_FAILED|UNREGISTER_FAILED|RELEASE_FAILED))\s*$"
+)
 SCENES = ["profile", "language-ko", "door-closed", "door-open", "door-restored", "seatbelt",
           "official-guide-step2", "ask-ko", "translation-en", "language-en", "ask-en", "ask-ja",
           "drive-restricted", "end-session"]
@@ -49,6 +54,54 @@ def sanitized(row):
     for key in ("request_id", "answer_request_id", "cancelled_request_id"):
         if row.get(key): result[key + "_hash"] = digest(row[key].encode())
     return result
+
+
+class AuditObservation:
+    """Observe the real audit independently of potentially slow ADB calls.
+
+    This never calls a provider or changes its completion. First-seen time is
+    still an upper bound on completion, so the in-flight proof stays conservative.
+    """
+    def __init__(self, audit):
+        self.audit = audit
+        self.first_seen = {}
+        self.error = None
+        self.lock = threading.Lock()
+        self.stop = threading.Event()
+        self.worker = threading.Thread(target=self.observe, daemon=True, name="real-audit-observer")
+
+    def observe(self):
+        while not self.stop.is_set():
+            try:
+                rows = self.audit.events()
+                observed = time.monotonic()
+                with self.lock:
+                    for row in rows:
+                        self.first_seen.setdefault(row.get("request_id_hash"), observed)
+            except RuntimeError as exc:
+                # A concurrent append may briefly expose an incomplete line.
+                # The main validator still requires complete, sanitized final records.
+                if str(exc) != "AUDIT_RECORD_INCOMPLETE":
+                    self.error = str(exc)
+                    return
+            except Exception:
+                self.error = "AUDIT_OBSERVER_READ_FAILED"
+                return
+            self.stop.wait(.02)
+
+    def start(self):
+        self.worker.start()
+        return self
+
+    def completed_at(self, hashed):
+        require(self.error is None and self.worker.is_alive(), "AUDIT_OBSERVER_FAILED")
+        with self.lock:
+            return self.first_seen.get(hashed)
+
+    def close(self):
+        self.stop.set()
+        self.worker.join(timeout=2)
+        require(not self.worker.is_alive() and self.error is None, "AUDIT_OBSERVER_FAILED")
 
 
 def validate_audit(events, hashes, model):
@@ -134,7 +187,9 @@ def main():
     parser.add_argument("--media-tool-source", type=Path, default=ROOT / "scripts/render_sdk_intro.swift",
                         help="Approved new AVFoundation tool source; compiled only to the new QA directory for read-only video probing")
     args = parser.parse_args()
-    require(args.serial == "emulator-5584" and args.avd == "CarCue_Pleos21_LocalAI", "PRESERVED_AVD_REQUIRED")
+    require(args.serial == "emulator-5584" and args.avd in {
+        "CarCue_Pleos21_LocalAI", "CarCue_Pleos21_SdkRecovery"
+    }, "DEDICATED_PLEOS_AVD_REQUIRED")
     require(not args.record or args.mode == "showcase", "RECORD_SHOWCASE_ONLY")
     require(re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{0,63}", args.run_id) is not None, "SAFE_RUN_ID_REQUIRED")
     out = (args.output_dir / args.run_id).resolve()
@@ -144,10 +199,12 @@ def main():
     base = [str(args.adb.resolve()), "-s", args.serial]
     markers = "files/qa/" + args.run_id + "/sdk-session"
     report = {"passed": False, "functional_passed": False, "mode": args.mode, "run_id": args.run_id,
+        "avd_name": args.avd, "serial": args.serial,
+        "avd_data_origin": "EXISTING_PRESERVED_DATA" if args.avd == "CarCue_Pleos21_LocalAI" else "SEPARATE_FRESH_FACTORY_DATA",
         "started_at": datetime.now(timezone.utc).isoformat(), "cleanup_errors": [], "fixtures": [], "late_boundaries": {},
         "physical_vehicle_tested": False, "app_sdk_set_called": False, "paid_provider_called": False,
         "question_translation_calls": 0, "seatbelt_status_connected": False, "semantic_review_status": "PENDING_INDEPENDENT_REVIEW"}
-    process, recorder, record_log, lease, audit = None, None, None, None, None
+    process, recorder, record_log, lease, audit, observation = None, None, None, None, None, None
     functional, recorded_ok, native_done, stop_sent = False, not args.record, False, False
     handled, pending, completed = set(), {}, set()
     pid, records, scenes, result, guides = None, None, None, None, None
@@ -284,6 +341,8 @@ def main():
             report["normal_launch"] = {"route": "INSTRUMENTATION_RULE_AFTER_OWN_PACKAGE_FORCE_STOP",
                                        "normal_launcher_verified": False, "userdata_cleared": False}
         audit = AuditCursor(args.audit_file.resolve())
+        if args.mode == "late":
+            observation = AuditObservation(audit).start()
         method = "connectedShowcaseFlow" if args.mode == "showcase" else "lateResponseBoundaries"
         command = base + ["shell", "am", "instrument", "--user", "10", "-w", "-r", "-e", "validateSdkSessionFlow", "true",
             "-e", "sessionFlowMode", args.mode, "-e", "runId", args.run_id, "-e", "expectedLocalModel", args.model,
@@ -296,7 +355,13 @@ def main():
             activity_reselected = False
             while process.poll() is None and time.monotonic() < deadline:
                 try: lease.check_heartbeat()
-                except ConsoleHeartbeatError: lease.wait_ready(timeout=min(30, max(.01, deadline - time.monotonic())))
+                except ConsoleHeartbeatError:
+                    # The independent heartbeat keeps recovering. Do not suspend real
+                    # SDK/audit observations behind fixture-readiness HTTP waits.
+                    # Every external mutation below still requires wait_ready(), as
+                    # do INITIAL/RESTORED Park checks and lease shutdown.
+                    require(lease.diagnostics()["heartbeat_running"], "CONSOLE_HEARTBEAT_THREAD_STOPPED")
+                    report["console_observation_recovery_checks"] = report.get("console_observation_recovery_checks", 0) + 1
                 present = names()
                 if args.mode == "late" and not activity_reselected and "activity-ready" in present:
                     activity = marker("activity-ready")
@@ -332,6 +397,8 @@ def main():
                         time.sleep(1)
                     signal("go"); ready = True
                 for name, paths in (("request-open", ("/vehicle/body?door_fl=1",)), ("request-close", ("/vehicle/body?door_fl=0",)),
+                                    ("request-warm-drive", ("/vehicle/gear?gear=Drive", "/vehicle/controls?speed=20&accelerator=0&brake=0")),
+                                    ("request-warm-park", ("/vehicle/controls?speed=0&accelerator=0&brake=0", "/vehicle/gear?gear=Park")),
                                     ("request-drive", ("/vehicle/gear?gear=Drive", "/vehicle/controls?speed=20&accelerator=0&brake=0")),
                                     ("request-park", ("/vehicle/controls?speed=0&accelerator=0&brake=0", "/vehicle/gear?gear=Park"))):
                     if name in present and name not in handled:
@@ -343,6 +410,14 @@ def main():
                         if "pending-" + name in present and name not in pending:
                             row = marker("pending-" + name); request = row["request_id"]
                             require(str(uuid.UUID(request)) == request and row.get("busy") is True, "ACTUAL_PENDING_REQUEST_REQUIRED")
+                            require(row.get("source") == "PLEOS" and row.get("capability") == "SUPPORTED"
+                                    and row.get("read_status") == "VALUE" and row.get("value") == "CLOSED"
+                                    and row.get("ux_known") is True and row.get("ux_restricted") is False and row.get("ux_flags") == 0
+                                    and row.get("profile_id") == PROFILE and row.get("market") == "KR", "ACTUAL_PENDING_SDK_CONTEXT_REQUIRED")
+                            received = datetime.fromisoformat(row["received_at"].replace("Z", "+00:00"))
+                            recorded = datetime.fromisoformat(row["recorded_at"].replace("Z", "+00:00"))
+                            require(0 <= (recorded - received).total_seconds() * 1000 <= row["state_ttl_ms"] == 60000,
+                                    "FRESH_PENDING_SDK_CONTEXT_REQUIRED")
                             hashed = digest(request.encode())
                             require(not any(e.get("request_id_hash") == hashed for e in audit.events()), "INFLIGHT_NOT_EXERCISED")
                             pending[name] = {"request_id_hash": hashed, "boundary_lower_monotonic": time.monotonic(), "pending_native": sanitized(row)}
@@ -354,13 +429,18 @@ def main():
                         if name in pending and "boundary_observed_monotonic" in pending[name] and name not in completed:
                             matching = [e for e in audit.events() if e.get("request_id_hash") == pending[name]["request_id_hash"]]
                             if matching:
-                                done = time.monotonic(); event, = matching
+                                done = observation.completed_at(pending[name]["request_id_hash"])
+                                if done is None: continue
+                                event, = matching
                                 elapsed = (done - pending[name]["boundary_lower_monotonic"]) * 1000
                                 duration = event.get("duration_ms")
-                                require(isinstance(duration, int) and not isinstance(duration, bool) and elapsed < duration, "INFLIGHT_NOT_EXERCISED")
+                                require(done >= pending[name]["boundary_observed_monotonic"]
+                                        and isinstance(duration, int) and not isinstance(duration, bool)
+                                        and elapsed < duration - 1, "INFLIGHT_NOT_EXERCISED")
                                 pending[name].update(model_done_observed_monotonic=done, elapsed_after_boundary_lower_ms=elapsed,
                                                      provider_duration_ms=duration, provider_started_before_boundary_proven=True,
-                                                     completion_after_native_boundary_proven=True)
+                                                     completion_after_native_boundary_proven=True,
+                                                     completion_observation="INDEPENDENT_REAL_AUDIT_POLL_20MS", duration_rounding_margin_ms=1)
                                 signal("model-finished-" + name); completed.add(name)
                         if name in pending and "checked-" + name in present:
                             pending[name]["checked_native"] = sanitized(marker("checked-" + name))
@@ -395,8 +475,51 @@ def main():
             report["responses"] = [sanitized(row) for row in records]
         else:
             require(completed == {"locale", "drive", "end"} and all("checked_native" in row for row in pending.values()), "ALL_THREE_LATE_BOUNDARIES_REQUIRED")
+            routes = {"locale": "PRODUCTION_LANGUAGE_HANDLERS_ON_MAIN_THREAD_WHILE_INFLIGHT",
+                      "drive": "ACTUAL_PLATFORM_UX_CALLBACK_WHILE_INFLIGHT",
+                      "end": "PRODUCTION_END_SESSION_HANDLER_ON_MAIN_THREAD_WHILE_INFLIGHT"}
+            require(all(row["boundary_native"].get("route") == routes[name] for name, row in pending.items()),
+                    "EXPLICIT_PRODUCTION_ACTION_ROUTE_REQUIRED")
+            ended = pending["end"]["boundary_native"]
+            require(ended.get("page") == "PROFILE" and ended.get("session_started") is False
+                    and ended.get("profile_id") is None and ended.get("value") is None
+                    and ended["session_epoch"] > pending["end"]["pending_native"]["session_epoch"], "ACTUAL_SESSION_EPOCH_END_REQUIRED")
             validate_audit(audit.events(), {row["request_id_hash"] for row in pending.values()}, args.model)
-            require(handled == {"request-drive", "request-park"}, "ACTUAL_DRIVE_RESTORE_REQUIRED")
+            require(handled == {"request-warm-drive", "request-warm-park", "request-drive", "request-park"}, "ACTUAL_DRIVE_RESTORE_REQUIRED")
+            require("ACTUAL_UX_WARMUP_DRIVE_AND_PARK" in {e["phase"] for e in events}, "ACTUAL_UX_WARMUP_REQUIRED")
+            captures = {}
+            for name in ("late-locale", "late-drive", "late-drive-restored", "late-end"):
+                capture = json.loads((out / (name + "-capture.json")).read_text())
+                require(capture.get("app_pid") == pid and capture.get("compose_capture") == "ACTUAL_CURRENT_APP_ROOT"
+                        and capture.get("method") == "UIAUTOMATION_REAL_DISPLAY"
+                        and isinstance(capture.get("attempts"), int) and capture["attempts"] > 0
+                        and (out / (name + ".png")).read_bytes().startswith(b"\x89PNG\r\n\x1a\n"), "ACTUAL_APP_CAPTURE_REQUIRED")
+                require(capture.get("window_focused") is True and capture.get("activity_destroyed") is False
+                        and isinstance(capture.get("activity_identity"), int)
+                        and not isinstance(capture["activity_identity"], bool)
+                        and capture["activity_identity"] == capture.get("prepared_activity_identity")
+                        and capture.get("compose_test_clock_auto_advance") is False
+                        and isinstance(capture.get("late_manual_frames_pumped"), int)
+                        and not isinstance(capture["late_manual_frames_pumped"], bool)
+                        and capture["late_manual_frames_pumped"] > 0, "ORIGINAL_FOCUSED_ACTIVITY_AND_COMMITTED_FRAMES_REQUIRED")
+                if name == "late-drive":
+                    require(capture.get("physical_required") is False and capture.get("ux_known") is True
+                            and capture.get("ux_restricted") is True, "DRIVE_CAPTURE_SCOPE_INVALID")
+                else:
+                    require(capture.get("physical_required") is True and capture.get("passed") is True,
+                            "UNRESTRICTED_REAL_DISPLAY_CAPTURE_REQUIRED")
+                physical = out / (name + "-physical.png")
+                if capture.get("passed") is True:
+                    require(capture.get("physical_unavailable") is False and physical.read_bytes().startswith(b"\x89PNG\r\n\x1a\n"),
+                            "ACTUAL_DISPLAY_CAPTURE_REQUIRED")
+                else:
+                    require(name == "late-drive" and capture.get("physical_unavailable") is True and not physical.exists(),
+                            "UNAVAILABLE_DISPLAY_MUST_NOT_BE_SUBSTITUTED")
+                captures[name] = capture
+            report["physical_captures"] = captures
+            report["physical_capture_complete"] = all(c["passed"] for c in captures.values())
+            report["display_capture_limitations"] = [] if report["physical_capture_complete"] else [
+                "DRIVE_GLOBAL_CAPTURE_UNAVAILABLE_ACTUAL_COMPOSE_CAPTURE_PRESERVED"]
         report["native_result"] = result
         functional = True
     except Exception as exc:
@@ -425,11 +548,17 @@ def main():
         if pid is not None:
             def sdk_logs():
                 raw = adb("logcat", "-d", "--pid", str(pid), "-v", "brief", "-s", "CarCueVehicle:I", "*:S")
-                safe = [m.group(1) for line in raw.splitlines() if (m := SDK_EVENT.search(line))]
+                safe = [m.group(1) for line in raw.splitlines()
+                        if (m := SDK_EVENT.search(line) or SDK_FAILURE_EVENT.search(line))]
                 (out / "sdk-events.json").write_text(json.dumps(safe, indent=2) + "\n")
+                report["sdk_failure_events"] = [event for event in safe if SDK_FAILURE_EVENT.fullmatch(event)]
                 require(any("PLEOS:GET_RECEIVED" in e for e in safe) and "PLEOS:LISTENER_UNREGISTER_RETURNED" in safe
                         and "PLEOS:RELEASE_RETURNED" in safe and any("UX:CALLBACK:requires=true" in e for e in safe)
                         and any("UX:CALLBACK:requires=false" in e for e in safe), "SDK_LIFECYCLE_OR_REAL_UX_EVIDENCE_MISSING")
+                if args.mode == "late":
+                    require(sum("UX:CALLBACK:requires=true" in e for e in safe) >= 2
+                            and sum("UX:CALLBACK:requires=false" in e for e in safe) >= 2,
+                            "WARMUP_AND_INFLIGHT_REAL_UX_CALLBACKS_REQUIRED")
                 if args.mode == "showcase": require(any("CALLBACK_RECEIVED:RANGE_VERIFIED:value=1" in e for e in safe)
                     and any("CALLBACK_RECEIVED:RANGE_VERIFIED:value=0" in e for e in safe), "ACTUAL_DOOR_CALLBACK_EVIDENCE_MISSING")
                 report["sdk_events"] = safe
@@ -445,6 +574,10 @@ def main():
                 cleanup_step("FINAL_AUDIT_CONTRACT", lambda: validate_audit(report["audit"],
                     {digest(row["request_id"].encode()) for row in records if row["phase"].startswith("ask-")} if args.mode == "showcase"
                     else {row["request_id_hash"] for row in pending.values()}, args.model))
+        if observation is not None:
+            cleanup_step("CLOSE_AUDIT_OBSERVER", observation.close)
+            report["audit_observer"] = {"independent": True, "poll_interval_seconds": .02,
+                "thread_stopped": not observation.worker.is_alive(), "error": observation.error}
         report["final_database_counts"] = cleanup_step("FINAL_DATABASE_COUNTS", counts)
         if functional and report["final_database_counts"] is not None:
             cleanup_step("CONFIRM_DATABASE_EMPTY", lambda: require(all(n == 0 for n in report["final_database_counts"].values()), "SESSION_DATA_REMAINS"))
