@@ -4,7 +4,7 @@
 
 ## 공식 제출 준비 · 2026-11-15
 
-앱명은 **CarCue(카큐)**로 확정했다. 공식 Word 양식의 기획 내용과 앱명3곳을 작성해6쪽 전체 렌더·독립 검토를 통과했다. 참가정보·동의·서명·날짜는 미작성이다. `OFFICIAL_SUBMISSION_PROPOSAL.md`, `OFFICIAL_SUBMISSION_VALIDATION.md`를 따른다.
+앱명은 **CarCue(카큐)**로 확정했다. 공식 Word 양식의 기획 내용과 앱명3곳을 작성해6쪽 전체 렌더·독립 검토를 통과했다. 공개 원고에는 개인정보를 넣지 않았다. 참가정보는 로컬 접수양식에서만 관리하고 동의·본인 서명·서명일은 직접 작성한다. `OFFICIAL_SUBMISSION_PROPOSAL.md`, `OFFICIAL_SUBMISSION_VALIDATION.md`를 따른다.
 
 신규 `apk/calmkeen_CarCue_release.apk`는 clean 소스 `7d492c1`의 실제 Pleos release 빌드다. 별도 인증서, `DEBUG=false`/`IS_MOCK=false`, Vehicle SDK2.3.2, 게시 안내12개를 확인했다. release JVM148·lint오류0/경고16·서명/내부 바이트 검사·설정거절4개가 통과했다. 새 release의 설치·AVD·모델 시험은 수행하지 않았으며 기존34초 영상은 과거 debug 검증본이다. 제출 실행 설정과 남은 조건은 `SUBMISSION_RELEASE_APK.md`, `SUBMISSION_READINESS.md`를 따른다. 기존APK·영상·PDF·ZIP은 변경하지 않는다.
 
