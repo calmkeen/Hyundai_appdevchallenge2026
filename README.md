@@ -12,9 +12,11 @@
 
 ## 34초 소개 영상
 
-[![CarCue 소개 영상 — 언제, 어디서든, 평소와 같은 경험을.](https://raw.githubusercontent.com/calmkeen/Hyundai_appdevchallenge2026/develop/media/intro/intro.png)](https://github.com/calmkeen/Hyundai_appdevchallenge2026/blob/develop/media/intro/carcue-sdk-intro.mp4)
+[![CarCue 소개 영상 — 언제, 어디서든, 평소와 같은 경험을.](https://raw.githubusercontent.com/calmkeen/Hyundai_appdevchallenge2026/develop/media/intro/intro.png)](https://github.com/calmkeen/Hyundai_appdevchallenge2026/raw/refs/heads/develop/media/intro/carcue-sdk-intro.mp4)
 
-**[영상 보기](https://github.com/calmkeen/Hyundai_appdevchallenge2026/blob/develop/media/intro/carcue-sdk-intro.mp4) · [MP4 다운로드](https://github.com/calmkeen/Hyundai_appdevchallenge2026/raw/refs/heads/develop/media/intro/carcue-sdk-intro.mp4)**
+**[34초 소개 영상 MP4 다운로드](https://github.com/calmkeen/Hyundai_appdevchallenge2026/raw/refs/heads/develop/media/intro/carcue-sdk-intro.mp4)**
+
+썸네일을 누르면 원본 MP4를 다운로드합니다.
 
 한국어·영어·일본어 안내를 담은 34초 편집본입니다. 동일한 앱의 연속 녹화에서 전용 AVD의 실제 Pleos SDK 연결, 문 상태 변화, 공식 안내, 무료 로컬 AI 선택과 저장 번역을 보여줍니다.
 
