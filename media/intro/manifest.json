@@ -8,8 +8,8 @@
   "files": [
     {
       "path": "carcue-sdk-intro.mp4",
-      "bytes": 10540119,
-      "sha256": "638c1f54d3e29ddba3212154c118267bcfc8be21a3dda0ad004066f3e600e18d"
+      "bytes": 5880682,
+      "sha256": "22399ce4af059b25c85e102e15cdedefd5fd27254aef8ba0910b279835da156c"
     },
     {
       "path": "intro.png",
@@ -30,5 +30,14 @@
   "seatbelt_sensor_connected": false,
   "originals_preserved": true,
   "public_readme_publication_requested": true,
-  "pleos_visual_redistribution_permission_confirmed": false
+  "pleos_visual_redistribution_permission_confirmed": false,
+  "rendering_revision": "OPAQUE_FRAME_CLEANUP_20261115",
+  "original_edit_sha256": "638c1f54d3e29ddba3212154c118267bcfc8be21a3dda0ad004066f3e600e18d",
+  "audio_pcm_exact_match": true,
+  "audio_pcm_sha256": "cc2131ac9a83db8a4b1cd8e539e78c40d75fa1e648e9d93539bdafa67b5b96ba",
+  "green_artifact_frames_after": 0,
+  "black_flash_frames_after": 0,
+  "core_animation_used": false,
+  "progress_bar_used": false,
+  "source_motion_interpolated": false
 }
