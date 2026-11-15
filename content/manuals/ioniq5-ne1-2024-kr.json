@@ -68,5 +68,235 @@
       "published_record_sha256": "328d40db77e78db69fa5fab26ca21d7a2977609b6f01ba37fc2c58ca7796531f",
       "record_path": "content/guides/guide-db9aec19fc6c91a72c94edddaf8f4ec57e724dc785a3a008428ecbb30bc2475f.json"
     }
-  ]
+  ],
+  "usage_guide_review_20261115": {
+    "review_date": "2026-11-15",
+    "review_method": "Official Korean HTML and same-version PDF comparison; independent second-agent semantic review of KO/EN/JA summaries",
+    "human_certified_review": false,
+    "oem_approved": false,
+    "sdk_vehicle_identity_verified": false,
+    "new_topic_vehicle_sensor_connected": false,
+    "actual_model_called_for_this_review": false,
+    "original_documents_redistributed": false,
+    "review_records": [
+      {
+        "path": "output/qa/guide-expansion-20261115/charging-independent-final-review.json",
+        "sha256": "5591f453bfdd04284e59fb9e895002e01b01b545f98180a96627033c04569fd2"
+      },
+      {
+        "path": "output/qa/guide-expansion-20261115/seats-independent-review.json",
+        "sha256": "0a5a43b47a6b781f3ef7fc8476669ec5c3f020cbf27d05874fab382850709cfd"
+      },
+      {
+        "path": "output/qa/guide-expansion-20261115/display-independent-review.json",
+        "sha256": "6cafaa303e58ca984ed0a3f191bb63a0d47f65553d0d3eb46cffcd4f29954136"
+      },
+      {
+        "path": "output/qa/guide-expansion-20261115/display-independent-structural-review.json",
+        "sha256": "0e041ed6c880eb2bdaf2419549ac8d374eade0769eef618fe7025a42c29c4272"
+      }
+    ],
+    "reviewed_sources": [
+      {
+        "source_id": "hyundai-ne1-2024-kr-charge-precautions",
+        "title": "Hyundai IONIQ 5 2024 - Korean owner manual",
+        "url": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/id8c4c9da6f01.html",
+        "version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+        "section": "충전 시 주의사항 · 인쇄 0-23 / PDF 29",
+        "verification_status": "VERIFIED",
+        "retrieval_evidence": {
+          "kind": "LOCAL_FIRECRAWL_HTML",
+          "sha256": "191f552c3b13f58ec66ff0c726fd7daf00f21cef348109beb18572484b9446f5",
+          "retrieved_on": "2026-11-15"
+        }
+      },
+      {
+        "source_id": "hyundai-ne1-2024-kr-charge-general",
+        "title": "Hyundai IONIQ 5 2024 - Korean owner manual",
+        "url": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/id9c9b83617dd.html",
+        "version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+        "section": "전기 자동차 충전 · 인쇄 0-25 / PDF 31",
+        "verification_status": "VERIFIED",
+        "retrieval_evidence": {
+          "kind": "DIRECT_HTTPS_HTML_CERTIFI_VERIFIED",
+          "sha256": "0c0850109cc9565f6187120bd821288c22a4c97c6895364b306bfc605dfdbdc7",
+          "retrieved_on": "2026-11-15"
+        }
+      },
+      {
+        "source_id": "hyundai-ne1-2024-kr-ac-charge-start",
+        "title": "Hyundai IONIQ 5 2024 - Korean owner manual",
+        "url": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/iddf8ac57572b.html",
+        "version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+        "section": "완속 충전 방법 > 연결·시작 확인 · 인쇄 0-25~27 / PDF 31~33",
+        "verification_status": "VERIFIED",
+        "retrieval_evidence": {
+          "kind": "LOCAL_FIRECRAWL_HTML",
+          "sha256": "dcb627ca703585a910dc1141fe8f1937a41a1a4da9c0b22b902eb41ccd54cb9c",
+          "retrieved_on": "2026-11-15"
+        }
+      },
+      {
+        "source_id": "hyundai-ne1-2024-kr-charge-label-stop",
+        "title": "Hyundai IONIQ 5 2024 - Korean owner manual",
+        "url": "https://ownersmanual.hyundai.com/full_pdf/NE1/2024/ko_KR#page=30",
+        "version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+        "section": "충전 정보 라벨·비상시 충전 커넥터 분리의 경고 · 인쇄 0-24 / PDF 30; 비상 분리 절차는 이 안내 범위 밖",
+        "verification_status": "VERIFIED",
+        "retrieval_evidence": {
+          "kind": "CACHED_OFFICIAL_PDF_PAGE_VISUAL_REVIEW",
+          "pdf_sha256": "fd7e08cf0f3ed06a8e47ddee38fcaa463f32fa375b5a7d76c0aee4e0025a6248",
+          "pdf_page_one_based": 30
+        }
+      },
+      {
+        "source_id": "hyundai-ne1-2024-kr-driving-posture",
+        "title": "Hyundai IONIQ 5 2024 — Korean owner manual",
+        "url": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/idb26b9ae7995.html",
+        "version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+        "section": "올바른 운전 자세 · 인쇄 2-3 / PDF 81",
+        "verification_status": "VERIFIED",
+        "retrieval_evidence": {
+          "kind": "DIRECT_HTTPS_HTML_CERTIFI_VERIFIED",
+          "sha256": "f08cd68ab647962143ad6fd9a1a62aeba8fd6a354d89c9b49d98356482d0b893",
+          "retrieved_on": "2026-11-15"
+        }
+      },
+      {
+        "source_id": "hyundai-ne1-2024-kr-seat-safety",
+        "title": "Hyundai IONIQ 5 2024 — Korean owner manual",
+        "url": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/id81db5616e14.html",
+        "version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+        "section": "좌석 · 공통 경고 · 인쇄 3-2~3-5 / PDF 92~95",
+        "verification_status": "VERIFIED",
+        "retrieval_evidence": {
+          "kind": "LOCAL_FIRECRAWL_HTML",
+          "sha256": "1b376e03ec1906e690cfae46d38a7de20c37e172de9210f06b2d5e6c6fff47b2",
+          "retrieved_on": "2026-11-15"
+        }
+      },
+      {
+        "source_id": "hyundai-ne1-2024-kr-front-seat",
+        "title": "Hyundai IONIQ 5 2024 — Korean owner manual",
+        "url": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/idf49da880ae1.html",
+        "version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+        "section": "앞좌석 · 수동/전동 조절 및 헤드레스트 · 인쇄 3-6~3-13 / PDF 96~103",
+        "verification_status": "VERIFIED",
+        "retrieval_evidence": {
+          "kind": "LOCAL_FIRECRAWL_HTML",
+          "sha256": "12f8dec71afccc1b6363fdd888dc79cd50cf6edb7a60cb51002d40a85626d9ba",
+          "retrieved_on": "2026-11-15"
+        }
+      },
+      {
+        "source_id": "hyundai-ne1-2024-kr-inside-mirror",
+        "title": "Hyundai IONIQ 5 2024 — Korean owner manual",
+        "url": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/id38ef2ccc415.html",
+        "version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+        "section": "실내 미러 · 인쇄 5-43 / PDF 217",
+        "verification_status": "VERIFIED",
+        "retrieval_evidence": {
+          "kind": "LOCAL_FIRECRAWL_HTML",
+          "sha256": "ece7c05b6169bb48024f271bf7bf5c6cfed46fe56c87797d684b70085cb4701f",
+          "retrieved_on": "2026-11-15"
+        }
+      },
+      {
+        "source_id": "hyundai-ne1-2024-kr-outside-mirror",
+        "title": "Hyundai IONIQ 5 2024 — Korean owner manual",
+        "url": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/id754c73d5e23.html",
+        "version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+        "section": "실외 미러 · 각도와 접힘/펴짐 · 인쇄 5-44~5-45 / PDF 218~219",
+        "verification_status": "VERIFIED",
+        "retrieval_evidence": {
+          "kind": "LOCAL_FIRECRAWL_HTML",
+          "sha256": "2fdf46c821a8045a404cdad395250e55c3c4fb3b47b1e5608b3fe819a600f058",
+          "retrieved_on": "2026-11-15"
+        }
+      },
+      {
+        "source_id": "hyundai-ne1-2024-kr-cluster-brightness",
+        "title": "Hyundai IONIQ 5 2024 - Korean owner manual",
+        "url": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/id4d773b8d07c.html",
+        "version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+        "section": "클러스터 조명 밝기 조절 · 인쇄 4-3 / PDF 149",
+        "verification_status": "VERIFIED",
+        "retrieval_evidence": {
+          "kind": "LOCAL_FIRECRAWL_HTML",
+          "sha256": "8113a5ec58262652c337f085f44e65bdc7ad4e7fabb216ff9294c960a88cdebd",
+          "retrieved_on": "2026-11-15"
+        }
+      },
+      {
+        "source_id": "hyundai-ne1-2024-kr-ev-ready-service-powerdown",
+        "title": "Hyundai IONIQ 5 2024 - Korean owner manual",
+        "url": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/id44e0749ede7.html",
+        "version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+        "section": "클러스터 경고등 및 표시등 > 주행 가능 표시등·서비스 경고등·파워다운 표시등 · 인쇄 0-48 / PDF 54",
+        "verification_status": "VERIFIED",
+        "retrieval_evidence": {
+          "kind": "LOCAL_FIRECRAWL_HTML",
+          "sha256": "c02dd951a578dab5bb2edb5693b47148138b8f7274845e278005e19bc4c527f9",
+          "retrieved_on": "2026-11-15"
+        }
+      }
+    ],
+    "reviewed_guides": [
+      {
+        "guide_id": "ioniq5-ac-charging-check",
+        "locale": "ja-JP",
+        "record_path": "content/guides/guide-0e2f39cefa5da97951333c78f929694ec2fc2b4e5f52e8841f7f45fe53238cdc.json",
+        "published_record_sha256": "28e284dcc781ccda4f1cefec8ca5212eef7eb2f54e8e8af293659005098bad44"
+      },
+      {
+        "guide_id": "ioniq5-ac-charging-check",
+        "locale": "ko-KR",
+        "record_path": "content/guides/guide-1833502accb09f7f9ff2e5c16ffd155f5c954b3e733f52b21a38fb4b7b170320.json",
+        "published_record_sha256": "a1fd344fcc82f381f9a91ca47b50bff68ba87d085386ba6e511bd307d0c1dc48"
+      },
+      {
+        "guide_id": "ioniq5-seat-mirror-before-driving",
+        "locale": "ko-KR",
+        "record_path": "content/guides/guide-384ef4bceadb0c5cf252dc4b549b262730da43d163f8628e0693b8662a03a370.json",
+        "published_record_sha256": "f2ff2bec2b88202177d87791b83717b1c804208f057808d3cd3b7fa5df3a87e6"
+      },
+      {
+        "guide_id": "ioniq5-seat-mirror-before-driving",
+        "locale": "ja-JP",
+        "record_path": "content/guides/guide-3e66eb24f512f3df06f7e4bc6e58132096b6ef478ebf17736e363492cb1c40b2.json",
+        "published_record_sha256": "8efc7b02edd0d0b686b2f9eb36b6fc3af2eea22d3570bbbc190ad7c3bcd1011b"
+      },
+      {
+        "guide_id": "ioniq5-cluster-display-check",
+        "locale": "ko-KR",
+        "record_path": "content/guides/guide-6acea0b6d1fafc32ffd9b4777fec9b28e2264f0fbdb30604f5c2f9295dc7c115.json",
+        "published_record_sha256": "37b92b1033efc743b15b1acd7157b2bbc725fdad2dc06b1a36f4931ba3997270"
+      },
+      {
+        "guide_id": "ioniq5-cluster-display-check",
+        "locale": "en",
+        "record_path": "content/guides/guide-6b891982d447e71265fcda6157e1fc38dfc0d84449d3f6dd5be835f643fc6642.json",
+        "published_record_sha256": "4f3259b04a299517a66b5374c4e0f2e236ab5c55aa35cc3c2712cd3956e3489c"
+      },
+      {
+        "guide_id": "ioniq5-seat-mirror-before-driving",
+        "locale": "en",
+        "record_path": "content/guides/guide-89366d0a0a2f03202f9b9bd74f97450a87bbf01571ca58ab585d7d20ed62df27.json",
+        "published_record_sha256": "65986588f06e807297ceded3cd4baa484f565d013e7f057adb553204c5f7b101"
+      },
+      {
+        "guide_id": "ioniq5-cluster-display-check",
+        "locale": "ja-JP",
+        "record_path": "content/guides/guide-b023fdd43211cfd27acc968f50ad70fc472dd9ae1a1896dcc459d9cb7dc145c4.json",
+        "published_record_sha256": "06f0e7bac7cd4d87cabfd44d8c3f588df1216f023015b7d7196221915ea06c3c"
+      },
+      {
+        "guide_id": "ioniq5-ac-charging-check",
+        "locale": "en",
+        "record_path": "content/guides/guide-be8ae554ba93835f50d7e4a14659bfe7036abba0df2446d1d4bca0f31b5618d4.json",
+        "published_record_sha256": "2bc96d560db66f9e31a46398de941a67d2ab3d3a730f849df59dc281ed164f27"
+      }
+    ],
+    "translation_scope": "CarCue summaries of 2024 Korean-market Korean manual; not US/Japan market procedures or certified native translations"
+  }
 }

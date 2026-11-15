@@ -2,6 +2,16 @@
 
 2026-11-15 (KST). 실차, 공식 전용 AVD의 실제 SDK, 일반 AVD의 Mock, 외부 AI 대역을 구분한다.
 
+## 최신: 공식 사용 안내 9개 확장 · 2026-11-15
+
+새 AC충전·좌석/일반미러·클러스터 가이드 각3언어의 공식 원문/PDF·독립 의미 대조와 게시 등록을 완료했다. 카탈로그는13개(기존문3+신규9+기존DRAFT1)이며 기존문3파일·closing 규칙/문자열은그대로다. 새topic/relatedProperties로 실제문 binding과수동안내를 나누고,4개전체답변정책/12핀·3000자/5출처·명시범위밖거절을검사한다.
+
+- 전체 backend **606 passed,1warning,27.11s**, 계약/UI194·카탈로그·4답변정책·기존SDK규칙1개 통과. 선택한 순수Kotlin/JVM28개도통과했다. provider/HTTP대역·합성정책은 실제모델/SDK시험과구분한다.
+- 실제 별도 FastAPI/SQLite/TCP에서 가이드9개·저장번역36건(ANSWER18/GUIDE18)·범위밖질문9개를 확인했다. 공급자DISABLED·STORED_GUIDE이며 실제모델0이다. 생성세션모두DELETE확인·DB0/0/0·자기서버shutdown로그확인을통과했다. 기존서버/DB는재시작/재사용하지않았다.
+- APK5ef560ba…·영상638c1f54…·PDF3a9aece0…·ZIP79a131c4… 네SHA가그대로다. 고정release와main은보존한다. 구APK는해당release서버/content와짝으로사용한다.
+
+원문·게시 파일·해시·실행 명령·로그·새 주제 센서 미연결과 남은 기기 시험은 `GUIDE_EXPANSION_VALIDATION.md`를 따른다. 새9개 실제 SDK 앱 화면·새3주제 실제 무료 모델 선택, 기존 in-flight3경계와429기기 화면은 미실시다. 원격 Android는 Demo JVM/Mock APK 빌드이며 실제 SDK/모델 수신 검증으로 계산하지 않는다.
+
 ## 1차 제출 준비와 원격 Android 검증 · 2026-11-15
 
 사용자 요청으로 AVD 재시험과 유료 AI는 보류했다. 기존 검증 APK `5ef560ba…`와 소개 영상 `638c1f54…`는 변경하지 않았다. HTTP429 대기는 새 개발 기능이며 이 시연 APK에 포함되지 않는다.

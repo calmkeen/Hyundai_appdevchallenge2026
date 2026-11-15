@@ -8,6 +8,7 @@ CarCue는 낯선 차량의 상태와 사용법을 자신의 언어로 확인하�
 
 ## 실행과 현황
 
+- [공식 사용 안내 9개 확장·검증](Docs/GUIDE_EXPANSION_VALIDATION.md) · 충전/좌석·거울/화면·표시등 각3언어, 기존 문 안내 포함12개 게시
 - [1차 제출 검토용 기획서](Docs/FIRST_SUBMISSION_PLAN.md) · [제출 묶음·실행 조건·남은 범위](Docs/FIRST_SUBMISSION_PACKAGE.md)
 - [실행 방법](Docs/RUNBOOK.md)
 - [구현 상태 및 Mock 구분](Docs/IMPLEMENTATION_STATUS.md)
@@ -25,7 +26,9 @@ CarCue는 낯선 차량의 상태와 사용법을 자신의 언어로 확인하�
 - [무료 로컬 AI 구성·실제 호출](Docs/LOCAL_AI_INTEGRATION.md) · [Pleos 앱 AI 연결 검증](Docs/LOCAL_AI_APP_VALIDATION.md)
 - [화면 명세](Docs/SCREEN_SPEC.md) · [API 계약](Docs/DATA_API_SPEC.md) · [완료 기준](Docs/ACCEPTANCE.md)
 
-`android/`는 네이티브 Compose 앱, `backend/`는 서버, `content/`는 프로필·언어·가이드 데이터입니다. 공식 2024 한국시장 아이오닉 5 매뉴얼을 대조한 문 안내 1개를 한국어·영어·일본어로 등록했습니다. 기존 개발 프로필과 `contracts/guide.template.json`은 미검수/비게시로 보존합니다. 유료 AI 연결은 보류하고 Mac의 Ollama/Qwen3 로컬 모델을 사용합니다. 질문 답변은 공식 검수 단위 선택, 안내 번역은 저장된 검수 번역, 자유 질문 번역은 품질 미완료로 기본 보류합니다.
+`android/`는 네이티브 Compose 앱, `backend/`는 서버, `content/`는 프로필·언어·가이드 데이터입니다. 공식 2024 한국시장 아이오닉5 문·AC 완속 충전·좌석/일반미러·클러스터 안내를 각3언어로 게시했습니다. 문 상태만 실제 Pleos AVD SDK와 연결했으며 새 세 주제는 수동 공식 안내입니다. 유료 AI와 생성 질문 번역은 보류하고, 답변은 완전한 검토 단위 선택·번역은 저장된 검토 문자열을 사용합니다. 새9개의 실제 모델 선택과 기기 화면 시험은 미실시입니다. 기존 미검수 프로필/템플릿은 비게시로 보존합니다.
+
+기존 제출 APK·영상·기획서·ZIP은 고정 release의 스냅샷으로 보존합니다. 구 APK는 해당 release의 backend/content와 짝으로 사용하며 최신 개발 서버와 혼용하지 않습니다. 새 가이드의 실제 HTTP 검증은 별도 서버/DB에서 수행합니다.
 
 ## 문서
 
