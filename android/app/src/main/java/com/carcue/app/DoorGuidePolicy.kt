@@ -21,6 +21,18 @@ internal class DoorGuidePolicy(
     private val rules: List<StateGuideRule>,
     private val ttlMs: Long,
 ) {
+    fun hasDoorBinding(profile: Profile?, guide: Guide): Boolean {
+        if (profile == null || profiles.singleOrNull { it.id == profile.id } != profile || !profile.verified ||
+            !guide.publicationVerified || guide.topic != "door" || "door.position" !in guide.relatedProperties ||
+            guide.locale.isBlank() || profile.id !in guide.profileIds || guide.manualSetId != profile.manualSetId ||
+            guide.sourceVersion != profile.manualVersion) return false
+        val rule = rules.filter { it.verificationStatus == "VERIFIED" && it.id.isNotBlank() &&
+            it.profileId == profile.id && it.manualSetId == guide.manualSetId && it.sourceVersion == guide.sourceVersion &&
+            it.guideId == guide.id && it.propertyId == "door.position" && it.areaId == "ROW_1_LEFT" && it.value == "OPEN" }
+            .singleOrNull() ?: return false
+        return rules.count { it.id == rule.id && it.verificationStatus == "VERIFIED" } == 1
+    }
+
     fun relatedGuide(profile: Profile?, locale: String, reading: Reading, ux: UxState,
                      guides: List<Guide>, now: Instant): Guide? {
         if (profile == null || profiles.singleOrNull { it.id == profile.id } != profile || !profile.verified ||
@@ -38,7 +50,8 @@ internal class DoorGuidePolicy(
         val rule = matching.singleOrNull() ?: return null
         // Ambiguous registered IDs and multiple candidates fail closed instead of picking the first one.
         if (rules.count { it.id == rule.id && it.verificationStatus == "VERIFIED" } != 1) return null
-        return guides.filter { it.id == rule.guideId && it.publicationVerified && it.sources.isNotEmpty() &&
+        return guides.filter { it.id == rule.guideId && it.publicationVerified && it.topic == "door" &&
+            "door.position" in it.relatedProperties && it.sources.isNotEmpty() &&
             it.locale == locale && profile.id in it.profileIds && it.manualSetId == rule.manualSetId &&
             it.sourceVersion == rule.sourceVersion }.singleOrNull()
     }

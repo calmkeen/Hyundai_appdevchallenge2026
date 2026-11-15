@@ -17,6 +17,12 @@ PROFILE = "ioniq5-ne1-2024-kr"
 GUIDE = "ioniq5-door-open-check"
 
 
+def door_guides(catalog, locale):
+    """Select the deployed door record explicitly as other reviewed topics grow."""
+    guide, = [guide for guide in catalog.published(PROFILE, locale) if guide["guide_id"] == GUIDE]
+    return [guide]
+
+
 def test_factory_defaults_to_no_generated_question_translation(monkeypatch):
     monkeypatch.setenv("CARCUE_AI_PROVIDER", "OLLAMA_LOCAL")
     monkeypatch.setenv("CARCUE_LOCAL_MODEL", "qwen3:4b")
@@ -61,8 +67,8 @@ def test_default_still_calls_local_ask_and_reuses_reviewed_answer_and_guide(sour
         answer = client.post("/v1/ask", headers=headers, json={**base, "request_id": "default-ask",
             "locale": source, "question": question}).json()
         assert answer["status"] == "ANSWERED" and answer["ai_provider"] == "OLLAMA_LOCAL"
-        source_guide, = Catalog().published(PROFILE, source)
-        target_guide, = Catalog().published(PROFILE, target)
+        source_guide, = door_guides(Catalog(), source)
+        target_guide, = door_guides(Catalog(), target)
         for kind in ("ANSWER", "GUIDE"):
             result = client.post("/v1/translate", headers=headers, json={**base, "request_id": "stored-" + kind,
                 "source_locale": source, "target_locale": target,

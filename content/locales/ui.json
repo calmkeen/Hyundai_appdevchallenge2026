@@ -963,5 +963,10 @@
     "ko-KR": "요청 한도에 도달했어요. 대기 시간이 끝나면 다시 보내 주세요.",
     "en": "Request limit reached. Please send again after the wait.",
     "ja-JP": "リクエストの上限に達しました。待機時間が過ぎてから再送信してください。"
+  },
+  "ui_guide_manual_only": {
+    "ko-KR": "공식 자료를 참고한 안내예요. 이 주제의 차량 상태 센서는 아직 연결하지 않았어요.",
+    "en": "This guidance is based on the official manual. Vehicle sensors for this topic are not connected.",
+    "ja-JP": "公式資料に基づくガイドです。この項目の車両状態センサーはまだ接続されていません。"
   }
 }

@@ -1,0 +1,125 @@
+{
+  "guide_id": "ioniq5-ac-charging-check",
+  "profile_ids": [
+    "ioniq5-ne1-2024-kr"
+  ],
+  "manual_set_id": "hyundai-ioniq5-ne1-2024-kr",
+  "source_version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+  "topic": "charging",
+  "source_locale": "ko-KR",
+  "lifecycle": "PUBLISHED",
+  "title": "AC普通充電の事前・開始確認",
+  "body": "安全な場所に駐車してから確認してください。対象は韓国市場向け2024年型IONIQ 5のAC普通充電の事前・開始確認のみです。DC急速充電・携帯型ICCB・V2L・緊急解除は対象外です。充電状態は車両と充電器で直接確認し、接続・取り外しの順序は充電器の説明書に従ってください。",
+  "locale": "ja-JP",
+  "glossary_version": "carcue-ioniq5-ac-charging-v1",
+  "translation_review_status": "REVIEWED",
+  "sources": [
+    {
+      "source_id": "hyundai-ne1-2024-kr-charge-precautions",
+      "title": "Hyundai IONIQ 5 2024 - Korean owner manual",
+      "url": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/id8c4c9da6f01.html",
+      "version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+      "section": "충전 시 주의사항 · 인쇄 0-23 / PDF 29",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "source_id": "hyundai-ne1-2024-kr-charge-general",
+      "title": "Hyundai IONIQ 5 2024 - Korean owner manual",
+      "url": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/id9c9b83617dd.html",
+      "version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+      "section": "전기 자동차 충전 · 인쇄 0-25 / PDF 31",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "source_id": "hyundai-ne1-2024-kr-ac-charge-start",
+      "title": "Hyundai IONIQ 5 2024 - Korean owner manual",
+      "url": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/iddf8ac57572b.html",
+      "version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+      "section": "완속 충전 방법 > 연결·시작 확인 · 인쇄 0-25~27 / PDF 31~33",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "source_id": "hyundai-ne1-2024-kr-charge-label-stop",
+      "title": "Hyundai IONIQ 5 2024 - Korean owner manual",
+      "url": "https://ownersmanual.hyundai.com/full_pdf/NE1/2024/ko_KR#page=30",
+      "version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+      "section": "충전 정보 라벨·비상시 충전 커넥터 분리의 경고 · 인쇄 0-24 / PDF 30; 비상 분리 절차는 이 안내 범위 밖",
+      "verification_status": "VERIFIED"
+    }
+  ],
+  "steps": [
+    {
+      "step_id": "check-charge-site",
+      "order": 1,
+      "title": "人・場所・充電設備を確認する",
+      "body": "車両の充電ラベルの定格電圧・最大電流に合う指定EV充電器と、その車両用の純正ケーブル（装備車）を確認します。",
+      "image_asset_id": null,
+      "official_cautions": [
+        "充電器の電磁波が医療用電気機器の動作に致命的な影響を与えるおそれがあります。ペースメーカーなどを使用している場合は、充電作業の前に医療従事者と機器メーカーに影響を確認してください。",
+        "防水機能のある充電器を使用してください。ぬれた手で接続・取り外しをせず、水や雪の上に立ってケーブルを接続しないでください。",
+        "落雷のおそれがあるとき、または雨水がコネクターやプラグの接合部にかかる場所では充電しないでください。",
+        "損傷・腐食・さび・緩みのあるケーブルやコネクター、プラグは使用せず、点検を受けてください。被覆が損傷したケーブルは新品に交換してください。延長コードは使用しないでください。",
+        "ケーブルは清潔で乾燥した状態を保ち、改造・分解しないでください。"
+      ],
+      "source_ids": [
+        "hyundai-ne1-2024-kr-charge-precautions",
+        "hyundai-ne1-2024-kr-charge-label-stop",
+        "hyundai-ne1-2024-kr-ac-charge-start",
+        "hyundai-ne1-2024-kr-charge-general"
+      ],
+      "related_properties": [],
+      "actions": [
+        {
+          "kind": "OPEN_MANUAL",
+          "target_id": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/id8c4c9da6f01.html"
+        }
+      ]
+    },
+    {
+      "step_id": "park-and-check-connection",
+      "order": 2,
+      "title": "駐車状態と接続部を確認する",
+      "body": "ブレーキを踏んでパーキングブレーキをかけ、電装スイッチを切り、Pにして車両の電源を切ります。コネクター・プラグ・インレットに水やほこりなどがないことを確認します。充電器の説明書に従い、車両側のACコネクターは持ち手をつかんでインレットにカチッと音がするまで確実に差し込みます。",
+      "image_asset_id": null,
+      "official_cautions": [
+        "接合部に手や体を触れさせず、ケーブルを引っ張らないでください。接続不良は火災や感電の原因になります。",
+        "凍った充電ドアを無理に開けたり、コネクターを地面に落としたりしないでください。",
+        "充電はPでのみ行ってください。電源が切れていても冷却ファンが動くことがあるため、手を近づけないでください。"
+      ],
+      "source_ids": [
+        "hyundai-ne1-2024-kr-charge-precautions",
+        "hyundai-ne1-2024-kr-charge-general",
+        "hyundai-ne1-2024-kr-ac-charge-start"
+      ],
+      "related_properties": [],
+      "actions": [
+        {
+          "kind": "OPEN_MANUAL",
+          "target_id": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/iddf8ac57572b.html"
+        }
+      ]
+    },
+    {
+      "step_id": "check-charge-start",
+      "order": 3,
+      "title": "車両で充電開始を確認する",
+      "body": "接続直後にメーターの充電コネクター表示が点灯するか直接確認します（約1分間表示）。充電が始まると予想時間も約1分間表示されます。予約充電・空調設定時は予想時間が--になることがあります。",
+      "image_asset_id": null,
+      "official_cautions": [
+        "異臭・煙など普段と違う異常があれば、直ちに充電を中止してください。",
+        "予想時間はバッテリーの状態・寿命、充電器の仕様、温度で変わります。開始しない場合は公式マニュアルと充電器の説明書を確認してください。"
+      ],
+      "source_ids": [
+        "hyundai-ne1-2024-kr-ac-charge-start",
+        "hyundai-ne1-2024-kr-charge-label-stop"
+      ],
+      "related_properties": [],
+      "actions": [
+        {
+          "kind": "OPEN_MANUAL",
+          "target_id": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/iddf8ac57572b.html"
+        }
+      ]
+    }
+  ]
+}

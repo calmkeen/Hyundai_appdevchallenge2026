@@ -311,14 +311,14 @@ private fun Reading.description(ko: UiCopy): String = when {
     Heading(guide.title, guide.body)
     GuideOriginLabel(guide, ko)
     GuideConnectionNotice(s, ko)
-    if (guide.publicationVerified) {
+    if (vm.content.showsDoorStatus(guide, s.profile)) {
         Text(ko.get("ui_guide_live_status").replace("{status}", s.reading.description(ko)), fontWeight = FontWeight.SemiBold,
             modifier = Modifier.testTag("guide_live_door_status"))
         Text("${s.reading.source} · ${s.reading.capability} · ${s.reading.status}", color = Muted, fontSize = 14.sp)
         s.reading.receivedAt?.let { Text(ko.get("ui_cc088cb58015") + DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss XXX").withZone(ZoneId.systemDefault()).format(it), color = Muted, fontSize = 14.sp) }
         Notice(ko.get("ui_door_reading_limit"))
         Action(ko.get("ui_3b6510d9d5ee"), s.reading.status != ReadStatus.LOADING, Modifier.testTag("refresh_door_status")) { vm.refresh() }
-    }
+    } else if (guide.publicationVerified) Notice(ko.get("ui_guide_manual_only"))
     if (guide.id == "__layout_preview__") Notice(ko.get("ui_a94f7c5cbf98"))
     Text("${s.guideStep+1} / ${guide.steps.size.coerceAtLeast(1)}", color = Blue, fontWeight = FontWeight.Bold, fontSize = 22.sp,
         style = LocalTextStyle.current.copy(textDirection = TextDirection.Ltr))
