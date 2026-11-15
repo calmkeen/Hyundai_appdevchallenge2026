@@ -39,7 +39,12 @@ def request(topic, locale, question=None, context=None):
 def expanded(monkeypatch):
     catalog = Catalog()
     originals = {locale: next(g for g in catalog.published(PROFILE, locale) if g["topic"] == "door") for locale in LOCALES}
+    # Keep these synthetic records independent from the shipped content. A
+    # duplicate immutable identity correctly blocks publication, so replace the
+    # three real topic records rather than appending a second copy of each.
+    catalog.guides = [g for g in catalog.guides if g.get("guide_id") not in TOPICS.values()]
     registry = copy.deepcopy(answer_policy._REGISTRY)
+    registry["bundles"] = [rule for rule in registry["bundles"] if rule["guide_id"] not in TOPICS.values()]
     for topic, identifier in TOPICS.items():
         records = []
         for locale in LOCALES:
