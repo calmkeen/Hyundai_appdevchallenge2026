@@ -129,3 +129,14 @@ OF-001 구현 `e816d61`, 철회 navigation 보완 `684556c`/`e7c58ad`, SE-001 �
 검증 도구 `37b26c7`과 no-ff develop 통합 `71cd181`의 실제 원격 SHA·CI success를 확인했다(backend475/UI191, 기기 시험은 CI 미포함). 검증 도구 통합과 실제 SDK 경계 미완료를 구분한다. 남은 SystemUI/CarService 부팅 진단·실행 증거는 새 `feature/pleos-runtime-diagnostics`에서 계속한다. main·앱 기능 코드·기존 AVD 데이터와 실패 원본을 보존한다.
 
 후속 진단은 같은 공식 이미지의 독립 factory 데이터·host GPU/원해상도·기준선 CPU/태그·kernel 로그까지 분리했으나 준비 gate를 통과하지 못했다. 에뮬레이터 종료 뒤에도 별도 host CPU 표본 idle0%와 약25GB swap을 확인했다. 다른 앱을 임의 종료하거나 OS 보안을 바꾸지 않고, 여유 있는 호스트 상태를 확보한 뒤 실제 세 경계 재시험을 이어가는 조건을 기록한다. 처리 중 End 미실행과 과거 부분 증명의 한계를 그대로 유지한다.
+
+## 공식 접수양식과 release 제출 후보 · 2026-11-15
+
+| 작업 | 브랜치 | 검증·기록 |
+| --- | --- | --- |
+| 공식 양식 기획서 | `feature/official-submission-form` | `7f0b946`. 원본 양식 보존,6쪽 전체 렌더/독립 검토, 동의/서명 공란. 참가정보 후속본은 Git 제외 로컬에만 보관 |
+| 제출용 README | `feature/submission-readme` | `7949339`. 실행·설정·Pleos 버전/화면규격·실제/Mock/남은시험. 독립 LIVE/DISABLED health와 링크/셸구문 확인 |
+| 실제 signed release APK | `feature/submission-release-apk` | `4c954e8`, clean빌드소스 `7d492c1`. release JVM148·lint0errors/16warnings·4설정거절/허용검사·실제APK서명/SDK/12안내바이트 검사 |
+| 제출 후보 통합 | `feature/submission-candidate-integration` | 팀명 calmkeen의 공식APK명, 개인정보 비공개, README/양식/manifest 일치, APK 정적검사 CI 추가, 제품입력 diff·원본4파일SHA 보존 검증 |
+
+기존 main과 `release/0.1-first-draft`를 보존하고 새 `release/0.1.1-first-submission`을 분리한다. 서명키·개인정보는 Git/APK에 넣지 않는다. 새로운 release의 설치/AVD/모델 시험과 유료 AI는 실행하지 않았다. 과거34초 실제 SDK 영상과 새release를 동일 바이너리로 표시하지 않는다. 완료 작업은 no-ff develop 통합 후 feature/develop/새release를 push하고 실제 remote SHA와 CI를 따로 확인한다.

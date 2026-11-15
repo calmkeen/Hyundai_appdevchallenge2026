@@ -117,7 +117,7 @@ def inspect(apk, build_tools, environment):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--apk", type=Path, default=ROOT / "apk/CarCue_release.apk")
+    parser.add_argument("--apk", type=Path, default=ROOT / "apk/calmkeen_CarCue_release.apk")
     parser.add_argument("--build-tools", type=Path,
                         default=Path(os.environ.get("ANDROID_HOME", ROOT / ".tooling/android-sdk")) / "build-tools/35.0.0")
     parser.add_argument("--java-home", type=Path)

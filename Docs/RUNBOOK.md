@@ -71,7 +71,7 @@ adb -s <일반-테스트-AVD> install -r app/build/outputs/apk/demo/debug/app-de
 adb -s <일반-테스트-AVD> shell am start -n com.carcue.app.demo/com.carcue.app.MainActivity
 ```
 
-로컬 HTTP는 debug에서만 허용한다. release는 HTTPS 서버가 필요하다. OpenAI 키를 Gradle property나 APK에 넣지 않는다.
+일반 release는 HTTPS 서버가 필요하다. 제출용 release는 명시적 AVD 프로필에서만 에뮬레이터 호스트 `10.0.2.2`의 HTTP를 허용한다. 실제 서명·빌드·호스트 제한·미실시 기기 시험은 [SUBMISSION_RELEASE_APK.md](SUBMISSION_RELEASE_APK.md)를 따른다. OpenAI 키를 Gradle property나 APK에 넣지 않는다.
 
 실제 Pleos 빌드는 별도다. 기본 버전은 실제 빌드·수신한 Vehicle SDK 2.3.2다.
 

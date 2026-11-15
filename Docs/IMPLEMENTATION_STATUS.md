@@ -2,6 +2,12 @@
 
 2026-11-15 (KST). 최종 검증 명령과 결과는 `VALIDATION_REPORT.md`를 따른다. 코드 작성과 실제 외부 연동 완료를 구분한다. 현재 확정된 SDK 시연은 `SDK_SESSION_VALIDATION.md`, 후속 in-flight 시험 복구와 호스트 부하로 남은 기기 검증은 `SDK_INFLIGHT_RECOVERY.md`, 새 소개 영상은 `SDK_LIVE_INTRO.md`에 기록한다.
 
+## 공식 제출 준비 · 2026-11-15
+
+앱명은 **CarCue(카큐)**로 확정했다. 공식 Word 양식의 기획 내용과 앱명3곳을 작성해6쪽 전체 렌더·독립 검토를 통과했다. 참가정보·동의·서명·날짜는 미작성이다. `OFFICIAL_SUBMISSION_PROPOSAL.md`, `OFFICIAL_SUBMISSION_VALIDATION.md`를 따른다.
+
+신규 `apk/calmkeen_CarCue_release.apk`는 clean 소스 `7d492c1`의 실제 Pleos release 빌드다. 별도 인증서, `DEBUG=false`/`IS_MOCK=false`, Vehicle SDK2.3.2, 게시 안내12개를 확인했다. release JVM148·lint오류0/경고16·서명/내부 바이트 검사·설정거절4개가 통과했다. 새 release의 설치·AVD·모델 시험은 수행하지 않았으며 기존34초 영상은 과거 debug 검증본이다. 제출 실행 설정과 남은 조건은 `SUBMISSION_RELEASE_APK.md`, `SUBMISSION_READINESS.md`를 따른다. 기존APK·영상·PDF·ZIP은 변경하지 않는다.
+
 ## 공식 사용 안내 확장 · 2026-11-15
 
 충전·좌석/거울·화면/표시등을 각3언어로 추가해 **4주제·3언어=12개 게시 안내**가 됐다. 신규9개는 공식 한국시장2024 원문/PDF와 독립 의미 대조를 거친 자체 요약이다. 단계·부정·주의·출처를 검토했으며 OEM/인간 전문가 인증은 아니다. 상세는 `GUIDE_EXPANSION_VALIDATION.md`와 주제별 `REVIEW_*_2024_KR.md`를 따른다.

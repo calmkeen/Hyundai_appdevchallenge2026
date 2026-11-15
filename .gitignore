@@ -10,7 +10,7 @@ local.properties
 .env.*
 *.aar
 *.apk
-!/apk/CarCue_release.apk
+!/apk/calmkeen_CarCue_release.apk
 *.aab
 *keystore.properties
 *signing.properties
