@@ -37,19 +37,24 @@ def inspect(apk, build_tools, environment):
     require("application-debuggable" not in badging, "APK is debuggable")
     require("package: name='com.carcue.app' versionCode='2' versionName='0.1.1-rc1'" in badging,
             "Unexpected package/version")
-    require("sdkVersion:'28'" in badging and "targetSdkVersion:'35'" in badging, "Unexpected SDK levels")
+    require(re.search(r"(?:minSdkVersion|sdkVersion):'28'", badging) and "targetSdkVersion:'35'" in badging,
+            "Unexpected SDK levels")
     require("android.hardware.type.automotive" in badging and "pleos.car.permission.CAR_DOORS" in badging,
             "Pleos automotive declarations are required")
     require("CONTROL_" not in badging, "Vehicle control permissions are forbidden")
     manifest = tool("aapt2", "dump", "xmltree", "--file", "AndroidManifest.xml", apk)
-    require(re.search(r"android:debuggable[^\n]*=false", manifest), "Explicit debuggable=false required")
+    debuggable = re.search(r"android:debuggable[^\n]*=(\w+)", manifest)
+    require(not debuggable or debuggable[1] == "false", "Manifest must be non-debuggable")
+    require(not re.search(r"android:testOnly[^\n]*=true", manifest), "Test-only APK is forbidden")
     require(re.search(r"android:usesCleartextTraffic[^\n]*=false", manifest), "Global cleartext must remain disabled")
     network_reference = re.search(r"android:networkSecurityConfig[^\n]*=@(0x[0-9a-f]+)", manifest)
     resources = tool("aapt2", "dump", "resources", apk)
-    require(network_reference and re.search(re.escape(network_reference[1]) + r" xml/submission_network_security_config", resources),
-            "Submission profile network config must be selected")
-    network = tool("aapt2", "dump", "xmltree", "--file", "res/xml/submission_network_security_config.xml", apk)
-    require(network.count("E: domain ") == 1 and '"10.0.2.2"' in network, "Only emulator-host domain may be excepted")
+    selected_network = re.search(re.escape(network_reference[1]) +
+        r" xml/submission_network_security_config\s+\(\) \(file\) (\S+) type=XML", resources) if network_reference else None
+    require(selected_network, "Submission profile network config must be selected")
+    network = tool("aapt2", "dump", "xmltree", "--file", selected_network[1], apk)
+    require(network.count("E: domain ") == 1 and re.findall(r"T: '([^']+)'", network) == ["10.0.2.2"],
+            "Only emulator-host domain may be excepted")
     require(re.search(r"E: base-config[^\n]*\n\s+A: cleartextTrafficPermitted=false", network), "Default cleartext denied")
     require(re.search(r"E: domain-config[^\n]*\n\s+A: cleartextTrafficPermitted=true", network), "Explicit host exception required")
     require("includeSubdomains=false" in network, "Subdomains must not be included")
@@ -57,8 +62,11 @@ def inspect(apk, build_tools, environment):
     sdk_defined = False
     with zipfile.ZipFile(apk) as archive, tempfile.TemporaryDirectory(prefix="carcue-apk-inspect-") as raw:
         names = archive.namelist()
-        require(not any(name.endswith((".jks", ".keystore", ".sqlite", ".sqlite3", ".db", ".properties"))
-                        or any(part.startswith(".env") for part in name.split("/")) for name in names),
+        public_metadata = {"META-INF/com/android/build/gradle/app-metadata.properties"}
+        require(not any(name not in public_metadata and (
+                        name.endswith((".jks", ".keystore", ".p12", ".pfx", ".sqlite", ".sqlite3", ".db",
+                                       ".sqlite3-wal", ".sqlite3-shm", ".properties"))
+                        or any(part.startswith(".env") or part == ".secrets" for part in name.split("/"))) for name in names),
                 "Private key/database/config file found in APK")
         published = 0
         guide_files = sorted((ROOT / "content/guides").glob("*.json"))
