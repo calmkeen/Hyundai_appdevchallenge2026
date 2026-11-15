@@ -27,7 +27,8 @@ import org.junit.runner.RunWith
 class PleosSessionBoundariesTest {
     @get:Rule val rule = createAndroidComposeRule<MainActivity>()
     private val args get() = InstrumentationRegistry.getArguments()
-    private val vm get() = ViewModelProvider(rule.activity)[CarCueViewModel::class.java]
+    private lateinit var activity: MainActivity
+    private lateinit var vm: CarCueViewModel
     private lateinit var directory: File
     private val gets = mutableSetOf<String>()
     private val profileId = "ioniq5-ne1-2024-kr"
@@ -69,7 +70,7 @@ class PleosSessionBoundariesTest {
         } }
     }
     private fun refresh() {
-        reading(); val before = getCount(); val received = vm.state.value.reading.receivedAt
+        val before = getCount(); val received = vm.state.value.reading.receivedAt
         rule.runOnIdle { vm.refresh() }
         rule.waitUntil(60000) { getCount() > before && vm.state.value.reading.receivedAt != received }
         reading(); ux()
@@ -125,18 +126,39 @@ class PleosSessionBoundariesTest {
         val root = rule.onRoot().getUnclippedBoundsInRoot()
         assertTrue("Full caution bundle must fit the recorded viewport", bounds.top >= root.top && bounds.bottom <= root.bottom)
     }
-    private fun image(name: String) {
-        rule.waitUntil(15000) { rule.activity.hasWindowFocus() }
+    private fun image(name: String, requirePhysical: Boolean = true) {
+        check(requirePhysical || name == "late-drive" && vm.state.value.ux.let { it.known && it.restricted })
+        rule.waitUntil(15000) { activity.hasWindowFocus() }
         rule.waitForIdle()
         file("$name.png").outputStream().use { rule.onRoot().captureToImage().asAndroidBitmap().compress(Bitmap.CompressFormat.PNG, 100, it) }
-        val physical = requireNotNull(InstrumentationRegistry.getInstrumentation().uiAutomation.takeScreenshot())
-        file("$name-physical.png").outputStream().use { physical.compress(Bitmap.CompressFormat.PNG, 100, it) }
+        var physical: Bitmap? = null
+        var attempts = 0
+        var nullBufferErrors = 0
+        val captureBy = SystemClock.elapsedRealtime() + 5000
+        while (physical == null && SystemClock.elapsedRealtime() < captureBy) {
+            check(activity.hasWindowFocus()) { "Original app window lost focus during physical capture" }
+            attempts++
+            // API34 may throw inside UiAutomation when ScreenCapture returns a transient null hardware buffer.
+            // Retry the real display capture; never substitute the Compose bitmap or an older image.
+            physical = try { InstrumentationRegistry.getInstrumentation().uiAutomation.takeScreenshot() }
+                catch (_: NullPointerException) { nullBufferErrors++; null }
+            if (physical == null) { Thread.sleep(200); rule.mainClock.advanceTimeByFrame(); rule.waitForIdle() }
+        }
+        file("$name-capture.json").writeText(JSONObject().put("method", "UIAUTOMATION_REAL_DISPLAY")
+            .put("attempts", attempts).put("null_hardware_buffer_errors", nullBufferErrors)
+            .put("passed", physical != null).put("physical_required", requirePhysical)
+            .put("physical_unavailable", physical == null).put("compose_capture", "ACTUAL_CURRENT_APP_ROOT")
+            .put("ux_known", vm.state.value.ux.known).put("ux_restricted", vm.state.value.ux.restricted)
+            .put("recorded_at", Instant.now().toString()).put("app_pid", Process.myPid()).toString())
+        if (physical == null && !requirePhysical) return
+        val display = requireNotNull(physical) { "Real display capture remained unavailable" }
+        file("$name-physical.png").outputStream().use { display.compress(Bitmap.CompressFormat.PNG, 100, it) }
     }
     private fun state(): JSONObject {
         val s = vm.state.value
         val translated = s.page == Page.TRANSLATE
         return JSONObject().put("device_ms", SystemClock.elapsedRealtime()).put("recorded_at", Instant.now().toString())
-            .put("app_pid", Process.myPid()).put("locale", s.locale).put("page", s.page.name)
+            .put("app_pid", Process.myPid()).put("session_epoch", s.sessionEpoch).put("locale", s.locale).put("page", s.page.name)
             .put("profile_id", s.profile?.id ?: JSONObject.NULL).put("profile_name", s.profile?.name ?: JSONObject.NULL)
             .put("guide_id", s.selectedGuide?.id ?: JSONObject.NULL).put("guide_step", s.guideStep)
             .put("market", s.profile?.market ?: JSONObject.NULL).put("source", s.reading.source.name)
@@ -203,6 +225,12 @@ class PleosSessionBoundariesTest {
             clickTag("ai_consent")
             event("EDITED_INPUT_RESET_CONSENT")
         }
+        if (args.getString("sessionFlowMode") == "late") {
+            // Long preparation may expire an earlier value. Obtain a real SDK GET before freezing the request context.
+            refresh()
+            rule.onNodeWithTag("ai_consent").assertIsOn()
+            event("LATE_PRE_SEND_FRESH_SDK_CONTEXT")
+        }
         val previous = vm.state.value.lastAiRequestId
         clickTag("ai_send")
         rule.waitUntil(15000) { vm.state.value.lastAiRequestId != previous && vm.state.value.lastAiRequestId.isNotEmpty() }
@@ -210,7 +238,7 @@ class PleosSessionBoundariesTest {
     }
     private fun awaitAnswer(locale: String, raw: JSONObject) {
         rule.waitUntil(150000) { vm.state.value.let { !it.busy && (it.answerStatus.isNotEmpty() || it.error != null) } }
-        ux(); reading()
+        refresh()
         rule.runOnIdle {
             val s = vm.state.value
             assertNull(s.error); assertEquals("ANSWERED", s.answerStatus); assertEquals("LIVE", s.answerMode)
@@ -228,7 +256,6 @@ class PleosSessionBoundariesTest {
         }
         rule.onNodeWithTag("ask_source_locale").performScrollTo()
             .assertTextContains(vm.content.languages.single { it.tag == locale }.native, substring = true)
-        refresh()
         visibleComplete(vm.state.value.answer, raw)
     }
     private fun response(phase: String, originalLocale: String, raw: JSONObject, translation: Boolean) {
@@ -295,15 +322,19 @@ class PleosSessionBoundariesTest {
         assertEquals("http://10.0.2.2:8001", BuildConfig.SERVER_URL.trimEnd('/'))
         val runId = requireNotNull(args.getString("runId"))
         require(runId.matches(Regex("[A-Za-z0-9][A-Za-z0-9_-]{0,63}")))
-        directory = File(rule.activity.filesDir, "qa/$runId/sdk-session")
+        // AndroidComposeTestRule.activity uses ActivityScenario.onActivity(), which waits for idle.
+        // Resolve the original Activity/VM once before any request; in-flight observations must not re-enter that barrier.
+        activity = rule.activity
+        vm = ViewModelProvider(activity)[CarCueViewModel::class.java]
+        directory = File(activity.filesDir, "qa/$runId/sdk-session")
         check(!directory.exists() && directory.mkdirs())
-        originallyKeptAwake = rule.activity.window.attributes.flags and WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON != 0
-        rule.runOnIdle { rule.activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) }
+        originallyKeptAwake = activity.window.attributes.flags and WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON != 0
+        rule.runOnIdle { activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) }
         if (mode == "late") {
             // Let the host select this already-created instrumentation task before starting SDK/UX assertions.
-            signal("activity-ready", state().put("window_focused", rule.activity.hasWindowFocus()))
+            signal("activity-ready", state().put("window_focused", activity.hasWindowFocus()))
             waitSignal("activity-go")
-            rule.waitUntil(30000) { rule.activity.hasWindowFocus() }
+            rule.waitUntil(30000) { activity.hasWindowFocus() }
             signal("activity-focus.json", state().put("window_focused", true))
         }
         ux(); event("PREPARED_$mode")
@@ -322,7 +353,7 @@ class PleosSessionBoundariesTest {
                 waitSignal("stop")
             }
         } finally {
-            if (!originallyKeptAwake) rule.runOnIdle { rule.activity.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) }
+            if (!originallyKeptAwake) rule.runOnIdle { activity.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) }
         }
     }
     private fun failure(error: Throwable) {
@@ -442,6 +473,11 @@ class PleosSessionBoundariesTest {
             prepare("late")
             clickTag("profile_$profileId"); clickText("한국어"); reading(); refresh()
             signal("ready"); waitSignal("go")
+            // Confirm both real platform UX directions before measuring in-flight cancellation.
+            // This is an external Console/CarService round trip, with no AI request or synthetic UX state.
+            signal("request-warm-drive"); ux(false)
+            signal("request-warm-park"); ux(); refresh()
+            event("ACTUAL_UX_WARMUP_DRIVE_AND_PARK")
             for ((name, locale) in listOf("locale" to "ko-KR", "drive" to "en", "end" to "ja-JP")) {
                 selectLanguage(locale); refresh(); enterAsk(0)
                 val request = startAsk(locale)
@@ -451,31 +487,48 @@ class PleosSessionBoundariesTest {
                 assertTrue("The boundary must precede the actual response", vm.state.value.busy)
                 when (name) {
                     "locale" -> {
-                        InstrumentationRegistry.getInstrumentation().runOnMainSync { vm.language() }
-                        clickText(vm.content.languages.single { it.tag == "en" }.native)
-                        // Record the actual UI boundary before unrelated asynchronous guide loading or semantic-idle checks.
+                        // Execute the real handlers with the real current scope; normal UI gestures are a separate showcase.
+                        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+                            vm.language()
+                            vm.chooseLanguage("en", vm.assistantActionScope(vm.state.value))
+                        }
                         val changed = vm.state.value
                         assertEquals("en", changed.locale); assertEquals(Page.ASK, changed.page); assertFalse(changed.busy)
                         signal("boundary-locale", state().put("cancelled_request_id", request)
-                            .put("route", "PRODUCTION_NAVIGATION_HANDLER_ON_MAIN_THREAD_WHILE_INFLIGHT"))
+                            .put("route", "PRODUCTION_LANGUAGE_HANDLERS_ON_MAIN_THREAD_WHILE_INFLIGHT"))
                     }
-                    "drive" -> { signal("request-drive"); ux(false); rule.onNodeWithTag("question_input").assertDoesNotExist() }
+                    "drive" -> {
+                        signal("request-drive")
+                        val restrictedBy = SystemClock.elapsedRealtime() + 45000
+                        while (SystemClock.elapsedRealtime() < restrictedBy && vm.state.value.let {
+                                !it.ux.known || !it.ux.restricted || it.busy
+                            }) Thread.sleep(20)
+                        val restricted = vm.state.value
+                        assertTrue("Actual restricted UX callback is required", restricted.ux.known && restricted.ux.restricted)
+                        assertFalse("Production callback must cancel the pending request", restricted.busy)
+                        // Capture the real callback/cancellation before any Compose semantic synchronization.
+                        signal("boundary-drive", state().put("cancelled_request_id", request)
+                            .put("route", "ACTUAL_PLATFORM_UX_CALLBACK_WHILE_INFLIGHT"))
+                        rule.onNodeWithTag("question_input").assertDoesNotExist()
+                    }
                     else -> {
-                        // DELETE may still be pending while the model request completes. Do not wait for it before the boundary marker.
-                        InstrumentationRegistry.getInstrumentation().runOnMainSync { vm.go(Page.SETTINGS) }
-                        clickText(copy("ui_48af33bc151c")); clickText(copy("ui_a827222cef89"))
+                        // Test endSession itself while pending, without a Settings navigation cancelling it first.
+                        // DELETE may still be pending. Normal confirmation clicks are exercised by endViaUi separately.
+                        InstrumentationRegistry.getInstrumentation().runOnMainSync { vm.endSession() }
                         clean()
+                        signal("boundary-end", state().put("cancelled_request_id", request)
+                            .put("route", "PRODUCTION_END_SESSION_HANDLER_ON_MAIN_THREAD_WHILE_INFLIGHT"))
                     }
                 }
                 assertNoLateResult()
-                if (name != "locale") signal("boundary-$name", state().put("cancelled_request_id", request).apply {
-                    if (name == "end") put("route", "PRODUCTION_NAVIGATION_HANDLER_ON_MAIN_THREAD_WHILE_INFLIGHT")
-                })
                 waitSignal("model-finished-$name", 150000)
                 val until = SystemClock.elapsedRealtime() + 2000
                 while (SystemClock.elapsedRealtime() < until) { assertNoLateResult(); Thread.sleep(50) }
-                image("late-$name"); event("LATE_${name.uppercase()}_SUPPRESSED")
-                if (name == "drive") { signal("request-park"); ux(); reading(); refresh(); assertNoLateResult() }
+                image("late-$name", requirePhysical = name != "drive"); event("LATE_${name.uppercase()}_SUPPRESSED")
+                if (name == "drive") {
+                    signal("request-park"); ux(); refresh(); assertNoLateResult()
+                    image("late-drive-restored") // Separate actual Park display; never a substitute for the Drive capture.
+                }
                 if (name == "end") {
                     rule.waitUntil(45000) { !vm.state.value.deletionPending }; clean()
                     clickTag("profile_$profileId"); clickText("English"); reading(); refresh()

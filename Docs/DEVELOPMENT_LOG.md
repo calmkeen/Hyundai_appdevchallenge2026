@@ -91,3 +91,7 @@ OF-001 구현 `e816d61`, 철회 navigation 보완 `684556c`/`e7c58ad`, SE-001 �
 | DV-001 최신 앱 소개 | `feature/sdk-intro-refresh` | `27b0616`/`5bdc5c1`. 같은 최신 SDK APK/프로세스의 연속 원본에서 34초 편집·기능당2초·기존 음악 PCM exact·첫 문구 유지. 독립 시각 검토 PASS |
 
 구현/정적 회귀와 실제 모델/SDK/녹화 성공을 분리했다. 상세 결과와 실패 이력은 `SDK_SESSION_VALIDATION.md`, 영상은 `SDK_LIVE_INTRO.md`를 따른다. 최종 서버DB0/0/0·Console 복구·lease 종료·AVD 정상 종료를 확인했다. 단계6의 추가 진행 중 경계 기기 시험은 남아 있으며 완료로 세지 않는다. 작업별 feature를 유지하고 develop에 no-ff 통합·원격 반영 후 실제 remote SHA/CI를 별도 QA 기록으로 확인한다. main은 변경하지 않는다.
+
+## 진행 중 AI 응답 경계 재시험 · 2026-11-15
+
+사용자 잠금 해제 후 위 4개 작업 feature와 develop `736dc95`의 실제 원격 SHA 및 CI5개 success를 확인했다. `feature/sdk-inflight-recovery`에서 남은 locale/Drive/이용 종료 경계를 별도 진행한다. 기능 APK는 보존하고 ActivityScenario의 반복 idle barrier를 없앤 계측 APK, 실제 AVD 화면/사용자/CarService/SDK 준비, 실제 무료 모델 처리시간과 경계 전후 관측, 세션 삭제·Park 복구까지 완료 조건으로 둔다. 최신 실행 결과 전에는 통과로 세지 않으며 유료 AI·생성 QUESTION 번역 보류와 기존 userdata/실패 증거를 유지한다.
