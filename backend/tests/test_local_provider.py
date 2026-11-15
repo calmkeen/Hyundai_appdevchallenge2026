@@ -15,6 +15,13 @@ from app.local_provider import LocalProviderError, OllamaProvider
 from app.models import AskRequest, ModelTranslation, TranslateRequest
 
 PROFILE = "ioniq5-ne1-2024-kr"
+GUIDE = "ioniq5-door-open-check"
+
+
+def door_guides(catalog, locale):
+    """Select the deployed door record explicitly as other reviewed topics grow."""
+    guide, = [guide for guide in catalog.published(PROFILE, locale) if guide["guide_id"] == GUIDE]
+    return [guide]
 
 
 def question(locale="ko-KR"):
@@ -32,7 +39,7 @@ def completed(value, **changes):
 
 @pytest.mark.parametrize("locale", ["ko-KR", "en", "ja-JP"])
 def test_local_model_selects_only_a_reviewed_unit_and_server_keeps_every_caution(locale):
-    guides = Catalog().published(PROFILE, locale)
+    guides = door_guides(Catalog(), locale)
     unit = answer_units(guides)[0]
     calls, audit = [], []
 
@@ -79,7 +86,7 @@ def test_local_model_selects_only_a_reviewed_unit_and_server_keeps_every_caution
 def test_null_non_answer_returns_only_a_server_replaceable_marker(status):
     provider = OllamaProvider(transport=httpx.MockTransport(lambda _: httpx.Response(
         200, json=completed({"status": status, "unit_id": None}))))
-    result = asyncio.run(provider.ask(question(), Catalog().published(PROFILE, "ko-KR"), []))
+    result = asyncio.run(provider.ask(question(), door_guides(Catalog(), "ko-KR"), []))
     assert result.status == result.answer == status and result.source_ids == [] and result.follow_up_question is None
 
 
@@ -91,12 +98,12 @@ def test_null_non_answer_returns_only_a_server_replaceable_marker(status):
 def test_unknown_null_or_freeform_answer_selection_is_rejected(selection):
     provider = OllamaProvider(transport=httpx.MockTransport(lambda _: httpx.Response(200, json=completed(selection))))
     with pytest.raises(LocalProviderError, match="LOCAL_INVALID_SELECTION"):
-        asyncio.run(provider.ask(question(), Catalog().published(PROFILE, "ko-KR"), []))
+        asyncio.run(provider.ask(question(), door_guides(Catalog(), "ko-KR"), []))
     assert provider.events[-1]["outcome"] == "FAILED"
 
 
 def test_non_answer_must_not_carry_a_selected_passage():
-    guides = Catalog().published(PROFILE, "ko-KR")
+    guides = door_guides(Catalog(), "ko-KR")
     provider = OllamaProvider(transport=httpx.MockTransport(lambda _: httpx.Response(200, json=completed(
         {"status": "NO_RELIABLE_SOURCE", "unit_id": answer_units(guides)[0]["unit_id"]}))))
     with pytest.raises(LocalProviderError, match="LOCAL_INVALID_SELECTION"):

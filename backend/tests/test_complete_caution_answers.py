@@ -27,6 +27,12 @@ QUESTIONS = {"ko-KR": "문을 닫기 전에 무엇을 확인해야 하나요?",
              "en": "What should I check before closing the door?", "ja-JP": "ドアを閉める前に何を確認すればいいですか？"}
 
 
+def door_guides(catalog, locale):
+    """Select the deployed door record explicitly as other reviewed topics grow."""
+    guide, = [guide for guide in catalog.published(PROFILE, locale) if guide["guide_id"] == GUIDE]
+    return [guide]
+
+
 class Fixture:
     kind, model = "UNKNOWN", "complete-caution-test-double"
     def __init__(self, transform=None):
@@ -89,7 +95,7 @@ def test_registered_payload_and_bundle_pins_match_all_three_immutable_published_
     catalog = Catalog()
     assert validate_bundle_registry(registry, catalog.guides) == []
     for locale in LOCALES:
-        guide = catalog.published(PROFILE, locale)[0]
+        guide = door_guides(catalog, locale)[0]
         unit, = answer_units([guide])
         assert unit["unit_id"].endswith(":closing-bundle:v1")
         assert unit["text"] == "\n".join([guide["body"], *[part for step in guide["steps"] for part in [step["body"], *step["official_cautions"]]]])
@@ -100,7 +106,7 @@ def test_registered_payload_and_bundle_pins_match_all_three_immutable_published_
 @pytest.mark.parametrize("locale", LOCALES)
 @pytest.mark.parametrize("part_index", range(5), ids=["summary", "pinch-body", "pinch-caution", "closure-body", "closure-caution"])
 def test_removing_any_required_body_or_caution_is_rejected_even_with_both_citations(locale, part_index):
-    guide = Catalog().published(PROFILE, locale)[0]
+    guide = door_guides(Catalog(), locale)[0]
     parts = [guide["body"]]
     for step in guide["steps"]:
         parts.extend([step["body"], *step["official_cautions"]])
@@ -117,7 +123,7 @@ def test_removing_any_required_body_or_caution_is_rejected_even_with_both_citati
 @pytest.mark.parametrize("locale", LOCALES)
 @pytest.mark.parametrize("old_unit", [0, 1, 2], ids=["old-body", "old-pinch-step", "old-closure-step"])
 def test_old_complete_partial_unit_is_no_longer_a_current_answer_or_translation(locale, old_unit):
-    guide = Catalog().published(PROFILE, locale)[0]
+    guide = door_guides(Catalog(), locale)[0]
     text = partial(guide, old_unit)
     provider = Fixture(lambda value, _: {**value, "answer": text})
     with api(locale, provider=provider) as (_, client, _, _, session, headers):
@@ -141,7 +147,7 @@ def test_a_bundle_with_only_one_of_the_two_required_sources_is_rejected(locale, 
 
 @pytest.mark.parametrize("change", ["profile", "manual", "version", "locale", "missing-step", "empty-caution", "changed-caution", "changed-source", "topic"])
 def test_protected_identity_never_falls_back_to_old_units_on_scope_or_payload_change(change):
-    guide = copy.deepcopy(Catalog().published(PROFILE, "ko-KR")[0])
+    guide = copy.deepcopy(door_guides(Catalog(), "ko-KR")[0])
     if change == "profile": guide["profile_ids"] = ["another-profile"]
     elif change == "manual": guide["manual_set_id"] = "another-manual"
     elif change == "version": guide["source_version"] = "future-version-needs-policy-review"
@@ -156,7 +162,7 @@ def test_protected_identity_never_falls_back_to_old_units_on_scope_or_payload_ch
 
 @pytest.mark.parametrize("registry", [None, {}, {"schema_version": 1, "bundles": []}])
 def test_missing_or_broken_registry_blocks_protected_answers_without_affecting_unrelated_guides(monkeypatch, registry):
-    protected = Catalog().published(PROFILE, "ko-KR")[0]
+    protected = door_guides(Catalog(), "ko-KR")[0]
     other = copy.deepcopy(protected); other["guide_id"] = "synthetic-unrelated-guide"
     monkeypatch.setattr(answer_policy, "_REGISTRY", registry)
     assert answer_units([protected]) == []
@@ -166,14 +172,18 @@ def test_missing_or_broken_registry_blocks_protected_answers_without_affecting_u
 @pytest.mark.parametrize("field", ["payload_sha256", "bundle_sha256"])
 def test_invalid_pin_does_not_promote_old_partial_units(monkeypatch, field):
     registry = copy.deepcopy(answer_policy._REGISTRY)
-    registry["bundles"][0]["records"][0][field] = "0" * 64
+    rule = next(rule for rule in registry["bundles"] if rule["guide_id"] == GUIDE)
+    pin = next(pin for pin in rule["records"] if pin["locale"] == "ko-KR")
+    pin[field] = "0" * 64
     monkeypatch.setattr(answer_policy, "_REGISTRY", registry)
-    assert answer_units(Catalog().published(PROFILE, "ko-KR")) == []
+    assert answer_units(door_guides(Catalog(), "ko-KR")) == []
 
 
 def test_oversized_even_repinned_bundle_is_rejected_without_truncation(monkeypatch):
-    guide = copy.deepcopy(Catalog().published(PROFILE, "ko-KR")[0]); guide["body"] = "x" * 3001
-    registry = copy.deepcopy(answer_policy._REGISTRY); pin = registry["bundles"][0]["records"][0]
+    guide = copy.deepcopy(door_guides(Catalog(), "ko-KR")[0]); guide["body"] = "x" * 3001
+    registry = copy.deepcopy(answer_policy._REGISTRY)
+    rule = next(rule for rule in registry["bundles"] if rule["guide_id"] == GUIDE)
+    pin = next(pin for pin in rule["records"] if pin["locale"] == "ko-KR")
     pin["payload_sha256"] = payload_digest(guide); pin["bundle_sha256"] = hashlib.sha256(closing_bundle_text(guide).encode()).hexdigest()
     monkeypatch.setattr(answer_policy, "_REGISTRY", registry)
     assert answer_units([guide]) == []
@@ -183,7 +193,7 @@ def test_oversized_even_repinned_bundle_is_rejected_without_truncation(monkeypat
 def test_missing_caution_in_an_otherwise_published_record_prevents_any_model_call(locale):
     catalog = Catalog(); guide = next(g for g in catalog.guides if g.get("guide_id") == GUIDE and g["locale"] == locale)
     guide["steps"][0]["official_cautions"] = []
-    assert catalog.published(PROFILE, locale) == [guide]
+    assert door_guides(catalog, locale) == [guide]
     with api(locale, catalog) as (_, client, _, provider, session, headers):
         result = client.post("/v1/ask", json=ask(session, locale), headers=headers).json()
         assert result["status"] == "NO_RELIABLE_SOURCE" and result["ai_provider"] == "NOT_CALLED"
@@ -192,7 +202,7 @@ def test_missing_caution_in_an_otherwise_published_record_prevents_any_model_cal
 
 @pytest.mark.parametrize("locale", LOCALES)
 def test_local_model_cannot_select_the_previous_second_step_id(locale):
-    guide = Catalog().published(PROFILE, locale)[0]
+    guide = door_guides(Catalog(), locale)[0]
     old_id = ":".join((GUIDE, locale, guide["source_version"])) + ":step:check-closure-display"
     body = {"model": "qwen3:4b", "done": True, "done_reason": "stop", "message": {"role": "assistant", "content": json.dumps({"status": "ANSWERED", "unit_id": old_id})}}
     provider = OllamaProvider(transport=httpx.MockTransport(lambda _: httpx.Response(200, json=body)))
@@ -207,7 +217,7 @@ def test_existing_db_partial_answer_cache_is_rejected_without_recalculation_or_f
         payload = ask(session, locale)
         current = client.post("/v1/ask", json=payload, headers=headers).json()
         assert current["status"] == "ANSWERED" and provider.calls == 1
-        old_text = partial(catalog.published(PROFILE, locale)[0], old_unit)
+        old_text = partial(door_guides(catalog, locale)[0], old_unit)
         fingerprint = seed_result(app, session, payload["request_id"], {**current, "answer": old_text})
         for _ in range(2):
             rejected = client.post("/v1/ask", json=payload, headers=headers).json()
@@ -231,11 +241,11 @@ def test_even_current_bundle_cache_requires_current_canonical_citation_metadata(
 @pytest.mark.parametrize("old_unit", [0, 1, 2])
 def test_existing_db_legacy_answer_translation_cannot_replay_after_upgrade(source, target, old_unit):
     with api(target) as (app, client, catalog, provider, session, headers):
-        text = partial(catalog.published(PROFILE, source)[0], old_unit)
+        text = partial(door_guides(catalog, source)[0], old_unit)
         payload = {"request_id": "old-translation", "session_id": session["session_id"], "profile_id": PROFILE,
             "source_locale": source, "target_locale": target, "content_kind": "ANSWER", "text": text}
         first = client.post("/v1/translate", json=payload, headers=headers).json()
-        legacy = {**first, "status": "TRANSLATED", "translated_text": partial(catalog.published(PROFILE, target)[0], old_unit),
+        legacy = {**first, "status": "TRANSLATED", "translated_text": partial(door_guides(catalog, target)[0], old_unit),
             "review_status": "REVIEWED", "ai_provider": "STORED_GUIDE"}
         fingerprint = seed_result(app, session, payload["request_id"], legacy)
         for _ in range(2):
