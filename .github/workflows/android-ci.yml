@@ -1,0 +1,127 @@
+name: Android validation
+
+"on":
+  pull_request:
+    branches: [develop, main, 'release/**']
+  push:
+    branches: [develop, main, 'feature/**', 'release/**', 'hotfix/**']
+  workflow_dispatch:
+    inputs:
+      compile_pleos:
+        description: 'Also compile the Pleos variant using its public Maven repository (no device test)'
+        type: boolean
+        required: false
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  demo-jvm-and-mock-apk:
+    name: Demo JVM tests and MOCK APK
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: android
+    env:
+      CARCUE_MODE: MOCK
+      CARCUE_AI_PROVIDER: DISABLED
+      OPENAI_API_KEY: ''
+      OPENAI_MODEL: ''
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v5
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/develop' && github.ref != 'refs/heads/main' }}
+      - name: Ensure Android API 35 and build tools
+        run: |
+          "${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager" \
+            --sdk_root="${ANDROID_HOME}" "platforms;android-35" "build-tools;35.0.0"
+      - name: Check pinned Gradle wrapper
+        run: |
+          test "$(sed -n 's/.*gradle-\([0-9.]*\)-bin.zip/\1/p' gradle/wrapper/gradle-wrapper.properties)" = '8.10.2'
+          ./gradlew --version
+      - name: Run demo JVM tests and assemble MOCK debug APK
+        run: >-
+          ./gradlew --no-daemon --max-workers=2
+          -PcarcueServerUrl=http://10.0.2.2:8000
+          :app:testDemoDebugUnitTest :app:assembleDemoDebug
+      - name: Verify and label MOCK artifact
+        run: >-
+          python3 ../scripts/package_android_ci.py --variant demo
+          --apk app/build/outputs/apk/demo/debug/app-demo-debug.apk
+          --aapt2 "${ANDROID_HOME}/build-tools/35.0.0/aapt2"
+          --output-dir ../output/ci/android-demo
+          --commit "${GITHUB_SHA}" --run-id "${GITHUB_RUN_ID}"
+      - name: Upload MOCK APK and provenance
+        uses: actions/upload-artifact@v7
+        with:
+          name: carcue-demo-MOCK-${{ github.sha }}-attempt-${{ github.run_attempt }}
+          path: output/ci/android-demo/
+          if-no-files-found: error
+          retention-days: 7
+      - name: Upload demo JVM reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: carcue-demo-jvm-reports-${{ github.sha }}-attempt-${{ github.run_attempt }}
+          path: |
+            android/app/build/test-results/testDemoDebugUnitTest/
+            android/app/build/reports/tests/testDemoDebugUnitTest/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  pleos-compile-only:
+    name: Pleos APK compile only — no SDK runtime validation
+    if: github.event_name == 'workflow_dispatch' && inputs.compile_pleos
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: android
+    env:
+      OPENAI_API_KEY: ''
+      OPENAI_MODEL: ''
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v5
+        with:
+          cache-read-only: true
+      - name: Ensure Android API 35 and build tools
+        run: |
+          "${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager" \
+            --sdk_root="${ANDROID_HOME}" "platforms;android-35" "build-tools;35.0.0"
+      - name: Check pinned Gradle wrapper
+        run: test "$(sed -n 's/.*gradle-\([0-9.]*\)-bin.zip/\1/p' gradle/wrapper/gradle-wrapper.properties)" = '8.10.2'
+      - name: Assemble Pleos debug APK from public SDK dependency
+        run: >-
+          ./gradlew --no-daemon --max-workers=2
+          -PpleosSdkVersion=2.3.2 -PcarcueServerUrl=http://10.0.2.2:8000
+          :app:assemblePleosDebug
+      - name: Verify and label compile-only artifact
+        run: >-
+          python3 ../scripts/package_android_ci.py --variant pleos
+          --apk app/build/outputs/apk/pleos/debug/app-pleos-debug.apk
+          --aapt2 "${ANDROID_HOME}/build-tools/35.0.0/aapt2"
+          --output-dir ../output/ci/android-pleos
+          --commit "${GITHUB_SHA}" --run-id "${GITHUB_RUN_ID}"
+      - name: Upload Pleos COMPILE_ONLY APK and provenance
+        uses: actions/upload-artifact@v7
+        with:
+          name: carcue-pleos-COMPILE_ONLY-${{ github.sha }}-attempt-${{ github.run_attempt }}
+          path: output/ci/android-pleos/
+          if-no-files-found: error
+          retention-days: 7
