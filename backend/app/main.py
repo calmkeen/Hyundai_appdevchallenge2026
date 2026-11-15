@@ -28,9 +28,9 @@ UNAVAILABLE_MESSAGES = {
     "ja-JP": "現在、回答を確認できません。保存済みのガイドをご利用ください。",
 }
 FOLLOW_UP_MESSAGES = {
-    "ko-KR": "선택한 문 안내에서 어떤 부분을 더 확인하고 싶으신가요?",
-    "en": "Which part of the selected door guide would you like to check?",
-    "ja-JP": "選択したドアのガイドのどの部分を確認したいですか？",
+    "ko-KR": "선택한 안내에서 어떤 부분을 더 확인하고 싶으신가요?",
+    "en": "Which part of the selected guide would you like to check?",
+    "ja-JP": "選択したガイドのどの部分を確認したいですか？",
 }
 
 
@@ -169,21 +169,27 @@ def create_app(db_path=None, catalog=None, provider=None, mode=None):
                 return False
             guides = catalog.retrieve(request)
             ids = [citation["source_id"] for citation in value["citations"]]
-            validate_answer({"status": "ANSWERED", "answer": value["answer"], "source_ids": ids}, guides)
-            index = {source["source_id"]: (guide, source) for guide in guides for source in guide["sources"]}
+            unit = validate_answer({"status": "ANSWERED", "answer": value["answer"], "source_ids": ids}, guides)
+            selected = next(guide for guide in guides if guide["guide_id"] == unit["guide_id"])
+            index = {source["source_id"]: (selected, source) for source in selected["sources"]}
             expected = []
             for sid in ids:
                 guide, source = index[sid]
                 expected.append({"source_id": sid, "guide_id": guide["guide_id"], "profile_id": request.profile_id,
                     "manual_set_id": guide["manual_set_id"], "source_version": guide["source_version"],
                     "title": source["title"], "url": source["url"], "section": source["section"]})
-            actions = [{"kind": "OPEN_GUIDE", "target_id": expected[0]["guide_id"]},
-                       {"kind": "REFRESH_STATUS", "target_id": "door.position"}]
+            actions = guide_actions(selected)
             actions += manual_actions(expected, guides, catalog.profile(request.profile_id))
             actions += support_actions(catalog.support_contacts(request.profile_id))
             return value["citations"] == expected and value["actions"] == actions
-        except (KeyError, TypeError, ValueError, IndexError):
+        except (KeyError, TypeError, ValueError, IndexError, StopIteration):
             return False
+
+    def guide_actions(guide):
+        actions = [{"kind": "OPEN_GUIDE", "target_id": guide["guide_id"]}]
+        if guide["topic"] == "door" and any("door.position" in step["related_properties"] for step in guide["steps"]):
+            actions.append({"kind": "REFRESH_STATUS", "target_id": "door.position"})
+        return actions
 
     def unavailable_translation(request):
         return {"request_id": request.request_id, "original_text": request.text,
@@ -278,7 +284,9 @@ def create_app(db_path=None, catalog=None, provider=None, mode=None):
                     if output.status == "ANSWERED" and not output.source_ids:
                         raise ValueError("ANSWER_WITHOUT_CITATION")
                     if output.status == "ANSWERED":
-                        validate_answer(output, sources)
+                        unit = validate_answer(output, sources)
+                        selected = next(guide for guide in sources if guide["guide_id"] == unit["guide_id"])
+                        index = {source["source_id"]: (selected, source) for source in selected["sources"]}
                     # Conservative semantic filter; it is not a substitute for human evaluations.
                     if output.status == "ANSWERED" and re.search(r"safe to drive|you can drive|고장 원인은|운전해도|주행해도|안전합니다", output.answer, re.I):
                         raise ValueError("UNSAFE_CLAIM")
@@ -294,8 +302,7 @@ def create_app(db_path=None, catalog=None, provider=None, mode=None):
                             result["citations"].append({"source_id": sid, "guide_id": g["guide_id"], "profile_id": request.profile_id,
                                 "manual_set_id": g["manual_set_id"], "source_version": g["source_version"],
                                 "title": s["title"], "url": s["url"], "section": s["section"]})
-                        result["actions"] = [{"kind": "OPEN_GUIDE", "target_id": result["citations"][0]["guide_id"]},
-                                             {"kind": "REFRESH_STATUS", "target_id": "door.position"}]
+                        result["actions"] = guide_actions(selected)
                         result["actions"] += manual_actions(result["citations"], sources, catalog.profile(request.profile_id))
                         result["actions"] += support_actions(catalog.support_contacts(request.profile_id))
                 except Exception:

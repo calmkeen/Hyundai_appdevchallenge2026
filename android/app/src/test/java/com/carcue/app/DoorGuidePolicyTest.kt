@@ -11,7 +11,7 @@ class DoorGuidePolicyTest {
     private val reading = Reading(source = Source.PLEOS, capability = Capability.SUPPORTED, status = ReadStatus.VALUE,
         value = "OPEN", rawValue = "1", receivedAt = now.minusSeconds(1))
     private val parked = UxState(known = true, restricted = false)
-    private val guide = f.guide.toGuide()
+    private val guide = f.guide.toGuide().copy(topic = "door", relatedProperties = setOf("door.position"))
     private val rule = StateGuideRule("fixture-door-rule", f.profile.id, "fixture-manual", "v1", "door.position",
         "ROW_1_LEFT", "OPEN", guide.id, "VERIFIED")
     private fun related(profile: Profile? = f.profile, locale: String = "ko-KR", reading: Reading = this.reading,
@@ -107,5 +107,26 @@ class DoorGuidePolicyTest {
         assertSame(english, related(locale = "en", guides = listOf(guide, english)))
         assertNull(related(locale = "ja-JP", guides = listOf(guide, english)))
         assertEquals("KR", f.profile.market)
+    }
+
+    @Test fun manualOnlyTopicsCannotInheritADoorRecommendationOrLiveStatus() {
+        val policy = DoorGuidePolicy(listOf(f.profile), listOf(rule), 60000)
+        assertTrue(policy.hasDoorBinding(f.profile, guide))
+        for (topic in listOf("charging", "seats_mirrors", "display_indicators", "")) {
+            val other = guide.copy(topic = topic)
+            assertFalse(policy.hasDoorBinding(f.profile, other))
+            assertNull(related(guides = listOf(other)))
+        }
+        assertFalse(policy.hasDoorBinding(f.profile, guide.copy(relatedProperties = emptySet())))
+        assertNull(related(guides = listOf(guide.copy(relatedProperties = emptySet()))))
+    }
+
+    @Test fun publishedMetadataAloneDoesNotCreateAnSdkBinding() {
+        val policy = DoorGuidePolicy(listOf(f.profile), listOf(rule), 60000)
+        assertFalse(policy.hasDoorBinding(f.profile, guide.copy(id = "unregistered-guide")))
+        assertFalse(policy.hasDoorBinding(f.profile.copy(manualVersion = "v2"), guide))
+        assertFalse(policy.hasDoorBinding(f.profile, guide.copy(publicationVerified = false)))
+        assertFalse(DoorGuidePolicy(listOf(f.profile), emptyList(), 60000).hasDoorBinding(f.profile, guide))
+        assertFalse(DoorGuidePolicy(listOf(f.profile), listOf(rule, rule), 60000).hasDoorBinding(f.profile, guide))
     }
 }

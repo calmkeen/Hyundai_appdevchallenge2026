@@ -1,7 +1,7 @@
 """Canonical answer assembly over publication-validated, reviewed summaries.
 
-The registered closing guide is indivisible: step context cannot remove earlier
-body-part checks or explicit caution summaries. This is not new OEM text,
+Protected registered guides are indivisible: step context cannot remove earlier
+prerequisites or explicit caution summaries. This is not new OEM text,
 translation certification, or vehicle identity verification.
 """
 import hashlib
@@ -17,6 +17,9 @@ _VALIDATOR = Draft202012Validator(_SCHEMA)
 # Reserve the deployed guide namespace even if a registry entry is removed or
 # corrupted: configuration failure must never restore the old partial units.
 _REQUIRED_GUIDES = {"ioniq5-door-open-check"}
+_PROTECTED_GUIDES = _REQUIRED_GUIDES | {
+    "ioniq5-ac-charging-check", "ioniq5-seat-mirror-before-driving", "ioniq5-cluster-display-check",
+}
 
 
 def payload_digest(guide):
@@ -25,8 +28,10 @@ def payload_digest(guide):
 
 
 def closing_bundle_text(guide):
+    # Kept as a compatible name for deployed door callers; assembly is topic-independent.
     return "\n".join([guide["body"], *[part for step in guide["steps"]
-                                    for part in [step["body"], *step["official_cautions"]]]])
+        for part in ([step["body"], *step["official_cautions"]] if guide["topic"] == "door"
+                     else [step["title"], step["body"], *step["official_cautions"]])]])
 
 
 def _rules(registry):
@@ -45,6 +50,11 @@ def _rules(registry):
                 or len({pin["locale"] for pin in rule["records"]}) != len(rule["records"])
                 or {pin["locale"] for pin in rule["records"]} != set(rule["locales"])):
             return None
+        required_cautions = rule.get("required_caution_step_ids", [step["step_id"] for step in rule["required_steps"]])
+        if not set(required_cautions).issubset(step["step_id"] for step in rule["required_steps"]):
+            return None
+        if rule["topic"] == "door" and set(required_cautions) != {step["step_id"] for step in rule["required_steps"]}:
+            return None
     return rules
 
 
@@ -57,7 +67,8 @@ def _bundle(guide, rule):
                 or [source["source_id"] for source in guide["sources"]] != rule["source_ids"]
                 or [{"step_id": step["step_id"], "order": step["order"], "source_ids": step["source_ids"]}
                     for step in guide["steps"]] != rule["required_steps"]
-                or any(not step["official_cautions"] for step in guide["steps"])
+                or any(not step["official_cautions"] for step in guide["steps"] if step["step_id"] in
+                       rule.get("required_caution_step_ids", [item["step_id"] for item in rule["required_steps"]]))
                 or {ref for step in guide["steps"] for ref in step["source_ids"]} != set(rule["source_ids"])):
             return None
         pin = next(item for item in rule["records"] if item["locale"] == guide["locale"])
@@ -98,7 +109,7 @@ def answer_units(guides):
     rules = _rules(_REGISTRY)
     for guide in guides:
         registered = next((rule for rule in rules or [] if rule["guide_id"] == guide["guide_id"]), None)
-        if guide["guide_id"] in _REQUIRED_GUIDES or registered is not None:
+        if guide["guide_id"] in _PROTECTED_GUIDES or registered is not None:
             unit = _bundle(guide, registered) if registered is not None else None
             if unit is not None:
                 units.append(unit)
