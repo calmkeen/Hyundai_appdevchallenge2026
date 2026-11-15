@@ -176,6 +176,7 @@ def check_candidate(root, config, source_ref=None):
         "ai": "Actual local Ollama/qwen3:4b passage selection; ANSWER/GUIDE use stored reviewed translations",
         "inflight_boundaries_passed": False, "physical_vehicle_tested": False,
         "seatbelt_status_connected": False, "new_feature_build_included": False,
+        "pleos_visual_redistribution_permission_confirmed": False,
         "assets": {role: {"filename": names[role], "sha256": assets[role]["sha256"],
                           "bytes": asset_paths[role].stat().st_size} for role in sorted(assets)},
         "evidence_sha256": {kind: evidence[kind]["sha256"] for kind in sorted(evidence)},
@@ -214,6 +215,8 @@ AI 모델·SDK 바이너리·서버 키·개인 세션 DB는 APK 외부이며 �
 공식2024KR 아이오닉5 문 안내, 무료 로컬 AI 선택, 저장 번역,
 정상 Drive/Park 제한·가이드 복귀·정상 이용 종료를 같은 APK 시연에서 확인했습니다.
 실차·VIN 자동 인증·안전벨트 센서 연결·모든 언어/임의 질문의 품질 완료를 뜻하지 않습니다.
+차량·벨트 녹화 프레임의 외부 재배포 권한은 확인되지 않았습니다.
+음악의 CC BY 4.0은 이 그래픽의 이용 허락을 의미하지 않습니다. 출처 기록은 Docs/PLEOS_VISUAL_SOURCE.md를 따릅니다.
 
 ## 남은 확인
 
