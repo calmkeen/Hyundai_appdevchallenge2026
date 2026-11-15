@@ -73,6 +73,7 @@ class ContentRepository(private val context: Context) {
         } catch (_: Exception) { emptyList() } // Missing/malformed bundled rules never create a recommendation.
     }
     private val doorGuides by lazy { DoorGuidePolicy(profiles, stateGuideRules, BuildConfig.STATE_TTL_MS) }
+    fun showsDoorStatus(guide: Guide, profile: Profile?) = doorGuides.hasDoorBinding(profile, guide)
 
     fun relatedDoorGuide(state: UiState, now: Instant): Guide? = if (!state.sessionStarted) null else
         doorGuides.relatedGuide(state.profile, state.locale, state.reading, state.ux, state.guides, now)
@@ -108,7 +109,8 @@ class ContentRepository(private val context: Context) {
                 val order = step.get("order") as? Number ?: error("Step order must be an integer")
                 require(order.toDouble() == order.toInt().toDouble())
                 PublishedGuideStep(step.text("step_id"), order.toInt(), step.text("title"), step.text("body"),
-                    step.getJSONArray("official_cautions").texts(), step.getJSONArray("source_ids").texts()) } })
+                    step.getJSONArray("official_cautions").texts(), step.getJSONArray("source_ids").texts(),
+                    step.getJSONArray("related_properties").texts()) } })
     } catch (_: Exception) { null } // An unrelated malformed record must not hide valid records.
 }
 
