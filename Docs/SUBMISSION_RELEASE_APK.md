@@ -49,6 +49,34 @@ CARCUE_DB=output/qa/submission-release-review.sqlite3 \
 
 빌드 검사와 APK 내부 검사는 실제 기기 검증과 구분한다. 유료 AI, AVD 재시험, in-flight 언어 변경/Drive/이용 종료 세 경계,429 기기 화면과 신규 세 주제의 실제 센서·무료 모델 시험은 보류 상태다. `scripts/package_submission.py`의 기존 SDK영상·APK 일치 검사를 완화하지 않았으며 기존 묶음 도구는 새 release를 검증된 구 영상과 동일 바이너리로 묶지 않는다.
 
+## 실제 생성·검사 결과
+
+최종 APK 빌드 소스는 **`7d492c1aa3daf4d2dcf436b4dd89222835094bd2`**이며, clean 상태로 빌드를 시작했다. 소스/설정 커밋을 먼저 만들고 APK·해시/검사 기록은 후속 커밋에 추가했다. Gradle의 worktree VCS metadata는 `NO_SUPPORTED_VCS_FOUND`여서 APK 내부에 소스 SHA가 있다고 주장하지 않으며 외부 manifest로 고정한다. 후속 문서/아티팩트 커밋과 이 빌드 소스 사이의 제품 입력 차이를 별도로 확인한다.
+
+| 항목 | 실제 결과 |
+| --- | --- |
+| 파일 | `apk/CarCue_release.apk`, **32,560,321bytes** |
+| APK SHA256 | `b5060db99072ae67af28a161304cc27e8e202ee282d11aa96803dbb977ff377f` |
+| 서명 인증서 SHA256 | `c945dc5eed5903ddd06efd51455c0d96239af5f11bc329fcd6b5381c99bf95e3`, 프로젝트 전용 release 인증서·Android Debug 아님 |
+| 빌드 | 최종 offline `assemblePleosRelease` 성공, heap768MB·worker1 |
+| JVM | **148 passed**, 실패/오류/건너뜀0. manifest 중복 선언 수정 전 실제 수행했고 JVM 입력이 같은 최종 빌드에서는 UP-TO-DATE 재사용 |
+| lint | release 전체 **오류0·경고16**. 중복 debug 선언을 제거해 수정했으며 lint suppression을 추가하지 않음 |
+| 설정 거절 | 서명 없음, 제출 AVD 프로필 없는 HTTP, 다른 HTTP 호스트 모두 거절. 일반 release의 HTTPS URL 설정 검사 통과(실제 서버 접속 없음) |
+| APK 내부 | 실제 Vehicle class 정의·release/DEBUG=false/IS_MOCK=false·API28/35·선택한 NSC·검수 안내12개와 소스 JSON byte 일치·비공개 key/DB/config 파일 부재 확인 |
+
+첫 offline 시도는 캐시에 없는 `lint-gradle:31.8.2` 때문에 중단했고 `--online`으로 의존성만 내려받았다. 첫 전체 lint의 중복 manifest debug 선언 오류는 새 소스 커밋에서 수정한 뒤 최종 offline 빌드로 통과했다. 중간 APK를 제출 파일로 사용하지 않았다. 현지 증거 로그는 `output/apk/submission-release-20261115/`, 공개 검사 결과는 `apk/APK_VERIFICATION.json`, `apk/CONFIGURATION_GUARD_CHECKS.json`에 있다.
+
+```bash
+# 키·설치·AVD·모델 없이 현재 제출 APK의 실제 바이트/서명을 검사한다.
+python3 scripts/verify_submission_apk.py \
+  --apk apk/CarCue_release.apk \
+  --manifest apk/SUBMISSION_RELEASE_MANIFEST.json
+```
+
+검사기는 공개 Android Build Tools의 `apksigner`, `aapt2`, `dexdump`와 JDK가 필요하다. `--build-tools`, `--java-home`으로 위치를 지정할 수 있다. 동봉 가이드는 현재 checkout의 `content/guides`와 비교하므로 향후 콘텐츠 개발 시에는 고정 빌드 소스로 checkout해 검사하거나 새 APK를 명시적으로 갱신해야 한다. 이 검사는 고정 소스 커밋 이름만 읽고 소스 일치를 증명하는 기능을 대신하지 않는다.
+
+기존 APK `5ef560ba…1479f`와 기존 영상 `638c1f54…e18d`를 실제 재해시해 두 SHA가 그대로임을 확인했다. 새 release를 기존 영상에 나온 동일 바이너리라고 표시하지 않는다. 새 APK의 기기 실행/원문 왕복/무료 모델 검증은 여전히 미실시다.
+
 ## 공식 근거
 
 2026-11-15 Firecrawl 로컬로 읽은 Android 공식 [앱 서명](https://developer.android.com/studio/publish/app-signing)은 비공개 properties 분리와 인증서 일치가 필요한 업데이트 조건을 설명한다. [Network Security Configuration](https://developer.android.com/privacy-and-security/security-config)은 base/domain별 cleartext 정책과 manifest 연결을 설명한다. 이 문서의 특정 호스트 예외는 해당 기능을 이번 로컬 검토 환경에 적용한 선택이다.
