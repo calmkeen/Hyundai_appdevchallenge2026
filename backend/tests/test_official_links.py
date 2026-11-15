@@ -18,9 +18,16 @@ from app.official_links import manual_actions, resolve_manual, validate_support_
 
 ROOT = Path(__file__).resolve().parents[2]
 PROFILE = "ioniq5-ne1-2024-kr"
+GUIDE = "ioniq5-door-open-check"
 SUPPORT = "hyundai-kr-customer-support"
 URL = "https://www.hyundai.com/kr/ko/e/customer/center"
 LOCALES = ("ko-KR", "en", "ja-JP")
+
+
+def door_guides(catalog, locale):
+    """Select the deployed door record explicitly as other reviewed topics grow."""
+    guide, = [guide for guide in catalog.published(PROFILE, locale) if guide["guide_id"] == GUIDE]
+    return [guide]
 
 
 class ReviewedUnitFixture:
@@ -136,13 +143,14 @@ def test_unsupported_question_offers_registered_support_without_model_or_unrelat
 def test_manual_resolver_rejects_raw_url_other_profile_version_and_ambiguous_source():
     catalog = Catalog()
     guides = catalog.published(PROFILE, "ko-KR")
-    source = guides[0]["sources"][0]
+    door, = door_guides(catalog, "ko-KR")
+    source = door["sources"][0]
     assert catalog.manual_source(PROFILE, "ko-KR", source["url"]) is None
     assert catalog.manual_source("demo-ioniq5n-2025-gb", "ko-KR", source["source_id"]) is None
     old_profile = copy.deepcopy(catalog.profile(PROFILE))
     old_profile["manual_version"] = "old-version"
     assert resolve_manual(guides, old_profile, source["source_id"]) is None
-    conflicting = copy.deepcopy(guides[0])
+    conflicting = copy.deepcopy(door)
     conflicting["sources"][0]["url"] = "https://example.test/conflicting-source"
     assert resolve_manual([*guides, conflicting], catalog.profile(PROFILE), source["source_id"]) is None
     canonical = catalog.manual_source(PROFILE, "ko-KR", source["source_id"])
@@ -152,7 +160,7 @@ def test_manual_resolver_rejects_raw_url_other_profile_version_and_ambiguous_sou
 
 def test_legacy_published_url_action_remains_preserved_but_is_never_resolved_as_an_id():
     catalog = Catalog()
-    guide = catalog.published(PROFILE, "ko-KR")[0]
+    guide, = door_guides(catalog, "ko-KR")
     legacy = next(action for step in guide["steps"] for action in step["actions"] if action["kind"] == "OPEN_MANUAL")
     assert legacy["target_id"].startswith("https://ownersmanual.hyundai.com/")
     assert catalog.manual_source(PROFILE, "ko-KR", legacy["target_id"]) is None
@@ -193,7 +201,7 @@ def test_publication_valid_source_id_outside_action_contract_cannot_become_manua
     guide["sources"][0]["source_id"] = source_id
     for step in guide["steps"]:
         step["source_ids"] = [source_id if ref == previous else ref for ref in step["source_ids"]]
-    assert catalog.published(PROFILE, "ko-KR") == [guide]  # Preserve the broader publication contract.
+    assert guide in catalog.published(PROFILE, "ko-KR")  # Preserve the broader publication contract.
     assert catalog.manual_source(PROFILE, "ko-KR", source_id) is None
     app = create_app(db_path=":memory:", mode="LIVE", catalog=catalog, provider=provider)
     with TestClient(app) as client:

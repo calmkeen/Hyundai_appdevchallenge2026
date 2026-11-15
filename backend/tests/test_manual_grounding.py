@@ -14,6 +14,12 @@ PROFILE = "ioniq5-ne1-2024-kr"
 GUIDE = "ioniq5-door-open-check"
 
 
+def door_guides(catalog, locale):
+    """Select the deployed door record explicitly as other reviewed topics grow."""
+    guide, = [guide for guide in catalog.published(PROFILE, locale) if guide["guide_id"] == GUIDE]
+    return [guide]
+
+
 def request(locale="ko-KR", question="문이 열려 있는데 무엇을 확인해야 하나요?", guide_id=None, profile=PROFILE):
     return AskRequest(request_id="grounding-test", session_id="not-a-real-session", profile_id=profile,
                       locale=locale, question=question, guide_context={"guide_id": guide_id})
@@ -40,7 +46,7 @@ def test_natural_door_question_retrieves_only_the_selected_manual_and_language(l
 
 @pytest.mark.parametrize("locale", ["ko-KR", "en", "ja-JP"])
 def test_every_complete_reviewed_unit_has_exact_passage_citations(locale):
-    guides = Catalog().published(PROFILE, locale)
+    guides = door_guides(Catalog(), locale)
     units = answer_units(guides)
     assert len(units) == 1 and units[0]["unit_id"].endswith(":closing-bundle:v1")
     for unit in units:
@@ -54,7 +60,7 @@ def test_every_complete_reviewed_unit_has_exact_passage_citations(locale):
 
 @pytest.mark.parametrize("locale", ["ko-KR", "en", "ja-JP"])
 def test_caution_or_negation_cannot_be_removed_from_a_step(locale):
-    guides = Catalog().published(PROFILE, locale)
+    guides = door_guides(Catalog(), locale)
     step = guides[0]["steps"][0]
     unit = answer_units(guides)[0]
     with pytest.raises(ValueError, match="COMPLETE_UNIT"):
@@ -64,7 +70,7 @@ def test_caution_or_negation_cannot_be_removed_from_a_step(locale):
 
 
 def test_citations_cannot_be_borrowed_from_another_step_or_incomplete_for_body():
-    guides = Catalog().published(PROFILE, "en")
+    guides = door_guides(Catalog(), "en")
     bundle = answer_units(guides)[0]
     pinch, closure = guides[0]["steps"]
     for invalid in (
@@ -80,18 +86,32 @@ def test_citations_cannot_be_borrowed_from_another_step_or_incomplete_for_body()
 
 @pytest.mark.parametrize("ids", [[], ["invented-source"], ["duplicate", "duplicate"]])
 def test_empty_invented_or_duplicate_citations_are_rejected(ids):
-    guides = Catalog().published(PROFILE, "ko-KR")
+    guides = door_guides(Catalog(), "ko-KR")
     with pytest.raises(ValueError):
         validate_answer(output(answer_units(guides)[0], source_ids=ids), guides)
 
 
-@pytest.mark.parametrize("question", [
-    "충전은 어떻게 하나요?", "문이 열려 있을 때 충전해도 되나요?",
-    "How do I charge the vehicle?", "Can I charge with the door open?",
-    "充電の方法を教えてください", "ドアを開けたまま充電できますか？",
+@pytest.mark.parametrize("locale,question", [
+    ("ko-KR", "충전은 어떻게 하나요?"),
+    ("en", "How do I charge the vehicle?"),
+    ("ja-JP", "充電の方法を教えてください"),
 ])
-def test_uncovered_charging_questions_do_not_borrow_the_selected_door_guide(question):
-    assert Catalog().retrieve(request(question=question, guide_id=GUIDE)) == []
+def test_charging_question_only_uses_available_charging_guide_instead_of_selected_door(locale, question):
+    catalog = Catalog()
+    guides = catalog.retrieve(request(locale, question, guide_id=GUIDE))
+    expected = [guide for guide in catalog.published(PROFILE, locale) if guide["guide_id"] == "ioniq5-ac-charging-check"]
+    assert guides == expected
+    assert guides == catalog.retrieve(request(locale, question))
+    assert all(guide["locale"] == locale and guide["guide_id"] != GUIDE for guide in guides)
+
+
+@pytest.mark.parametrize("locale,question", [
+    ("ko-KR", "문이 열려 있을 때 충전해도 되나요?"),
+    ("en", "Can I charge with the door open?"),
+    ("ja-JP", "ドアを開けたまま充電できますか？"),
+])
+def test_compound_door_and_charging_questions_do_not_borrow_the_selected_door_guide(locale, question):
+    assert Catalog().retrieve(request(locale, question, guide_id=GUIDE)) == []
 
 
 @pytest.mark.parametrize("question", ["다른 질문입니다", "문의드립니다", "What do I do?", "何をすればいいですか？"])
@@ -156,13 +176,13 @@ def test_neither_profile_nor_language_falls_back_to_the_official_korean_car():
 
 
 def test_non_answer_status_is_not_treated_as_a_grounded_passage():
-    guides = Catalog().published(PROFILE, "ko-KR")
+    guides = door_guides(Catalog(), "ko-KR")
     with pytest.raises(ValueError, match="STATUS"):
         validate_answer(output(answer_units(guides)[0], status="NO_RELIABLE_SOURCE"), guides)
 
 
 def test_ambiguous_complete_units_are_rejected_without_guessing_a_guide():
-    guides = Catalog().published(PROFILE, "en")
+    guides = door_guides(Catalog(), "en")
     duplicated = copy.deepcopy(guides[0])
     with pytest.raises(ValueError, match="AMBIGUOUS"):
         validate_answer(output(answer_units(guides)[0]), guides + [duplicated])
