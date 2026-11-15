@@ -43,7 +43,8 @@ data class Guide(val id: String, val title: String, val body: String, val steps:
     val locale: String = "ko-KR", val stepIds: List<String> = emptyList(), val cautions: List<List<String>> = emptyList(),
     val manualSetId: String? = null, val sourceVersion: String? = null, val profileIds: List<String> = emptyList(),
     val publicationVerified: Boolean = false, val origin: GuideOrigin = GuideOrigin.NONE,
-    val officialSources: List<OfficialSource> = emptyList())
+    val officialSources: List<OfficialSource> = emptyList(),
+    val topic: String = "", val relatedProperties: Set<String> = emptySet())
 data class UiState(
     val page: Page = Page.PROFILE,
     val sessionEpoch: Int = 0,

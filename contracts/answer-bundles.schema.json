@@ -12,11 +12,12 @@
         "profile_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
         "manual_set_id": {"type": "string", "minLength": 1},
         "source_version": {"type": "string", "minLength": 1},
-        "topic": {"const": "door"},
-        "unit_suffix": {"const": ":closing-bundle:v1"},
-        "source_ids": {"type": "array", "minItems": 2, "maxItems": 2, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "topic": {"enum": ["door", "charging", "seats_mirrors", "display_indicators"]},
+        "unit_suffix": {"enum": [":closing-bundle:v1", ":manual-bundle:v1"]},
+        "source_ids": {"type": "array", "minItems": 1, "maxItems": 12, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
         "locales": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 2}},
-        "required_steps": {"type": "array", "minItems": 2, "maxItems": 2, "items": {
+        "required_caution_step_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "required_steps": {"type": "array", "minItems": 1, "maxItems": 12, "items": {
           "type": "object", "additionalProperties": false,
           "properties": {"step_id": {"type": "string", "minLength": 1}, "order": {"type": "integer", "minimum": 1}, "source_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}}},
           "required": ["step_id", "order", "source_ids"]
@@ -31,7 +32,10 @@
         "human_certified_review": {"const": false},
         "oem_approved": {"const": false}
       },
-      "required": ["policy_id", "guide_id", "profile_ids", "manual_set_id", "source_version", "topic", "unit_suffix", "source_ids", "locales", "required_steps", "records", "content_basis", "review_method", "human_certified_review", "oem_approved"]
+      "required": ["policy_id", "guide_id", "profile_ids", "manual_set_id", "source_version", "topic", "unit_suffix", "source_ids", "locales", "required_steps", "records", "content_basis", "review_method", "human_certified_review", "oem_approved"],
+      "allOf": [{"if": {"properties": {"topic": {"const": "door"}}},
+        "then": {"properties": {"unit_suffix": {"const": ":closing-bundle:v1"}, "source_ids": {"minItems": 2, "maxItems": 2}, "required_steps": {"minItems": 2, "maxItems": 2}}},
+        "else": {"properties": {"unit_suffix": {"const": ":manual-bundle:v1"}}, "required": ["required_caution_step_ids"]}}]
     }}
   },
   "required": ["schema_version", "bundles"]

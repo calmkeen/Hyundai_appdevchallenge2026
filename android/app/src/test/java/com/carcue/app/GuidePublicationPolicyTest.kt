@@ -35,6 +35,16 @@ class GuidePublicationPolicyTest {
         assertTrue(guide.publicationVerified)
     }
 
+    @Test fun apiBundledAndCachedRecordConversionPreservesManualTopicAndSensorAssociations() {
+        for (topic in listOf("door", "charging", "seats_mirrors", "display_indicators")) {
+            val properties = if (topic == "door") listOf("door.position") else emptyList()
+            val record = f.guide.copy(topic = topic, steps = listOf(f.step.copy(relatedProperties = properties)))
+            val guide = accepted(record).single().toGuide()
+            assertEquals(topic, guide.topic)
+            assertEquals(properties.toSet(), guide.relatedProperties)
+        }
+    }
+
     @Test fun translatedContentRequiresReviewAndGlossaryVersion() {
         val translated = f.guide.copy(locale = "en", translationReviewStatus = "REVIEWED", glossaryVersion = "fixture-glossary-v1")
         assertEquals(listOf(translated), accepted(translated))
