@@ -6,6 +6,8 @@
 
 선행 작업 feature4개와 develop `736dc95`는 실제 원격 SHA 일치 및 CI5개 success를 확인했다. 후속 `feature/sdk-inflight-recovery` checkpoint `02947ed`도 원격 반영·CI success(run `43676020770`)이며 서버 회귀 **475개**, UI191개·가이드4레코드 검사가 통과했다. 추가 7개는 실제 파일·thread 기반 audit 관측 회귀다. CI는 MOCK 설정이며 실제 SDK·모델 검증과 구분한다. 실제 AVD 복구·기기 시험의 실패 원본과 최신 결과는 [SDK_INFLIGHT_RECOVERY.md](SDK_INFLIGHT_RECOVERY.md)를 따른다.
 
+최종 도구 브랜치 `37b26c7`은 run `43682172834`, no-ff develop `71cd181`은 run `43683711639`의 **실제 원격 SHA 일치·CI success**를 확인했다. 실제 SDK in-flight 세 경계는 **미완료**다. 언어·Drive의 부분 타이밍/결과 억제 증명은 있으나 전체 native 실행 성공이 없고 End는 미실행이다. 원본 AVD를 보존한 별도 factory AVD에서도 SystemUI/CarService 준비 실패가 있었고, 에뮬레이터 종료 후에도 호스트 CPU idle0%·약25GB swap을 관측했다. 이 상태를 App/SDK 오류의 단독 원인으로 확정하지 않으며, CPU·메모리 여유를 확보한 뒤 실제 조건으로 재시험한다. 대역으로 통과 결과를 만들지 않는다.
+
 ## 최신: 다국어·SDK·종료 시연과 소개 영상 · 2026-11-15
 
 프런트 경계 구현 `78bd767`은 UI/답변/번역 원문·대상 언어, 맥락별 동의와 응답 적용, 가이드 → ASK → 번역 → ASK → 같은 단계 복귀를 분리한다. `d6be741`은 생성 QUESTION 번역이 기본 보류일 때 과거 opt-in 성공 캐시도 재생하지 않도록 한다. backend **468개**, Android JVM **127개**, 계약과 세 언어 UI **191개** 자원 검사 및 Pleos 앱/테스트 빌드를 통과했다. 합성 정책·provider HTTP 대역 회귀를 실제 SDK/모델 시험으로 계산하지 않는다.

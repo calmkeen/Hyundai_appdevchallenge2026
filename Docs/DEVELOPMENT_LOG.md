@@ -97,3 +97,7 @@ OF-001 구현 `e816d61`, 철회 navigation 보완 `684556c`/`e7c58ad`, SE-001 �
 사용자 잠금 해제 후 위 4개 작업 feature와 develop `736dc95`의 실제 원격 SHA 및 CI5개 success를 확인했다. `feature/sdk-inflight-recovery`에서 남은 locale/Drive/이용 종료 경계를 별도 진행한다. 기능 APK는 보존하고 ActivityScenario의 반복 idle barrier를 없앤 계측 APK, 실제 AVD 화면/사용자/CarService/SDK 준비, 실제 무료 모델 처리시간과 경계 전후 관측, 세션 삭제·Park 복구까지 완료 조건으로 둔다. 최신 실행 결과 전에는 통과로 세지 않으며 유료 AI·생성 QUESTION 번역 보류와 기존 userdata/실패 증거를 유지한다.
 
 후속 test-only 보완은 실제 경계 뒤의 Compose 프레임 진행, 동일 원래 Activity의 실제 focus/화면 증거, 캡처 뒤 늦은 결과 재검사, 안전 SDK 실패 코드 수집이다. APK 빌드·독립 소스 검토·관측기 회귀7개를 통과했지만 run01~13 전체는 FAIL로 보존한다. 기능 앱5ef560ba…는 변경하지 않았다. 별도 공식 Stable runtime 비교와 호스트 Clamshell Sleep 교란, 삭제/복구 결과를 `SDK_INFLIGHT_RECOVERY.md`에 기록하며, 추가 실제 세 경계 완료 전에는 완료로 올리지 않는다.
+
+검증 도구 `37b26c7`과 no-ff develop 통합 `71cd181`의 실제 원격 SHA·CI success를 확인했다(backend475/UI191, 기기 시험은 CI 미포함). 검증 도구 통합과 실제 SDK 경계 미완료를 구분한다. 남은 SystemUI/CarService 부팅 진단·실행 증거는 새 `feature/pleos-runtime-diagnostics`에서 계속한다. main·앱 기능 코드·기존 AVD 데이터와 실패 원본을 보존한다.
+
+후속 진단은 같은 공식 이미지의 독립 factory 데이터·host GPU/원해상도·기준선 CPU/태그·kernel 로그까지 분리했으나 준비 gate를 통과하지 못했다. 에뮬레이터 종료 뒤에도 별도 host CPU 표본 idle0%와 약25GB swap을 확인했다. 다른 앱을 임의 종료하거나 OS 보안을 바꾸지 않고, 여유 있는 호스트 상태를 확보한 뒤 실제 세 경계 재시험을 이어가는 조건을 기록한다. 처리 중 End 미실행과 과거 부분 증명의 한계를 그대로 유지한다.

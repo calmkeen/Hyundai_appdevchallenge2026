@@ -1,6 +1,6 @@
 # CarCue 실행과 개발
 
-2026-11-15 다국어·차량 UX·이용 종료의 현재 검증 경로는 [SDK_SESSION_VALIDATION.md](SDK_SESSION_VALIDATION.md), 새 소개 영상 도구는 [SDK_LIVE_INTRO.md](SDK_LIVE_INTRO.md)를 따른다. 이전 Mock/SDK 영상 재현 명령은 아래 이력으로 보존한다. 새 검증 도구는 기존 앱/AVD userdata나 로그를 초기화하지 않는다.
+2026-11-15 다국어·차량 UX·이용 종료의 표준 시연은 [SDK_SESSION_VALIDATION.md](SDK_SESSION_VALIDATION.md), 추가 in-flight 시험·AVD 복구의 최신 상태는 [SDK_INFLIGHT_RECOVERY.md](SDK_INFLIGHT_RECOVERY.md), 새 소개 영상 도구는 [SDK_LIVE_INTRO.md](SDK_LIVE_INTRO.md)를 따른다. 이전 Mock/SDK 영상 재현 명령은 아래 이력으로 보존한다. 새 검증 도구는 기존 앱/AVD userdata나 로그를 초기화하지 않는다.
 
 최신 원문/공식지원·3언어왕복·실제SDK/주행중거절 재현은 `OFFICIAL_RESOURCE_APP_VALIDATION.md`를 따른다. 무료Ollama서버는 `LOCAL_AI_INTEGRATION.md`, UX연결의복구/한계는 `UX_CONNECTION_RECOVERY.md`에 있다. 기획·완료현황은 `Docs/`에 유지하며 유료AI와 생성질문번역 기본보류는 그대로다.
 
