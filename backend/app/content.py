@@ -27,13 +27,22 @@ _TOPIC_QUERIES = {
 _CHARGE_PORT_DOOR = re.compile(r"charg\w*\s+port\s+door|충전\s*(?:구\s*(?:도어|문)|도어)|充電(?:口|ポート)(?:の)?(?:ドア|扉)", re.IGNORECASE)
 _OUTSIDE_TOPIC_SCOPE = {
     "charging": re.compile(r"(?<![a-z0-9])(?:dc|iccb|v2l|chademo|ccs)(?![a-z0-9])|\b(?:fast|rapid|portable|emergency)\b|"
+        r"\b(?:disconnect\w*|unplug\w*)\b|\b(?:stop(?:ping)?|end(?:ing)?|finish(?:ing)?)\s+(?:ac\s+)?charg\w*\b|"
+        r"\bcharg\w*\s+(?:stop|end|finish|completion|termination)\b|"
         r"(?<![a-z0-9])(?:phones?|smartphones?|usb|wireless|12\s*v)(?![a-z0-9])|"
         r"급속|휴대용|휴대폰|휴대전화|스마트폰|무선|비상\s*(?:분리|해제)|강제\s*분리|"
+        r"충전.{0,24}(?:종료|중단|중지|분리|해제)|(?:커넥터|케이블)(?:를|을)?\s*(?:분리|빼|제거)|"
+        r"充電.{0,12}(?:終了|停止)|(?:コネクタ[ー]?|ケーブル).{0,12}(?:外|抜)|"
         r"急速|携帯|スマホ|スマートフォン|ワイヤレス|無線|ポータブル|非常|緊急", re.IGNORECASE),
-    "seats_mirrors": re.compile(r"(?<![a-z0-9])(?:dsm|memory|relaxation|reverse|camera)(?![a-z0-9])|seat[ -]?belts?|"
+    "seats_mirrors": re.compile(r"(?<![a-z0-9])(?:dsm|dcm|memory|relaxation|reverse|camera)(?![a-z0-9])|seat[ -]?belts?|"
+        r"\b(?:ventilat(?:ion|ed)|heating|heated|heaters?)\b|"
+        r"(?:remov\w*|detach\w*|reinstall\w*).{0,24}head[ -]?rests?|head[ -]?rests?.{0,24}(?:remov|detach|install)|"
+        r"헤드레스트.{0,16}(?:분리|탈거|장착)|ヘッドレスト.{0,16}(?:取(?:り)?外|取(?:り)?付)|"
+        r"통풍|열선|通風|ベンチレーション|シートヒーター|シートヒータ|シート暖房|シート冷房|"
         r"rear\s+seats?|child\s+seats?|메모리|릴렉|카메라|후진|디지털|안전벨트|뒷좌석|카시트|유아|"
         r"デジタル|カメラ|メモリ|リラック|後退|バック|後席|チャイルド|シートベルト", re.IGNORECASE),
     "display_indicators": re.compile(r"(?<![a-z0-9])(?:abs|tpms|brake|airbag|esc)(?![a-z0-9])|브레이크|제동|타이어|공기압|에어백|"
+        r"\b(?:high|main)[ -]?beam\b|상향\s*(?:등|전조등)|ハイビーム|"
         r"ブレーキ|タイヤ|空気圧|エアバッグ", re.IGNORECASE),
 }
 # Full-match only: a selected door guide may resolve a short referential
