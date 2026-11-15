@@ -1,0 +1,125 @@
+{
+  "guide_id": "ioniq5-ac-charging-check",
+  "profile_ids": [
+    "ioniq5-ne1-2024-kr"
+  ],
+  "manual_set_id": "hyundai-ioniq5-ne1-2024-kr",
+  "source_version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+  "topic": "charging",
+  "source_locale": "ko-KR",
+  "lifecycle": "PUBLISHED",
+  "title": "AC charging: before you start",
+  "body": "Park safely first. This guide covers pre-checks and the start of AC charging for the 2024 Korean-market IONIQ 5 only, not DC fast charging, portable ICCB, V2L or emergency release. Check charging on the vehicle and charger directly; follow that charger's instructions for connection and disconnection.",
+  "locale": "en",
+  "glossary_version": "carcue-ioniq5-ac-charging-v1",
+  "translation_review_status": "REVIEWED",
+  "sources": [
+    {
+      "source_id": "hyundai-ne1-2024-kr-charge-precautions",
+      "title": "Hyundai IONIQ 5 2024 - Korean owner manual",
+      "url": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/id8c4c9da6f01.html",
+      "version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+      "section": "충전 시 주의사항 · 인쇄 0-23 / PDF 29",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "source_id": "hyundai-ne1-2024-kr-charge-general",
+      "title": "Hyundai IONIQ 5 2024 - Korean owner manual",
+      "url": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/id9c9b83617dd.html",
+      "version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+      "section": "전기 자동차 충전 · 인쇄 0-25 / PDF 31",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "source_id": "hyundai-ne1-2024-kr-ac-charge-start",
+      "title": "Hyundai IONIQ 5 2024 - Korean owner manual",
+      "url": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/iddf8ac57572b.html",
+      "version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+      "section": "완속 충전 방법 > 연결·시작 확인 · 인쇄 0-25~27 / PDF 31~33",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "source_id": "hyundai-ne1-2024-kr-charge-label-stop",
+      "title": "Hyundai IONIQ 5 2024 - Korean owner manual",
+      "url": "https://ownersmanual.hyundai.com/full_pdf/NE1/2024/ko_KR#page=30",
+      "version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+      "section": "충전 정보 라벨·비상시 충전 커넥터 분리의 경고 · 인쇄 0-24 / PDF 30; 비상 분리 절차는 이 안내 범위 밖",
+      "verification_status": "VERIFIED"
+    }
+  ],
+  "steps": [
+    {
+      "step_id": "check-charge-site",
+      "order": 1,
+      "title": "Check people, site and equipment",
+      "body": "Use a designated EV charger matching the voltage and maximum current on the vehicle's charging label, and the genuine cable for this vehicle where equipped.",
+      "image_asset_id": null,
+      "official_cautions": [
+        "Charger electromagnetic fields can fatally interfere with medical-device operation. If you use a pacemaker or another electrical medical device, ask your clinician and device maker about effects before charging.",
+        "Use a waterproof charger. Do not connect or disconnect with wet hands, or stand in water or snow when connecting the cable.",
+        "Do not charge if lightning is possible or rain could reach connector or plug joints.",
+        "Do not use a damaged, corroded, rusty or loose cable, connector or plug; have it inspected. Replace any cable with damaged insulation with a new one. Do not use an extension lead.",
+        "Keep the cable clean and dry; do not modify or disassemble it."
+      ],
+      "source_ids": [
+        "hyundai-ne1-2024-kr-charge-precautions",
+        "hyundai-ne1-2024-kr-charge-label-stop",
+        "hyundai-ne1-2024-kr-ac-charge-start",
+        "hyundai-ne1-2024-kr-charge-general"
+      ],
+      "related_properties": [],
+      "actions": [
+        {
+          "kind": "OPEN_MANUAL",
+          "target_id": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/id8c4c9da6f01.html"
+        }
+      ]
+    },
+    {
+      "step_id": "park-and-check-connection",
+      "order": 2,
+      "title": "Park and check the connections",
+      "body": "Hold the brake, apply the parking brake, turn electrical switches off, select P and turn the vehicle off. Ensure the connector, plug and inlet are free of water, dust and debris. Follow the charger manual; hold the vehicle-side AC connector by its handle and insert it into the inlet until it clicks.",
+      "image_asset_id": null,
+      "official_cautions": [
+        "Keep hands and body away from mating parts; do not pull the cable. Poor connections can cause fire or electric shock.",
+        "Do not force a frozen charging door or drop a connector.",
+        "Charge only in P. Keep hands away from the cooling fan: it can run even with the vehicle off."
+      ],
+      "source_ids": [
+        "hyundai-ne1-2024-kr-charge-precautions",
+        "hyundai-ne1-2024-kr-charge-general",
+        "hyundai-ne1-2024-kr-ac-charge-start"
+      ],
+      "related_properties": [],
+      "actions": [
+        {
+          "kind": "OPEN_MANUAL",
+          "target_id": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/iddf8ac57572b.html"
+        }
+      ]
+    },
+    {
+      "step_id": "check-charge-start",
+      "order": 3,
+      "title": "Check the start on the vehicle",
+      "body": "Immediately after connection, check that the cluster charging-connector indicator lights (displayed for about 1 minute). Once charging starts, the estimated time also appears for about 1 minute. Scheduled charging or climate settings may show -- for the estimate.",
+      "image_asset_id": null,
+      "official_cautions": [
+        "Stop charging immediately if unusual smells, smoke or other abnormalities occur.",
+        "Time estimates vary with battery condition and age, charger specifications and temperature. If charging does not start, consult the official manual and charger instructions."
+      ],
+      "source_ids": [
+        "hyundai-ne1-2024-kr-ac-charge-start",
+        "hyundai-ne1-2024-kr-charge-label-stop"
+      ],
+      "related_properties": [],
+      "actions": [
+        {
+          "kind": "OPEN_MANUAL",
+          "target_id": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/iddf8ac57572b.html"
+        }
+      ]
+    }
+  ]
+}
