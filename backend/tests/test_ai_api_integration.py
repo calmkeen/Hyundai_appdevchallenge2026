@@ -35,6 +35,12 @@ ORIGINAL = "Do not exceed 25 kPa."
 FIXTURE_TRANSLATION = "25 kPa를 넘지 마세요."
 
 
+def door_guides(catalog, locale):
+    """Select the deployed door record explicitly as other reviewed topics grow."""
+    guide, = [guide for guide in catalog.published(PROFILE, locale) if guide["guide_id"] == GUIDE]
+    return [guide]
+
+
 class DeterministicLocalFixture:
     """Provider-port test double, explicitly identified in API responses."""
 
@@ -115,7 +121,7 @@ def saved_result(app, session, request_id):
 def test_official_questions_return_complete_bundle_regardless_of_selected_step(locale, step_context):
     provider = DeterministicLocalFixture()
     with session_for(provider, locale) as (_, client, catalog, session, headers):
-        guides = catalog.published(PROFILE, locale)
+        guides = door_guides(catalog, locale)
         assert len(guides) == 1 and guides[0]["guide_id"] == GUIDE
         unit = answer_units(guides)[0]
         payload = ask_payload(session, locale)
@@ -150,8 +156,8 @@ def test_official_questions_return_complete_bundle_regardless_of_selected_step(l
 def test_all_stored_guide_language_pairs_use_reviewed_target_without_provider(source_locale, target_locale):
     provider = DeterministicLocalFixture()
     with session_for(provider, target_locale) as (_, client, catalog, session, headers):
-        original = catalog.published(PROFILE, source_locale)[0]
-        target = catalog.published(PROFILE, target_locale)[0]
+        original = door_guides(catalog, source_locale)[0]
+        target = door_guides(catalog, target_locale)[0]
         payload = {"request_id": "stored-guide-pair", "session_id": session["session_id"],
                    "profile_id": PROFILE, "source_locale": "auto", "target_locale": target_locale,
                    "text": original["body"], "content_kind": "GUIDE", "guide_id": GUIDE}
@@ -176,8 +182,8 @@ def test_answer_translations_use_exact_reviewed_units_in_every_language_directio
         source_locale, target_locale, detect_source):
     provider = DeterministicLocalFixture()
     with session_for(provider, target_locale) as (_, client, catalog, session, headers):
-        original = catalog.published(PROFILE, source_locale)[0]
-        target = catalog.published(PROFILE, target_locale)[0]
+        original = door_guides(catalog, source_locale)[0]
+        target = door_guides(catalog, target_locale)[0]
         original_unit = answer_units([original])[0]
         target_unit = answer_units([target])[0]
         assert original_unit["unit_id"].endswith(":closing-bundle:v1")
@@ -209,7 +215,7 @@ def test_answer_translations_use_exact_reviewed_units_in_every_language_directio
 def test_unmatched_or_incomplete_answers_never_fall_back_to_model_translation(locale, invalid_kind):
     provider = DeterministicLocalFixture()
     with session_for(provider) as (_, client, catalog, session, headers):
-        original = catalog.published(PROFILE, locale)[0]
+        original = door_guides(catalog, locale)[0]
         unit = answer_units([original])[0]
         text, source_locale = unit["text"], "auto"
         if invalid_kind == "unknown-text":
@@ -248,7 +254,7 @@ def test_unmatched_or_incomplete_answers_never_fall_back_to_model_translation(lo
 def test_answer_with_unknown_explicit_source_locale_is_rejected_without_provider():
     provider = DeterministicLocalFixture()
     with session_for(provider) as (_, client, catalog, session, headers):
-        original = catalog.published(PROFILE, "en")[0]
+        original = door_guides(catalog, "en")[0]
         payload = translation_payload(session, source_locale="not-registered")
         payload.update(content_kind="ANSWER", text=original["body"])
         response = client.post("/v1/translate", json=payload, headers=headers)
