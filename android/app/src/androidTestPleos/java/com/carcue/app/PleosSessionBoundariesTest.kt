@@ -41,6 +41,9 @@ class PleosSessionBoundariesTest {
     )
     private val expectedModel get() = args.getString("expectedLocalModel") ?: "qwen3:4b"
     private var originallyKeptAwake = false
+    private var originalLateAutoAdvance: Boolean? = null
+    private var lateManualFramesPumped = 0
+    private var preparedActivityIdentity = 0
     private fun file(name: String) = File(directory, name)
     private fun signal(name: String, value: JSONObject = JSONObject()) { file(name).writeText(value.toString()) }
     private fun waitSignal(name: String, timeout: Long = 45000) {
@@ -126,9 +129,46 @@ class PleosSessionBoundariesTest {
         val root = rule.onRoot().getUnclippedBoundsInRoot()
         assertTrue("Full caution bundle must fit the recorded viewport", bounds.top >= root.top && bounds.bottom <= root.bottom)
     }
+    private fun pumpLateFrames(durationMillis: Long = 64) {
+        check(args.getString("sessionFlowMode") == "late" && !rule.mainClock.autoAdvance)
+        // Advance actual UI recomposition at a bounded, wall-clock-paced rate.
+        // SDK, HTTP/provider and SystemClock deadlines are never advanced by this test clock.
+        val until = SystemClock.elapsedRealtime() + durationMillis
+        do {
+            rule.mainClock.advanceTimeByFrame()
+            lateManualFramesPumped++
+            Thread.sleep(16)
+        } while (SystemClock.elapsedRealtime() < until)
+    }
+    private fun commitLateBoundaryUi() {
+        rule.mainClock.autoAdvance = false
+        pumpLateFrames(96)
+    }
+    private fun resumeLateClock(leaveAssistant: Boolean) {
+        check(!rule.mainClock.autoAdvance)
+        if (leaveAssistant) {
+            // Only after model completion, the two-second observation and checked marker.
+            // Unmount the real TextField before restoring Espresso auto synchronization.
+            InstrumentationRegistry.getInstrumentation().runOnMainSync { vm.go(Page.GUIDES) }
+        }
+        pumpLateFrames(96)
+        rule.onNodeWithTag("question_input").assertDoesNotExist()
+        rule.mainClock.autoAdvance = requireNotNull(originalLateAutoAdvance)
+    }
     private fun image(name: String, requirePhysical: Boolean = true) {
         check(requirePhysical || name == "late-drive" && vm.state.value.ux.let { it.known && it.restricted })
-        rule.waitUntil(15000) { activity.hasWindowFocus() }
+        val focusStarted = SystemClock.elapsedRealtime()
+        val manualLate = args.getString("sessionFlowMode") == "late" && !rule.mainClock.autoAdvance
+        val focusTimeout = if (manualLate) 45000L else 15000L
+        if (manualLate) {
+            val focusBy = focusStarted + focusTimeout
+            while (!activity.hasWindowFocus() && SystemClock.elapsedRealtime() < focusBy) pumpLateFrames(32)
+            assertTrue("Original activity must regain real window focus", activity.hasWindowFocus())
+            assertEquals(preparedActivityIdentity, System.identityHashCode(activity))
+            assertFalse("Original activity must remain alive", activity.isDestroyed)
+            pumpLateFrames(64)
+        } else rule.waitUntil(15000) { activity.hasWindowFocus() }
+        val focusWaitMillis = SystemClock.elapsedRealtime() - focusStarted
         rule.waitForIdle()
         file("$name.png").outputStream().use { rule.onRoot().captureToImage().asAndroidBitmap().compress(Bitmap.CompressFormat.PNG, 100, it) }
         var physical: Bitmap? = null
@@ -149,6 +189,11 @@ class PleosSessionBoundariesTest {
             .put("passed", physical != null).put("physical_required", requirePhysical)
             .put("physical_unavailable", physical == null).put("compose_capture", "ACTUAL_CURRENT_APP_ROOT")
             .put("ux_known", vm.state.value.ux.known).put("ux_restricted", vm.state.value.ux.restricted)
+            .put("focus_wait_ms", focusWaitMillis).put("focus_timeout_ms", focusTimeout)
+            .put("window_focused", activity.hasWindowFocus()).put("activity_destroyed", activity.isDestroyed)
+            .put("activity_identity", System.identityHashCode(activity)).put("prepared_activity_identity", preparedActivityIdentity)
+            .put("compose_test_clock_auto_advance", rule.mainClock.autoAdvance)
+            .put("late_manual_frames_pumped", lateManualFramesPumped)
             .put("recorded_at", Instant.now().toString()).put("app_pid", Process.myPid()).toString())
         if (physical == null && !requirePhysical) return
         val display = requireNotNull(physical) { "Real display capture remained unavailable" }
@@ -325,9 +370,11 @@ class PleosSessionBoundariesTest {
         // AndroidComposeTestRule.activity uses ActivityScenario.onActivity(), which waits for idle.
         // Resolve the original Activity/VM once before any request; in-flight observations must not re-enter that barrier.
         activity = rule.activity
+        preparedActivityIdentity = System.identityHashCode(activity)
         vm = ViewModelProvider(activity)[CarCueViewModel::class.java]
         directory = File(activity.filesDir, "qa/$runId/sdk-session")
         check(!directory.exists() && directory.mkdirs())
+        if (mode == "late") originalLateAutoAdvance = rule.mainClock.autoAdvance
         originallyKeptAwake = activity.window.attributes.flags and WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON != 0
         rule.runOnIdle { activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) }
         if (mode == "late") {
@@ -341,7 +388,15 @@ class PleosSessionBoundariesTest {
     }
     private fun finish(mode: String, passed: Boolean) {
         try {
-            rule.runOnIdle { if (vm.state.value.sessionStarted) vm.endSession() }
+            if (mode == "late") {
+                // Failure cleanup must not re-enter the ASK/TextField idle barrier.
+                rule.mainClock.autoAdvance = false
+                InstrumentationRegistry.getInstrumentation().runOnMainSync {
+                    if (vm.state.value.sessionStarted) vm.endSession()
+                }
+                pumpLateFrames(96)
+                rule.mainClock.autoAdvance = requireNotNull(originalLateAutoAdvance)
+            } else rule.runOnIdle { if (vm.state.value.sessionStarted) vm.endSession() }
             rule.waitUntil(45000) { !vm.state.value.deletionPending }
             clean()
             if (passed) {
@@ -353,13 +408,22 @@ class PleosSessionBoundariesTest {
                 waitSignal("stop")
             }
         } finally {
-            if (!originallyKeptAwake) rule.runOnIdle { activity.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) }
+            if (mode == "late") {
+                try {
+                    if (!originallyKeptAwake) InstrumentationRegistry.getInstrumentation().runOnMainSync {
+                        activity.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                    }
+                } finally { originalLateAutoAdvance?.let { rule.mainClock.autoAdvance = it } }
+            } else if (!originallyKeptAwake) rule.runOnIdle { activity.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) }
         }
     }
     private fun failure(error: Throwable) {
         if (::directory.isInitialized) {
             file("failure.json").writeText(state().put("error_type", error.javaClass.simpleName).toString(2))
-            runCatching { image("failure") }
+            runCatching {
+                if (args.getString("sessionFlowMode") == "late") commitLateBoundaryUi()
+                image("failure")
+            }
         }
     }
     private fun carImage(name: String): Bitmap {
@@ -460,6 +524,7 @@ class PleosSessionBoundariesTest {
     }
 
     private fun assertNoLateResult() {
+        if (args.getString("sessionFlowMode") == "late" && !rule.mainClock.autoAdvance) pumpLateFrames(32)
         val s = vm.state.value
         assertFalse(s.busy); assertEquals("", s.answer); assertEquals("", s.answerRequestId); assertEquals("", s.answerStatus)
         assertEquals("", s.followUpQuestion); assertTrue(s.citations.isEmpty()); assertTrue(s.officialCitations.isEmpty()); assertTrue(s.actions.isEmpty())
@@ -509,7 +574,6 @@ class PleosSessionBoundariesTest {
                         // Capture the real callback/cancellation before any Compose semantic synchronization.
                         signal("boundary-drive", state().put("cancelled_request_id", request)
                             .put("route", "ACTUAL_PLATFORM_UX_CALLBACK_WHILE_INFLIGHT"))
-                        rule.onNodeWithTag("question_input").assertDoesNotExist()
                     }
                     else -> {
                         // Test endSession itself while pending, without a Settings navigation cancelling it first.
@@ -520,21 +584,34 @@ class PleosSessionBoundariesTest {
                             .put("route", "PRODUCTION_END_SESSION_HANDLER_ON_MAIN_THREAD_WHILE_INFLIGHT"))
                     }
                 }
+                // The real boundary marker precedes all frame/semantics work.
+                commitLateBoundaryUi()
+                if (name == "drive") rule.onNodeWithTag("question_input").assertDoesNotExist()
                 assertNoLateResult()
-                waitSignal("model-finished-$name", 150000)
+                val modelBy = SystemClock.elapsedRealtime() + 150000
+                while (!file("model-finished-$name").exists() && SystemClock.elapsedRealtime() < modelBy) {
+                    assertNoLateResult()
+                    Thread.sleep(20)
+                }
+                check(file("model-finished-$name").exists()) { "Host handshake timed out: model-finished-$name" }
                 val until = SystemClock.elapsedRealtime() + 2000
                 while (SystemClock.elapsedRealtime() < until) { assertNoLateResult(); Thread.sleep(50) }
-                image("late-$name", requirePhysical = name != "drive"); event("LATE_${name.uppercase()}_SUPPRESSED")
+                image("late-$name", requirePhysical = name != "drive"); assertNoLateResult()
+                event("LATE_${name.uppercase()}_SUPPRESSED")
                 if (name == "drive") {
                     signal("request-park"); ux(); refresh(); assertNoLateResult()
                     image("late-drive-restored") // Separate actual Park display; never a substitute for the Drive capture.
+                    assertNoLateResult()
                 }
                 if (name == "end") {
+                    // End already removed the input by returning to the actual Profile page.
+                    resumeLateClock(leaveAssistant = false)
                     rule.waitUntil(45000) { !vm.state.value.deletionPending }; clean()
                     clickTag("profile_$profileId"); clickText("English"); reading(); refresh()
                     assertEquals("en", vm.state.value.locale); assertNoLateResult(); event("NEW_USER_HAS_NO_OLD_RESPONSE")
                 }
                 signal("checked-$name", state().put("cancelled_request_id", request))
+                if (name != "end") resumeLateClock(leaveAssistant = true)
             }
             endViaUi(); passed = true
         } catch (error: Throwable) { failure(error); throw error }

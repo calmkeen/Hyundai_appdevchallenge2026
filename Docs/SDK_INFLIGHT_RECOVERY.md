@@ -84,6 +84,32 @@ runtime04는 시험 정리 뒤 별도의 host SIGSEGV/exit139도 보였다. 새 
 
 후속 후보는 원본 설정/데이터를 유지한 `SwiftShader + -no-audio + -skin 1280x720 + -cores 4` 실행 override다. framebuffer/CPU 지원 형식은 설치된 emulator help로 확인했다. 이전 충돌 보고 동의 창이 부팅을 막아, 게스트 미연결 상태의 소유 프로세스에 SIGTERM을 요청한 뒤 응답하지 않아 종료했다. 해당 사전 부팅 종료와 중복 실행 거절도 QA에 보존한다. 이후 공식 `-crash-report-mode never -no-metrics`로 외부 전송 없이 시작하며 로컬 충돌 증거·SDK/UX 검사·hang 검출을 감추지 않는다. 이 준비 작업을 실제 세 경계 통과로 집계하지 않는다.
 
+## run10~11과 화면 동기화 보완
+
+run10은 위 1280×720/4-core 후보에서 부팅·user10·CarService·keyguard 및 설치 APK 해시를 확인한 뒤 시작했다. 이후 CarService가 사라져 `REGISTERED_CAR_SERVICE_REQUIRED` 전제 검사에서 거절됐으며 실제 생성 호출 0회·DB `0/0/0`이다. 직전 모델 load-only는 빈 응답의 모델 적재이며 생성 성공으로 세지 않는다. 플랫폼 exit-info에는 CarService의 Java crash와 SystemUI ANR이 있었다. CarService의 정제된 예외는 `CarServiceHelperWrapper.waitForCarServiceHelper → sendInitialUser → CarUserService` 초기 사용자 경로의 `IllegalStateException`이다. 모델 적재와의 시간적 근접만으로 메모리 부족이나 인과를 확정하지 않는다. 근거는 `runtime-preflight-20261115-01/platform-exit-summary-before-reboot.json`, `car-7945-filtered-cause.json`이다.
+
+같은 AVD를 정상 `adb reboot`하고 모델을 적재하지 않은 상태에서 실제 CarService/keyguard 준비를 두 번 확인한 뒤 run11을 실행했다. 실제 언어 handler의 처리 중 타이밍은 통과했다(provider 25,958ms, pending 하한→완료 관측 약 18,964.85ms). 이후 VM의 답변·번역은 비어 있었지만 `assistant_answer` 노드 부재 검사에서 Compose idle 대기가 끝나지 않아 native 224.065초에 실패했다. Drive·End는 진입하지 않았고 전체 FAIL, DB `0/0/0`, Park/0/CLOSED·lease 복구를 기록했다. SDK lifecycle의 미완료 callback 검사도 통과로 바꾸지 않는다. `sdk-inflight-20261115-11/` 원본과 `runtime-preflight-20261115-01/run11-runtime-summary.json`이 근거다.
+
+후속 계측은 실제 boundary marker **뒤에만** 공개 Compose test `mainClock`을 수동 진행한다. 실제 벽시계에 맞춰 프레임을 계속 진행하고, 기존 상태 및 실제 UI 노드 부재 검사·모델 완료 대기·완료 후 2초 반복 검사·실제 화면 캡처를 유지한다. SDK·HTTP·모델·SystemClock 시간은 바꾸지 않는다. 각 케이스의 완료 및 checked marker 뒤에만 ASK를 벗어나 TextField를 unmount하고 원래 clock 설정을 복원한다. 실패 정리에서도 생산 종료 handler와 프레임 반영 뒤 clock을 복원한다. 이는 테스트 렌더 동기화 보완이며 앱 안정성 문제의 단독 원인을 확정한 결론이나 세 경계 통과 증거가 아니다.
+
+run12는 이 보완의 테스트 APK `4ae3ce5b1fbb36656b42301f4e80d1f198d834eb0c5ed2193ee31bd36da00feb`로 실행했다. 언어 경계의 실제 provider 21,409ms·pending 하한→완료 관측 약 20,782.34ms 및 모델 완료 후 2초의 VM/실제 semantic 노드 부재 검사는 통과했다. 이어 `image()`의 원래 Activity window focus 15초 대기에서 시간 초과해 native 136.880초에 전체 FAIL했다. 실패 캡처에서는 약 6초 뒤 같은 PID의 실제 화면을 얻었지만 이를 원래 경계의 캡처 성공으로 대체하지 않았다. Drive·End 미실행, DB `0/0/0`·Park/0/CLOSED·lease 복구이며 원본은 `sdk-inflight-20261115-12/`에 보존한다.
+
+후속 focus 대기는 late/manual 모드에서만 45초 실제 deadline의 polling 안에서도 프레임을 진행한다. 같은 원래 Activity의 실제 focus·생존을 요구하고, 캡처 뒤 빈 결과/실제 노드 부재를 다시 검사한다. 호스트도 네 캡처의 focus·Activity·수동 clock·진행 프레임을 확인한다. focus를 직접 설정하거나 Activity를 재실행하지 않는다. 45초는 polling 기한이며 개별 플랫폼 호출까지의 절대 상한은 아니다. host의 최종 600초 거절 기준을 유지한다. 일반 autoAdvance/showcase의 기존 15초 대기는 바꾸지 않았다.
+
+run12 뒤에는 ADB shell 지연과 실제 CarService 미등록도 관측했다. `adb reboot`의 ACK가 시간 초과됐고 이후 uptime도 유지돼 즉시 재부팅 완료로 보고하지 않았다. 따라서 run12의 초점 실패를 테스트 프레임 정지 하나의 원인으로 확정하지 않는다. 소유 emulator의 정상 종료 ACK·launcher exit0·ADB 장치 부재 후 동일 데이터를 보존한 headless(`-no-window`) 실행을 후속 후보로 분리했다. 새 이미지·runtime 다운로드나 데이터 초기화 없이 실제 가상 display의 UI/물리 캡처·SDK/UX 준비 조건을 그대로 요구한다.
+
+## run13과 별도 Stable runtime 비교
+
+37.2.13 headless 부팅은 CarService/SystemUI 네 PID가 61초간 유지됐고, keyguard false/user10·`CarUserService`의 User0Unlocked/initial user10 및 Console DDS 준비를 확인했다. 그러나 run13은 최초 문 상태의 실제 GET을 받지 못해 `reading()`의 60초 기한에서 native 96.033초 FAIL했다. 모델 호출0, DB `0/0/0`·Park/0/CLOSED·lease 복구이며 새 clock 경계 구간에 진입하지 않았다. 같은 원래 Activity의 진단용 실제 캡처는 성공했지만 이를 기능 성공으로 대체하지 않는다. 원본은 `sdk-inflight-20261115-13/`, 최소 서비스 진단은 `build-focus-frames-13/run13-minimal-sdk-service-diagnosis.json`이다.
+
+초기 성공 로그 whitelist에는 `READ_TIMEOUT`이 없어 메인 Handler 정지처럼 보일 수 있었다. 별도 PID11881의 시각 로그에는 실제 12초 타이머 및 후속 READ_TIMEOUT 3회가 있었다. SDK2.3.2 jar의 GET은 one-way Binder 요청(code4/flags1/reply null) 뒤 callback을 받는 구조다. 두 근거는 60초 메인 스레드 차단 가설을 지지하지 않으며, 생산 SDK 코드를 추측으로 변경하지 않았다. 후속 관측기는 명시적 안전 실패 코드도 `sdk_failure_events`에 보존한다. 임의 로그 본문·질문을 추가 기록하지 않는다.
+
+비교 runtime은 [Google 공식 아카이브](https://developer.android.com/studio/emulator_archive)의 **37.2.12 Stable/build16428233/mac ARM64**다. ZIP은 416,112,708bytes, 공식 SHA256 `f4c4a142bda54fcec064bdb32b51f19e25bae0a45ad019197ef968bf7a48979b`와 일치하고 전체 CRC를 확인했다. `.tooling/emulator-runtimes/37.2.12/emulator/`에 404개 파일의 전체 패키지를 분리 추출했으며 기존 SDK를 덮어쓰거나 서로 다른 버전의 라이브러리를 혼합하지 않았다. 근거는 `emulator-37.2.12-archive-verified.json`, `emulator-37.2.12-runtime-prepared.json`이다.
+
+샌드박스 안의 버전 probe는 Qt의 NEON 기능 검사에서 SIGABRT였으나, 실제 Mac 환경의 읽기 전용 `-version`은 exit0/37.2.12/build16428233을 확인했다. 하드웨어 미지원이나 AVD crash로 단정하지 않으며 서명 재작성·보안 설정 변경도 하지 않았다. 기존 headless runtime의 정상 exit0·ADB 장치 부재 후 **binary/full package 버전만** 바꿔 같은 이미지·userdata·headless/SwiftShader/noaudio/1280×720/4cores·snapshot 금지 조건으로 비교한다. 이는 호환·문제 해결이 이미 검증됐다는 뜻이 아니다.
+
+37.2.12의 첫 준비는 13:50:24 KST에 통과했지만, 후속 재확인에서는 ADB/CarService가 응답하지 않고 Console active도 false였다. 이 사이 host 벽시계와 worker monotonic의 경과 차이가 나타났다. `pmset`의 최소 이벤트 확인 결과 **13:50:26에 Clamshell Sleep**, 이후 DarkWake/Maintenance Sleep 반복과 14:06:10 Wake가 있었다. 현재 덮개 열림(`AppleClamshellState=No`)과 기존 caffeinate의 idle display/system sleep 억제는 별도로 확인했다. 이 잠자기 교란 뒤의 재확인을 버전 호환 불가 증거로 쓰지 않고, 동일 runtime을 정상 종료/재시작한 뒤 다시 검사한다. OS 수면·잠금·보안 설정은 바꾸지 않았다. 근거는 `host-sleep-wake-events.json`, `host-current-lid-state.json`, `host-sleep-assertions.json`이다. 수집은 관련 시각/허용된 원인 태그/자체 assertion만 보존하며 전체 사용자 로그를 저장하지 않는다.
+
 ## 처리 중 handler 검증과 일반 UI 검증의 구분
 
 처리 중 세 케이스는 **실제 SDK·실제 무료 provider와 생산 handler의 통합 검증**이다. 언어는 main thread에서 `language()`를 실행한 뒤 현재 action scope로 `chooseLanguage("en", scope)`를 호출한다. 종료는 Settings 화면 이동이 먼저 요청을 취소하지 않도록 pending 상태에서 `endSession()` 자체를 호출해 epoch 증가와 실제 DELETE 경계를 검사한다. Drive는 실제 플랫폼 UX callback을 그대로 사용한다. 상태를 직접 쓰거나 handler의 세션·scope·UX 검사를 생략하지 않는다.
@@ -109,8 +135,8 @@ runtime04는 시험 정리 뒤 별도의 host SIGSEGV/exit139도 보였다. 새 
 
 ## 최종 실행 명령
 
-통합 담당자가 실제 실행 후 새 run ID·정확한 명령·설치 APK/test APK 해시·증거 경로를 기록할 예정. 이 문서 작성 과정에서는 기기·모델·런타임·빌드를 실행하지 않았다.
+최종 통과 실행의 run ID·정확한 명령·설치 APK/test APK 해시·증거 경로는 아래 결과와 함께 기록한다. 각 실패 실행의 실제 명령·설치 해시는 해당 `command.json`/`validation.json` 및 runtime pin 파일에 보존한다. 독립 검토자는 소스만 읽었으며 실제 빌드·런타임·모델 호출은 통합 실행 기록과 구분한다.
 
 ## 최종 결과
 
-**미완료 — runtime04의 `-no-audio` 복구 후보 이후 세 실제 in-flight handler 경계의 전체 통과 증거 대기.** run01~08의 부분 통과를 합쳐 최종 성공으로 취급하지 않는다. 통합 담당자가 후속 시험의 실제 결과와 실패/복구·삭제 상태를 확인한 뒤 갱신한다. 이전 미완료 증거와 원본 기록은 보존한다.
+**미완료 — run01~13은 전체 FAIL이며 세 실제 in-flight handler 경계의 전체 통과 증거 대기.** 언어·Drive의 부분 증명과 진단용 캡처를 합쳐 최종 성공으로 취급하지 않는다. 별도 공식 37.2.12 runtime의 실제 SDK 회신·준비 및 후속 시험 결과를 확인한 뒤 갱신한다. 기존 실패·복구·삭제 원본은 보존한다. 작업 브랜치의 checkpoint `02947ed` 원격/CI success와 현재 후속 소스의 실제 기기 검증 상태도 구분한다.

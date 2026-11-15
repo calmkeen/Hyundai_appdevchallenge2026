@@ -1,6 +1,6 @@
 # CarCue 구현 현황
 
-2026-11-15 (KST). 최종 검증 명령과 결과는 `VALIDATION_REPORT.md`를 따른다. 코드 작성과 실제 외부 연동 완료를 구분한다. 현재 확정된 SDK 시연과 추가 late-response 시험의 미완료 상태는 `SDK_SESSION_VALIDATION.md`, 새 소개 영상은 `SDK_LIVE_INTRO.md`에 기록한다.
+2026-11-15 (KST). 최종 검증 명령과 결과는 `VALIDATION_REPORT.md`를 따른다. 코드 작성과 실제 외부 연동 완료를 구분한다. 현재 확정된 SDK 시연은 `SDK_SESSION_VALIDATION.md`, 후속 in-flight 시험 복구는 `SDK_INFLIGHT_RECOVERY.md`, 새 소개 영상은 `SDK_LIVE_INTRO.md`에 기록한다.
 
 | 단계 | 구현 | 검증 / 남은 조건 |
 | --- | --- | --- |
@@ -15,6 +15,8 @@
 ## 최신 확정 기준 · 2026-11-15
 
 다국어·동의·응답 적용/복귀 경계 구현은 `78bd767`, 생성 QUESTION 번역의 과거 opt-in 캐시 차단은 `d6be741`이다. backend **468개**, Android JVM **127개**, 계약·3언어 UI **191개** 검사와 Pleos 앱/테스트 빌드를 통과했다. 캐시 재시작 회귀의 provider HTTP는 대역이며 실제 모델 호출 수에 포함하지 않는다. `MULTILINGUAL_ASSISTANT_BOUNDARIES.md`, `QUESTION_DEFERRAL_CACHE.md`를 따른다.
+
+후속 관측기 회귀 7개를 더한 `feature/sdk-inflight-recovery`의 checkpoint `02947ed`는 원격 SHA 일치 및 CI **475개 통과**를 확인했다(run `43676020770`). 실제 파일·thread의 audit 관측 회귀이며 SDK·모델 호출 시험은 CI에 포함하지 않는다. 선행 feature4개와 develop `736dc95`도 실제 원격 반영·CI5개 success를 확인했다. 후속 기기 시험 상태는 위 복구 문서를 따른다.
 
 최신 실제 SDK 시연 `sdk-session-showcase-20261115-03`은 **194.754초 PASS**다. 기능 APK `5ef560ba…`와 촬영 당시 테스트 APK `82409ca5…`의 설치 해시를 대조했다. 같은 APK/프로세스에서 실제 ASK3·저장 ANSWER 번역3, 문 개폐와 차량 이미지 복귀, 실제 UX Drive/Park, 언어 표기/동의/가이드 단계 복귀와 종료 후 sessions/results/history **0/0/0**을 확인했다. 이 결과를 3언어×3문맥 API9 전체나 이전 SDK9단계 회귀의 최신 APK 재실행으로 확대하지 않는다.
 

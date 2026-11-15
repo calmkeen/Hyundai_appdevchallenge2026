@@ -30,6 +30,10 @@ PACKAGE = "com.carcue.app"
 PROFILE = "ioniq5-ne1-2024-kr"
 GUIDE = "ioniq5-door-open-check"
 MODEL_DIGEST = "359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7"
+SDK_FAILURE_EVENT = re.compile(
+    r"(PLEOS:(?:PERMISSION_DENIED|INITIALIZE_FAILED|CAPABILITY_FAILED|AREA_UNSUPPORTED|"
+    r"READ_TIMEOUT|GET_FAILED|CALLBACK_FAILED|LISTENER_REGISTRATION_FAILED|UNREGISTER_FAILED|RELEASE_FAILED))\s*$"
+)
 SCENES = ["profile", "language-ko", "door-closed", "door-open", "door-restored", "seatbelt",
           "official-guide-step2", "ask-ko", "translation-en", "language-en", "ask-en", "ask-ja",
           "drive-restricted", "end-session"]
@@ -486,6 +490,14 @@ def main():
                         and capture.get("method") == "UIAUTOMATION_REAL_DISPLAY"
                         and isinstance(capture.get("attempts"), int) and capture["attempts"] > 0
                         and (out / (name + ".png")).read_bytes().startswith(b"\x89PNG\r\n\x1a\n"), "ACTUAL_APP_CAPTURE_REQUIRED")
+                require(capture.get("window_focused") is True and capture.get("activity_destroyed") is False
+                        and isinstance(capture.get("activity_identity"), int)
+                        and not isinstance(capture["activity_identity"], bool)
+                        and capture["activity_identity"] == capture.get("prepared_activity_identity")
+                        and capture.get("compose_test_clock_auto_advance") is False
+                        and isinstance(capture.get("late_manual_frames_pumped"), int)
+                        and not isinstance(capture["late_manual_frames_pumped"], bool)
+                        and capture["late_manual_frames_pumped"] > 0, "ORIGINAL_FOCUSED_ACTIVITY_AND_COMMITTED_FRAMES_REQUIRED")
                 if name == "late-drive":
                     require(capture.get("physical_required") is False and capture.get("ux_known") is True
                             and capture.get("ux_restricted") is True, "DRIVE_CAPTURE_SCOPE_INVALID")
@@ -532,8 +544,10 @@ def main():
         if pid is not None:
             def sdk_logs():
                 raw = adb("logcat", "-d", "--pid", str(pid), "-v", "brief", "-s", "CarCueVehicle:I", "*:S")
-                safe = [m.group(1) for line in raw.splitlines() if (m := SDK_EVENT.search(line))]
+                safe = [m.group(1) for line in raw.splitlines()
+                        if (m := SDK_EVENT.search(line) or SDK_FAILURE_EVENT.search(line))]
                 (out / "sdk-events.json").write_text(json.dumps(safe, indent=2) + "\n")
+                report["sdk_failure_events"] = [event for event in safe if SDK_FAILURE_EVENT.fullmatch(event)]
                 require(any("PLEOS:GET_RECEIVED" in e for e in safe) and "PLEOS:LISTENER_UNREGISTER_RETURNED" in safe
                         and "PLEOS:RELEASE_RETURNED" in safe and any("UX:CALLBACK:requires=true" in e for e in safe)
                         and any("UX:CALLBACK:requires=false" in e for e in safe), "SDK_LIFECYCLE_OR_REAL_UX_EVIDENCE_MISSING")
