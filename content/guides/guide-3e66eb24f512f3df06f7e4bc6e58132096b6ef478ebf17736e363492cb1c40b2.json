@@ -1,0 +1,182 @@
+{
+  "guide_id": "ioniq5-seat-mirror-before-driving",
+  "profile_ids": [
+    "ioniq5-ne1-2024-kr"
+  ],
+  "manual_set_id": "hyundai-ioniq5-ne1-2024-kr",
+  "source_version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+  "topic": "seats_mirrors",
+  "title": "出発前に運転席とミラーを合わせる",
+  "body": "安全な場所に停車し、出発前に運転席と通常のルームミラー・ドアミラーを調整してください。走行中にシートやミラーを調整しないでください。手動・電動など、実車の装備を確認してください。DSM・DCM、メモリー・リラクゼーション・後退時自動調整は専用の説明を確認してください。アプリはシート固定・ミラー位置・死角のセンサーを読み取らず、安全を判定しません。",
+  "locale": "ja-JP",
+  "source_locale": "ko-KR",
+  "glossary_version": "carcue-ioniq5-seat-mirror-v1",
+  "lifecycle": "PUBLISHED",
+  "translation_review_status": "REVIEWED",
+  "sources": [
+    {
+      "source_id": "hyundai-ne1-2024-kr-driving-posture",
+      "title": "Hyundai IONIQ 5 2024 — Korean owner manual",
+      "url": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/idb26b9ae7995.html",
+      "version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+      "section": "올바른 운전 자세 · 인쇄 2-3 / PDF 81",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "source_id": "hyundai-ne1-2024-kr-seat-safety",
+      "title": "Hyundai IONIQ 5 2024 — Korean owner manual",
+      "url": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/id81db5616e14.html",
+      "version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+      "section": "좌석 · 공통 경고 · 인쇄 3-2~3-5 / PDF 92~95",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "source_id": "hyundai-ne1-2024-kr-front-seat",
+      "title": "Hyundai IONIQ 5 2024 — Korean owner manual",
+      "url": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/idf49da880ae1.html",
+      "version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+      "section": "앞좌석 · 수동/전동 조절 및 헤드레스트 · 인쇄 3-6~3-13 / PDF 96~103",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "source_id": "hyundai-ne1-2024-kr-inside-mirror",
+      "title": "Hyundai IONIQ 5 2024 — Korean owner manual",
+      "url": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/id38ef2ccc415.html",
+      "version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+      "section": "실내 미러 · 인쇄 5-43 / PDF 217",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "source_id": "hyundai-ne1-2024-kr-outside-mirror",
+      "title": "Hyundai IONIQ 5 2024 — Korean owner manual",
+      "url": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/id754c73d5e23.html",
+      "version": "NE1-2024-KR-ko_KR-D202406100040-20240722",
+      "section": "실외 미러 · 각도와 접힘/펴짐 · 인쇄 5-44~5-45 / PDF 218~219",
+      "verification_status": "VERIFIED"
+    }
+  ],
+  "steps": [
+    {
+      "step_id": "park-and-clear",
+      "order": 1,
+      "title": "停車して可動範囲を空ける",
+      "body": "出発前に安全な場所に停車し、シートの移動範囲、後席の乗員、運転席の足元を確認してください。実車の調整装置が手動か電動かを確認してください。",
+      "image_asset_id": null,
+      "official_cautions": [
+        "走行中にシートやミラーを調整したり、ミラーを折りたたんだりしないでください。注意がそれて事故につながります。",
+        "シート下や運転席の足元に物を置かないでください。ペダル操作を妨げたり、動いて乗員を負傷させたりします。隙間の物を取るためにシートの機構内へ手を入れないでください。",
+        "床やシートの間にライターを置かないでください。シートが動くとガスが漏れて火災になるおそれがあります。",
+        "子供だけを車内に残さないでください。電動シートは車両の電源が切れていても作動することがあります。"
+      ],
+      "source_ids": [
+        "hyundai-ne1-2024-kr-driving-posture",
+        "hyundai-ne1-2024-kr-seat-safety",
+        "hyundai-ne1-2024-kr-front-seat",
+        "hyundai-ne1-2024-kr-outside-mirror"
+      ],
+      "related_properties": [],
+      "actions": [
+        {
+          "kind": "OPEN_MANUAL",
+          "target_id": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/idf49da880ae1.html"
+        }
+      ]
+    },
+    {
+      "step_id": "adjust-driver-seat",
+      "order": 2,
+      "title": "装備された操作部で運転席を調整する",
+      "body": "手動式は前側のレバーを引いたまま前後位置を調整し、レバーを離した後、軽く揺すって固定を確認してください。背もたれは体を少し前に倒し、外側のレバーを上げて調整してから、レバーの復帰と固定を確認してください。電動式は該当する位置・背もたれスイッチで調整し、希望位置で手を離してください。",
+      "image_asset_id": null,
+      "official_cautions": [
+        "シート下や可動部に手を入れないでください。指や手の挟み込み、レールや固定部との接触で負傷するおそれがあります。後席の乗員、特に子供に注意してください。",
+        "背もたれの動きを妨げる物を取り除き、調整後はシートと背もたれの確実な固定を確認してください。",
+        "電動スイッチに強い力を加えたり、二つ以上を同時に操作したりしないでください。調整後は手を離してください。モーターや電気装置が損傷するおそれがあります。",
+        "バッテリー上がりを防ぐため、車両の電源が切れた状態での電動調整はできるだけ控えてください。",
+        "ランバーサポート装備車では鋭い物で傷つけず、それ以上出なくなったら操作をやめてください。"
+      ],
+      "source_ids": [
+        "hyundai-ne1-2024-kr-seat-safety",
+        "hyundai-ne1-2024-kr-front-seat"
+      ],
+      "related_properties": [],
+      "actions": [
+        {
+          "kind": "OPEN_MANUAL",
+          "target_id": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/idf49da880ae1.html"
+        }
+      ]
+    },
+    {
+      "step_id": "check-posture-headrest",
+      "order": 3,
+      "title": "運転姿勢とヘッドレストを確認する",
+      "body": "シートに深く座り、背もたれを起こしてください。ブレーキを奥まで踏んだとき膝が少し曲がり、手首がステアリングの最も遠い部分に届く位置に合わせてください。ヘッドレストの中心を耳の上端の高さに合わせ、頭に近づけてください。ベルトの肩帯は胸、腰帯は骨盤を通してください。",
+      "image_asset_id": null,
+      "official_cautions": [
+        "運転操作を妨げない範囲でステアリングからできるだけ離れて座ってください。近すぎるとエアバッグ作動時に致命的なけがをするおそれがあります。",
+        "走行時は背もたれを過度に倒したり、折りたたんだシートに座ったりしないでください。ベルトが機能しない、または体がベルトの下へ潜って腹部・首が締め付けられることで重傷や死亡につながるおそれがあります。",
+        "座布団はシートとの摩擦を弱め、急停止・衝突時に体がベルトの下へ滑って重傷につながるおそれがあります。",
+        "ヘッドレストを外したまま走行したり、走行中に調整したりしないでください。ポールガイド間で指を挟まないよう注意し、アクセサリーなどを掛けたり付けたりしないでください。",
+        "シートを前に移動した状態で背もたれを前へ倒すと、ヘッドレストがサンバイザーなど周辺部品と接触・干渉することがあります。"
+      ],
+      "source_ids": [
+        "hyundai-ne1-2024-kr-driving-posture",
+        "hyundai-ne1-2024-kr-seat-safety",
+        "hyundai-ne1-2024-kr-front-seat"
+      ],
+      "related_properties": [],
+      "actions": [
+        {
+          "kind": "OPEN_MANUAL",
+          "target_id": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/idf49da880ae1.html"
+        }
+      ]
+    },
+    {
+      "step_id": "adjust-interior-mirror",
+      "order": 4,
+      "title": "通常のルームミラーで後方視界を合わせる",
+      "body": "通常のルームミラーは後ろの窓から見える視界の中央が映るように合わせてください。昼夜切替式は出発前、昼の位置で角度を調整してください。ECM装備車は前後の明るさセンサーをふさがないでください。DCM画面式にはこの操作をそのまま当てはめず、専用の説明を確認してください。",
+      "image_asset_id": null,
+      "official_cautions": [
+        "シートより高い物で後方視界を遮らないでください。急停止・衝突時に前へ飛ぶ危険もあります。",
+        "ルームミラーを改造したりワイドミラーを追加したり、独自に取り外し・再取り付けしたりしないでください。衝突時の負傷、破損、振動の危険があります。",
+        "昼夜切替式の夜の位置はまぶしさを抑えますが、鏡の見え方も不鮮明になることに注意してください。"
+      ],
+      "source_ids": [
+        "hyundai-ne1-2024-kr-inside-mirror"
+      ],
+      "related_properties": [],
+      "actions": [
+        {
+          "kind": "OPEN_MANUAL",
+          "target_id": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/id38ef2ccc415.html"
+        }
+      ]
+    },
+    {
+      "step_id": "adjust-exterior-mirrors",
+      "order": 5,
+      "title": "通常のドアミラーを合わせ、距離の違いを確認する",
+      "body": "車両がACC・ONまたは始動した状態でL（運転席）・R（助手席）を選び、調整スイッチで合わせてください。折りたたみ・展開には装備された格納ボタンを使ってください。車線変更時、後続車の実際の距離はルームミラーでも確認してください。DSMカメラ式には通常のミラーの説明をそのまま当てはめないでください。",
+      "image_asset_id": null,
+      "official_cautions": [
+        "ドアミラーは凸面鏡なので、物体は見える位置よりはるかに近くにあります。",
+        "調整限界でもモーターが動くため、スイッチを押し続けないでください。鏡の角度変更や格納・展開を手で行わないでください。",
+        "凍結して動かないときは無理に調整・格納せず、表面の氷を削らないでください。解氷スプレーを使うか、暖かい場所で解かしてください。",
+        "車両の電源が切れていても格納操作ができる場合がありますが、過度の操作はバッテリー上がりにつながります。"
+      ],
+      "source_ids": [
+        "hyundai-ne1-2024-kr-outside-mirror"
+      ],
+      "related_properties": [],
+      "actions": [
+        {
+          "kind": "OPEN_MANUAL",
+          "target_id": "https://ownersmanual.hyundai.com/full_webhelp/NE1/2024/ko_KR/id754c73d5e23.html"
+        }
+      ]
+    }
+  ]
+}
