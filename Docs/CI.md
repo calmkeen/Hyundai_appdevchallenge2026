@@ -1,5 +1,7 @@
 # 기본 CI와 작업별 검증
 
+2026-11-15 공식 제출 후보부터 Android job은 `apk/calmkeen_CarCue_release.apk`가 있으면 공개 `verify_submission_apk.py`로 서명·manifest 해시·release/실제 SDK·동봉 안내12개를 검사하고 STATIC-INSPECTION 보고서를 업로드한다. 서명키 없이 이미 생성된 APK를 검사하며 SDK 런타임 시험이나 새 release 빌드를 의미하지 않는다. 이후 콘텐츠 변경 시 APK를 갱신하거나 고정 제출 checkout에서 검사해야 한다.
+
 2026-11-14. `.github/workflows/basic-ci.yml`는 develop/main/release 대상 PR과 feature/develop/release/hotfix/main push, 수동 실행에서 계약·UI 자원·백엔드 회귀를 확인하도록 구성한다. Python 3.10과 기존 `backend/requirements.lock.txt`를 사용한다. 환경은 MOCK이며 외부 AI 키/모델을 주입하지 않는다.
 
 GitHub의 [Python 빌드·테스트 공식 문서](https://docs.github.com/en/actions/tutorials/build-and-test-code/python)에 따라 checkout/setup-python으로 환경을 준비하고 로컬과 같은 명령을 실행한다. 워크플로 권한은 저장소 읽기이며 앱 배포·업로드는 수행하지 않는다.

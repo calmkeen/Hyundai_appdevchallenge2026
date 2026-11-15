@@ -2,7 +2,7 @@
 
 2026-11-15. 새 제출 APK는 `:app:assemblePleosRelease`, package `com.carcue.app`, versionCode **2**, versionName **0.1.1-rc1**로 빌드한다. 실제 Vehicle SDK 2.3.2와 `IS_MOCK=false`를 사용하며 `debuggable=false`다. 이전 debug APK와 소개 영상은 보존한다. 새 APK의 서명·동봉 안내·버전은 이전 영상에서 검증된 바이너리와 다르다.
 
-공식 제출 파일은 `apk/CarCue_release.apk`로 준비한다. **CarCue는 프로젝트명인 임시 파일명이며 팀명·개인 참가자명이 확정되면 공식 `팀명_앱이름_release.apk` 규칙에 맞춰 바꿔야 한다.** 실제 파일 해시·빌드 소스 커밋·검사 결과는 같은 디렉터리의 `SUBMISSION_RELEASE_MANIFEST.json`을 따른다. 이 문서만으로 기기 시험 통과를 뜻하지 않는다.
+공식 제출 파일은 `apk/calmkeen_CarCue_release.apk`로 준비한다. 확정된 팀명 **calmkeen**, 앱명 **CarCue**를 공식 `팀명_앱이름_release.apk` 규칙에 반영했다. APK 바이트와 서명은 이름 변경 전과 동일하다. 실제 파일 해시·빌드 소스 커밋·검사 결과는 같은 디렉터리의 `SUBMISSION_RELEASE_MANIFEST.json`을 따른다. 이 문서만으로 기기 시험 통과를 뜻하지 않는다.
 
 ## 키와 재빌드
 
@@ -55,7 +55,7 @@ CARCUE_DB=output/qa/submission-release-review.sqlite3 \
 
 | 항목 | 실제 결과 |
 | --- | --- |
-| 파일 | `apk/CarCue_release.apk`, **32,560,321bytes** |
+| 파일 | `apk/calmkeen_CarCue_release.apk`, **32,560,321bytes** |
 | APK SHA256 | `b5060db99072ae67af28a161304cc27e8e202ee282d11aa96803dbb977ff377f` |
 | 서명 인증서 SHA256 | `c945dc5eed5903ddd06efd51455c0d96239af5f11bc329fcd6b5381c99bf95e3`, 프로젝트 전용 release 인증서·Android Debug 아님 |
 | 빌드 | 최종 offline `assemblePleosRelease` 성공, heap768MB·worker1 |
@@ -69,7 +69,7 @@ CARCUE_DB=output/qa/submission-release-review.sqlite3 \
 ```bash
 # 키·설치·AVD·모델 없이 현재 제출 APK의 실제 바이트/서명을 검사한다.
 python3 scripts/verify_submission_apk.py \
-  --apk apk/CarCue_release.apk \
+  --apk apk/calmkeen_CarCue_release.apk \
   --manifest apk/SUBMISSION_RELEASE_MANIFEST.json
 ```
 

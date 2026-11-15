@@ -44,6 +44,8 @@ main 통합·출시 태그·배포는 출시 작업으로 따로 진행한다. �
 
 강제 push·이력 재작성·기존 브랜치/작업 삭제는 하지 않는다. SDK·AVD·키·DB·APK/영상은 기존 ignore 정책을 유지한다. 기존 LICENSE와 재사용 모델의 원본·라이선스 기록을 보존한다.
 
+2026-11-15 사용자의 공식 제출용 release APK와 GitHub 준비 요청에 따라 **제출 APK 한 파일 `apk/calmkeen_CarCue_release.apk`만** 기존 APK ignore의 예외로 추적한다. 사용자가 확정한 팀명 calmkeen을 반영했으며 이 한 파일과 공개 검증 기록만 추적한다. 원본 APK·영상·PDF·ZIP과 `output/`의 ignore, 서명키·비밀번호·SDK 원본·모델·DB 제외는 유지한다. 새 `release/0.1.1-first-submission` 후보를 분리하고 기존 `release/0.1-first-draft`와 main을 보존한다. 후보 push는 접수 메일 발송이나 동의·서명 대행을 의미하지 않는다.
+
 ## 기준선과 다음 작업
 
 기존 `feature/carcue-mvp`의 `0c7b39d`까지를 develop에 이력 그대로 통합했다(`137e905`). main과 기존 기획/탐색 브랜치는 보존한다. 이후 작업은 `feature/git-flow-workflow`, `feature/basic-ci`처럼 분리한다. 이전 Git 규칙은 `history/GIT_FLOW_BEFORE_TASK_BRANCHES.md`에 보존했다.

@@ -16,9 +16,9 @@
     "contracts"
   ],
   "apk": {
-    "path": "apk/CarCue_release.apk",
-    "filename": "CarCue_release.apk",
-    "filename_status": "PROVISIONAL_PROJECT_NAME_AWAITING_CONFIRMED_TEAM_OR_PARTICIPANT",
+    "path": "apk/calmkeen_CarCue_release.apk",
+    "filename": "calmkeen_CarCue_release.apk",
+    "filename_status": "CONFIRMED_TEAM_NAME",
     "official_filename_rule": "팀명_앱이름_release.apk",
     "sha256": "b5060db99072ae67af28a161304cc27e8e202ee282d11aa96803dbb977ff377f",
     "bytes": 32560321,
@@ -30,7 +30,8 @@
     "min_sdk": 28,
     "target_sdk": 35,
     "debuggable": false,
-    "is_mock": false
+    "is_mock": false,
+    "team_name": "calmkeen"
   },
   "build": {
     "gradle": "8.10.2",

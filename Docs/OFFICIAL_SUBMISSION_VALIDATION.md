@@ -53,3 +53,5 @@ workspace dependency loader가 반환한 번들 Python과 번들 LibreOffice를 
 참가 단위·부문, 팀명 또는 개인 성명, 대표자 성명·역할·이메일·휴대폰, 참가 인원, 작성일, 대표자를 포함한 구성원, 각자의 동의·서명·서명일이 남아 있다. 소속은 공식 양식상 선택 사항이다. 운영사 접수번호와 게시하지 않은 선택 숏폼 링크는 공란이다. 참가자 정보를 받더라도 동의 체크·본인 서명·작성일을 임의로 대신 만들지 않는다.
 
 문서의7번은 새 `release/0.1.1-first-submission` 저장소와 `apk/CarCue_release.apk`를 참조한다. 정확한 최종 소스·APK 해시와 공개 여부는 최종 배포 기록으로 확인하며, 이 문서 작성 자체가 원격 release 생성이나 제출 완료의 증거는 아니다.
+
+이후 사용자가 팀명을 확정해 공개 원고의 APK 경로는 `apk/calmkeen_CarCue_release.apk`로 변경했다. 위 해시는 개인정보 입력 전 검수본 이력이다. 참가정보를 작성한 후속 `CarCue-application-proposal-filled.docx`와 렌더/해시는 로컬 `output/qa/official-form-filled-20261115/`에서만 관리한다. 동의 체크·서명·서명일은 공란이며 공개 Docs/빌더에는 연락정보를 넣지 않는다.

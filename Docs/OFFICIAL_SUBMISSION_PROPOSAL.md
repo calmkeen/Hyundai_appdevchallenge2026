@@ -43,7 +43,7 @@ SDK/API 적용: 실제 Pleos SDK의 문 GET·callback과 플랫폼 Car UX 제한
 <!-- slot:reference_link -->
 최신 제출 기준 저장소: https://github.com/calmkeen/Hyundai_appdevchallenge2026/tree/release/0.1.1-first-submission
 
-배포 APK: CarCue_release.apk. 저장소의 apk/CarCue_release.apk와 함께 제공하며 정확한 소스·빌드·해시는 배포 기록에서 확인할 수 있습니다. 신규 9개 안내를 포함한 최신 개발본의 빌드이며 AVD·실차 검증 완료를 의미하지 않습니다.
+배포 APK: calmkeen_CarCue_release.apk. 저장소의 apk/calmkeen_CarCue_release.apk와 함께 제공하며 정확한 소스·빌드·해시는 배포 기록에서 확인할 수 있습니다. 신규 9개 안내를 포함한 최신 개발본의 빌드이며 AVD·실차 검증 완료를 의미하지 않습니다.
 
 소개 영상 첨부: CarCue-intro-KO-EN-JA.mp4(34초). 기존 SDK 검증 debug APK에서 촬영한 한국어·영어·일본어 화면으로, 문 상태·질문·저장 번역·주행 제한·이용 종료의 기본 시연을 편집했습니다. 최신 배포 APK와 다른 빌드이며 새 9개 안내와 후속 기능을 시연한 영상은 아닙니다. 음악 출처는 함께 제공하는 CREDITS.txt에 기재합니다.
 

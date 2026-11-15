@@ -6,11 +6,12 @@
 
 ## 제출 APK와 기획서
 
-- **서명 Release APK:** [apk/CarCue_release.apk](apk/CarCue_release.apk) — 실제 Pleos SDK를 사용하는 `pleos` 빌드입니다. APK의 해시·서명·빌드 소스와 재빌드 절차는 [Release APK 기록](Docs/SUBMISSION_RELEASE_APK.md)을 따릅니다.
-- **기획서 원문:** [현재 시제품과 후속 계획](Docs/FIRST_SUBMISSION_PLAN.md)
+- **서명 Release APK:** [apk/calmkeen_CarCue_release.apk](apk/calmkeen_CarCue_release.apk) — 실제 Pleos SDK를 사용하는 `pleos` 빌드입니다. APK의 해시·서명·빌드 소스와 재빌드 절차는 [Release APK 기록](Docs/SUBMISSION_RELEASE_APK.md)을 따릅니다.
+- **공식 양식 기획서 원고:** [CarCue 공식 제출 기획서](Docs/OFFICIAL_SUBMISSION_PROPOSAL.md) · [6쪽 양식 검수](Docs/OFFICIAL_SUBMISSION_VALIDATION.md)
+- **최종 준비 현황:** [제출 전 확인할 항목](Docs/SUBMISSION_READINESS.md). 참가정보는 로컬 접수 문서에만 작성하며, 동의·본인 서명은 직접 확인해야 합니다.
 - **이전 검토 묶음:** [기존 APK·영상·PDF·ZIP과 실행 조건](Docs/FIRST_SUBMISSION_PACKAGE.md). 기존 34초 영상은 이전 debug APK의 검증 기록이며, 위 Release APK나 새 안내 9개의 기기 실행 증거가 아닙니다.
 
-공식 [제출 안내](https://appdevchallenge.auto-hmg.io/guide/submission)는 GitHub 소스, `apk/`의 서명된 실행 가능 Release APK, README의 실행 방법·환경·Pleos Connect 버전·화면 크기·APK 위치를 요구합니다. 최종 APK 파일명은 `팀명_앱이름_release.apk` 형식이며, 현재 `CarCue_release.apk`는 팀명 확정 전 임시 이름입니다. 메일에는 저장소 URL과 최종 커밋 해시를 기재합니다. 공개 범위와 11월 16~23일 저장소 접근 조건, 소스·APK ZIP 대체 제출은 [공식 FAQ](https://appdevchallenge.auto-hmg.io/faq)를 따릅니다.
+공식 [제출 안내](https://appdevchallenge.auto-hmg.io/guide/submission)는 GitHub 소스, `apk/`의 서명된 실행 가능 Release APK, README의 실행 방법·환경·Pleos Connect 버전·화면 크기·APK 위치를 요구합니다. 최종 APK 파일명은 `팀명_앱이름_release.apk` 형식이며, 확정 팀명 calmkeen에 맞춰 `calmkeen_CarCue_release.apk`로 준비했습니다. 메일에는 저장소 URL과 최종 커밋 해시를 기재합니다. 공개 범위와 11월 16~23일 저장소 접근 조건, 소스·APK ZIP 대체 제출은 [공식 FAQ](https://appdevchallenge.auto-hmg.io/faq)를 따릅니다.
 
 ## 실행 환경
 
@@ -55,7 +56,7 @@ CARCUE_DB=output/submission-local/sessions.sqlite3 \
 adb devices
 export CARCUE_SERIAL=emulator-5554
 adb -s "$CARCUE_SERIAL" shell am get-current-user
-adb -s "$CARCUE_SERIAL" install --user 10 -r apk/CarCue_release.apk
+adb -s "$CARCUE_SERIAL" install --user 10 -r apk/calmkeen_CarCue_release.apk
 adb -s "$CARCUE_SERIAL" shell am start --user 10 \
   -n com.carcue.app/com.carcue.app.MainActivity
 ```
@@ -129,7 +130,7 @@ Mock 차량 값과 미검수 시연 프로필이 표시됩니다. 외부 AI는 �
 
 ## 문서와 구조
 
-`android/`는 Compose 앱, `backend/`는 서버, `content/`는 프로필·언어·안내 데이터, `Docs/`는 기획·실행·검증 기록입니다. 인증정보·서명 키·SDK 바이너리·모델·사용자 세션 DB는 저장소에 올리지 않습니다.
+`android/`는 Compose 앱, `backend/`는 서버, `content/`는 프로필·언어·안내 데이터, `Docs/`는 기획·실행·검증 기록입니다. 인증정보·서명 키·별도 SDK 원본 AAR·모델·사용자 세션 DB는 저장소에 올리지 않습니다. 제출 APK에는 실제 Vehicle SDK의 실행 코드가 포함됩니다.
 
 - [전체 실행 안내](Docs/RUNBOOK.md) · [아키텍처](Docs/ARCHITECTURE.md) · [API 계약](Docs/DATA_API_SPEC.md)
 - [공식 안내 9개 확장·검증](Docs/GUIDE_EXPANSION_VALIDATION.md) · [콘텐츠 등록 절차](Docs/GUIDE_CONTENT_WORKFLOW.md) · [공식 매뉴얼 검토](Docs/MANUAL_REVIEW_IONIQ5_2024_KR.md)
