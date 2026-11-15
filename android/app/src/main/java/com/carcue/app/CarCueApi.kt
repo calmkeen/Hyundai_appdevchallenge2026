@@ -2,10 +2,11 @@ package com.carcue.app
 
 import java.net.HttpURLConnection
 import java.net.URL
+import java.time.Instant
 import org.json.JSONObject
 
 data class RemoteSession(val id: String, val token: String, val expires: String)
-class ApiFailure(val status: Int, val code: String = "UNKNOWN") : Exception("SERVER_$status")
+class ApiFailure(val status: Int, val code: String = "UNKNOWN", val retryAfterMillis: Long? = null) : Exception("SERVER_$status")
 
 class CarCueApi {
     private fun call(method: String, path: String, data: JSONObject? = null, session: RemoteSession? = null, readTimeoutMillis: Int = 30000, confirmDeletion: Boolean = false): String {
@@ -27,8 +28,10 @@ class CarCueApi {
             }
             val status = connection.responseCode
             if (status !in 200..299) {
+                val retryAfter = RetryAfterPolicy.forResponse(status, connection.headerFields, Instant.now())
                 val code = try { JSONObject(connection.errorStream.bufferedReader().use { it.readText().take(10000) }).optString("detail") } catch (_: Exception) { "UNKNOWN" }
-                throw ApiFailure(status, code.takeIf { it.matches(Regex("[A-Z_]{1,100}")) } ?: "UNKNOWN")
+                throw ApiFailure(status, code.takeIf { it.matches(Regex("[A-Z_]{1,100}")) } ?: "UNKNOWN",
+                    retryAfter)
             }
             val body = connection.inputStream.bufferedReader().use { it.readText() }
             if (confirmDeletion) {

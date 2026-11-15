@@ -85,6 +85,7 @@ fun CarCueApp(vm: CarCueViewModel) {
                                                 "ASSISTANT_CONTEXT_CHANGED" -> get("ui_assistant_context_changed")
                                                 "TRANSLATION_UNAVAILABLE" -> get("ui_241983579b6f")
                                                 "AI_UNAVAILABLE" -> get("ui_ai_unavailable")
+                                                "HTTP_429" -> get("ui_ai_request_limit")
                                                 "SESSION_EXPIRED" -> get("ui_ai_session_expired")
                                                 "GUIDE_UNAVAILABLE" -> get("ui_guides_withdrawn")
                                                 "RESOURCE_UNAVAILABLE" -> get("ui_resource_unavailable")
@@ -426,9 +427,11 @@ private fun Reading.description(ko: UiCopy): String = when {
         }, modifier = Modifier.testTag("ai_consent"))
         Text(ko.get("ui_e2c47f0a9a27"), fontSize = 14.sp, lineHeight = 22.sp)
     }
-    Action(if (s.busy) ko.get("ui_62d6724cd18d") else if (translate) ko.get("ui_e592e2e100ab") else ko.get("ui_12d7bd98bbd6"), input.isNotBlank() && !s.busy && consent, Modifier.testTag("ai_send")) { vm.send(input, translate, consent = consent, scope = actionScope) }
+    if (s.assistantCooldownSeconds > 0) Text(ko.get("ui_ai_retry_wait").replace("{seconds}", s.assistantCooldownSeconds.toString()),
+        color = Muted, modifier = Modifier.testTag("ai_retry_cooldown"))
+    Action(if (s.busy) ko.get("ui_62d6724cd18d") else if (translate) ko.get("ui_e592e2e100ab") else ko.get("ui_12d7bd98bbd6"), input.isNotBlank() && !s.busy && consent && s.assistantCooldownSeconds == 0L, Modifier.testTag("ai_send")) { vm.send(input, translate, consent = consent, scope = actionScope) }
     if (s.busy) { LinearProgressIndicator(Modifier.fillMaxWidth()); TextButton(onClick = vm::cancelRequest) { Text(ko.get("ui_25fa53c0d70d")) } }
-    if (s.assistantRetry != AssistantRetry.NONE) OutlinedButton(onClick = { vm.send(input, translate, retry = true, consent = consent, scope = actionScope) }, enabled = !s.busy && consent && input.isNotBlank(), modifier = Modifier.testTag("ai_retry")) {
+    if (s.assistantRetry != AssistantRetry.NONE) OutlinedButton(onClick = { vm.send(input, translate, retry = true, consent = consent, scope = actionScope) }, enabled = !s.busy && consent && input.isNotBlank() && s.assistantCooldownSeconds == 0L, modifier = Modifier.testTag("ai_retry")) {
         Text(ko.get(if (s.assistantRetry == AssistantRetry.RESEND) "ui_16c72fd12cf2" else "ui_ai_retry_new"))
     }
     if (s.error in setOf("SERVER_UNAVAILABLE", "AI_UNAVAILABLE", "TRANSLATION_UNAVAILABLE") && s.guides.any { it.publicationVerified }) {
