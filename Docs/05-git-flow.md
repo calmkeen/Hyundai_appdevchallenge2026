@@ -38,7 +38,9 @@ git merge --no-ff feature/<task> -m "merge: <완료한 작업>"
 
 2026-11-14 사용자가 develop과 작업 브랜치의 원격 push를 요청했다. 이후 완료 작업도 해당 feature와 develop을 반영한다. PR을 이용하는 검토에는 `.github/PULL_REQUEST_TEMPLATE.md`를 사용한다. 현재 요청의 로컬 develop 통합은 위 `--no-ff` 절차를 따른다. CI 결과와 실제 SDK 수신 검증 결과를 각각 기록한다. GitHub의 브랜치 보호는 실제로 설정한 경우에만 적용됐다고 보고한다. 현재 로컬 규칙만으로 GitHub 보호/필수 검사가 활성화된다고 가정하지 않는다.
 
-main 통합·출시 태그·배포는 출시 작업으로 따로 진행한다. 현재 debug 앱·예시 가이드·AI 미연결 상태를 배포 완료로 취급하지 않는다. 원본 시각화의 외부 사용 범위는 `PLEOS_VISUAL_SOURCE.md`를 따른다.
+main 통합·출시 태그·배포는 출시 작업으로 따로 진행한다. 실제 SDK·무료 로컬 AI가 연결된 debug 시제품과 제품 출시 완료를 구분한다. 원본 시각화의 외부 사용 범위는 `PLEOS_VISUAL_SOURCE.md`를 따른다.
+
+2026-11-15의 `release/0.1-first-draft`는 기존 검증 APK·영상과 제품 코드가 같은 제출 검토 후보로 분리한다. 문서·재현 도구만 포함하며, 새 429 대기 기능은 이후 develop에 통합한다. release 생성/push는 main 병합·출시 태그·메일 발송·실제 제출을 뜻하지 않는다. 후보 고정 커밋과 파일 해시는 `FIRST_SUBMISSION_PACKAGE.md`, `SUBMISSION_CANDIDATE.json` 및 생성 manifest에 기록한다.
 
 강제 push·이력 재작성·기존 브랜치/작업 삭제는 하지 않는다. SDK·AVD·키·DB·APK/영상은 기존 ignore 정책을 유지한다. 기존 LICENSE와 재사용 모델의 원본·라이선스 기록을 보존한다.
 

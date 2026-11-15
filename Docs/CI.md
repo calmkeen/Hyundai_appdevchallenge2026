@@ -78,3 +78,11 @@ cd android
 공식 근거: [setup-java v5](https://github.com/actions/setup-java/tree/v5), [Gradle actions v5](https://github.com/gradle/actions/releases/tag/v5.0.0), [setup-gradle 문서](https://github.com/gradle/actions/blob/v5/docs/setup-gradle.md), [upload-artifact v7.0.2](https://github.com/actions/upload-artifact/releases/tag/v7.0.2), [Ubuntu 24.04 Android 도구](https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2404-Readme.md#android), [sdkmanager](https://developer.android.com/tools/sdkmanager), [Gradle 8.10.2 Java 호환성](https://docs.gradle.org/8.10.2/userguide/compatibility.html). Java/Gradle action v5는 호환성을 확인해 선택한 버전이며 최신 major라는 뜻은 아니다.
 
 공식 문서 조회는 사용자 설정의 로컬 Firecrawl을 먼저 확인했다. 로컬 스택이 꺼져 있어 서비스를 추가 기동하지 않고 내장 웹 도구로 위 공식 문서만 확인했으며 Cloud Firecrawl은 사용하지 않았다.
+
+### 실제 원격 확인
+
+- `2209a65`: Android run `43690088481` success. 업로드 JUnit XML 합산12suite/127tests, 실패·오류·건너뜀0과 Mock APK 빌드/메타데이터/업로드를 확인했다.
+- `b016e12` (429 대기 기능): Basic `43690330444` 475passed/1warning/UI193, Android `43690330524` 전체 test/assemble task와 artifact 업로드 success.
+- `8b5003f` (제출 도구): Basic `43690650267` 502passed/1warning/UI191, Android `43690650258` success. 추가27개는 합성 파일·임시 Git 저장소 회귀다.
+
+후속 Android 두 실행의 JVM 개수는 별도 합산하지 않아 추정하지 않는다. 모든 실행에서 Pleos compile job은 skipped다. 실제 SDK·AVD·모델·서버 실행0이며, CI의 Mock APK를 검증된 SDK 시연 APK로 교체하지 않는다. 정확한 링크와 판정은 `VALIDATION_REPORT.md`를 따른다.

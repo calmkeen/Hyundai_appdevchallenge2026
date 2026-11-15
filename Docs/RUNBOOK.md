@@ -96,7 +96,7 @@ CARCUE_MODE=MOCK .venv/bin/python -m uvicorn app.main:app --app-dir backend --ho
 - `content/profiles/catalog.json`: 언어와 분리된 차량 사양. 기존 두 항목은 개발용 UNVERIFIED로 보존하고 공식 2024 한국시장 아이오닉 5 매뉴얼 선택 프로필을 추가했다.
 - `content/guides/`: Schema를 지키고 정확한 profile/manual/source version과 검수된 출처 절을 등록한다. DRAFT는 검색/답변에 사용하지 않는다.
 - `content/locales/catalog.json`: 48개 언어 후보의 RTL·UI/가이드 지원 상태. Mock 선택 목록은 `mock_visible=true`인 한국어·영어·일본어 3개이며, 다른 후보 데이터는 보존한다.
-- `content/locales/ui.json`: 168개 UI 문구의 한국어·영어·일본어 초안. UI 번역과 개별 가이드의 검토 상태를 구분한다. 공식 문 안내는 한국시장 원문의 3언어 자체 요약이며 다른 후보 언어/주제는 준비 중이다. 언어를 추가할 때 화면 코드를 바꿀 필요가 없다.
+- `content/locales/ui.json`: 제출 시연 기준191개, 별도429 개발본193개 UI 문구의 한국어·영어·일본어 초안. UI 번역과 개별 가이드의 검토 상태를 구분한다. 공식 문 안내는 한국시장 원문의 3언어 자체 요약이며 다른 후보 언어/주제는 준비 중이다. 언어를 추가할 때 화면 코드를 바꿀 필요가 없다.
 - `content/locales/country-locales.json`: 50개 지역의 개발 후보 매핑이며 방문 순위나 지원 완료 목록이 아니다.
 - `scripts/prepare_content.py`: 개발 초기 데이터 생성 도구. VERIFIED 프로필이나 PUBLISHED 가이드가 있으면 쓰기 전에 중단한다.
 

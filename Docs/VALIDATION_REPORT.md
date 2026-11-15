@@ -2,6 +2,22 @@
 
 2026-11-15 (KST). 실차, 공식 전용 AVD의 실제 SDK, 일반 AVD의 Mock, 외부 AI 대역을 구분한다.
 
+## 1차 제출 준비와 원격 Android 검증 · 2026-11-15
+
+사용자 요청으로 AVD 재시험과 유료 AI는 보류했다. 기존 검증 APK `5ef560ba…`와 소개 영상 `638c1f54…`는 변경하지 않았다. HTTP429 대기는 새 개발 기능이며 이 시연 APK에 포함되지 않는다.
+
+| 작업·커밋 | 실제 원격 검증 | 범위 |
+| --- | --- | --- |
+| Android CI `2209a65` | [run43690088481](https://github.com/calmkeen/Hyundai_appdevchallenge2026/actions/runs/43690088481) success, 업로드 JUnit XML 12suite/127tests·실패/오류/건너뜀0 | demo JVM·Mock APK 빌드. Pleos compile 수동 선택 job은 skipped |
+| HTTP429 대기 `852272f` + CI병합 `b016e12` | [Basic43690330444](https://github.com/calmkeen/Hyundai_appdevchallenge2026/actions/runs/43690330444) 475passed/1warning·UI193, [Android43690330524](https://github.com/calmkeen/Hyundai_appdevchallenge2026/actions/runs/43690330524) success | Android 전체 JVM task·demo Mock APK 빌드. 로컬 순수 정책25개·서버 한도1개 통과. 새 기능의 기기 화면/실제 HTTP429는 미시험 |
+| 제출 도구 `a614082`/`8b5003f` | [Basic43690650267](https://github.com/calmkeen/Hyundai_appdevchallenge2026/actions/runs/43690650267) 502passed/1warning·UI191, [Android43690650258](https://github.com/calmkeen/Hyundai_appdevchallenge2026/actions/runs/43690650258) success | 합성 제출 자산/임시 Git27개 회귀 포함. 실제 제출·메일·SDK·모델 호출0 |
+
+후속 두 Android 실행의 JVM 개수는 별도 XML 합산 전이므로 task 성공으로만 기록한다. CI의 SDK 컴파일 미실행·Mock 차량·HTTP 대역을 실제 차량/모델 시험으로 계산하지 않는다. 기존 AnyIO deprecation warning 1개는 남는다.
+
+제출 도구의 독립 리뷰에서 빌드 입력 범위, 원본 녹화 SHA 누락, Mac의 대소문자 구분 없는 예약 파일명 충돌을 보완했다. 로컬27개 회귀도 통과했고 원본 파일을 보존한다. 정확한 묶음 후보와 PDF 검토 결과는 `SUBMISSION_CANDIDATE.json`, `FIRST_SUBMISSION_PACKAGE.md` 및 `output/qa/submission-bundle-20261115/`를 따른다. 검증 APK와 같은 제품 코드 범위의 고정 GitHub 커밋을 사용하며 최신 개발본의 새 기능을 같은 APK의 검증으로 표시하지 않는다.
+
+기획서 `FIRST_SUBMISSION_PLAN.md`는 독립 사실 검토를 통과했다. 새 PDF8쪽을 Poppler로 렌더하고 모든 페이지를 실제 시각 검수했다. `output/pdf/20261115/proposal-review.json`의 passed/all_pages_visually_reviewed는 true, PDF SHA256은 `3a9aece08a3a05f7e95307ec234063f923dc9a6a5dcb296d2d5ef18310c6fb22`다. 기존 APK·영상의 SHA를 다시 대조했으며 `package_submission.py check`는 이 네 실제 자산과 다섯 검토 보고서의 연결·제품 소스 기준07ed를 통과했다. 이 결과는 메일 발송/최종 제출 또는 새429 기기 시험이 아니다.
+
 ## 최신 시험 복구·원격 검증
 
 선행 작업 feature4개와 develop `736dc95`는 실제 원격 SHA 일치 및 CI5개 success를 확인했다. 후속 `feature/sdk-inflight-recovery` checkpoint `02947ed`도 원격 반영·CI success(run `43676020770`)이며 서버 회귀 **475개**, UI191개·가이드4레코드 검사가 통과했다. 추가 7개는 실제 파일·thread 기반 audit 관측 회귀다. CI는 MOCK 설정이며 실제 SDK·모델 검증과 구분한다. 실제 AVD 복구·기기 시험의 실패 원본과 최신 결과는 [SDK_INFLIGHT_RECOVERY.md](SDK_INFLIGHT_RECOVERY.md)를 따른다.

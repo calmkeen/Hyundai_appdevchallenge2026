@@ -9,15 +9,18 @@
 | APK | `output/apk/carcue-pleos-session-boundaries-debug.apk`, SHA256 `5ef560ba1a24e3ce206aeeb6f4f336018b6e8a182bec7214aabc5dd4a261479f` |
 | 소개 영상 | `output/qa/sdk-live-intro/live-sdk-intro-20261115-03/carcue-sdk-live-intro.mp4`, SHA256 `638c1f54d3e29ddba3212154c118267bcfc8be21a3dda0ad004066f3e600e18d` |
 | GitHub | 검증 APK와 동일한 제품 코드인 고정 커밋. 새 개발 기능이 들어간 develop과 구분 |
-| 기획서 | `FIRST_SUBMISSION_PLAN.md`의 검토 PDF. 과거 `07-product-plan.md`와 `reference/` 문서는 결정 이력으로 보존 |
+| 기획서 | `output/pdf/20261115/CarCue-first-submission-plan.pdf`, 8쪽·1,651,622bytes, SHA256 `3a9aece08a3a05f7e95307ec234063f923dc9a6a5dcb296d2d5ef18310c6fb22`. 편집 원문은 `FIRST_SUBMISSION_PLAN.md` |
 
 영상은 같은 APK/프로세스의 SDK showcase03 연속 녹화에서 편집한 34초다. 첫 문구는 ‘언제, 어디서든, 평소와 같은 경험을.’이며 한국어·영어·일본어 전환, 14기능 각2초, 기존 무료 음악을 유지한다. 촬영/음악/픽셀 검증과 알려진 한계는 `SDK_LIVE_INTRO.md`를 따른다.
+
+기획서의 8쪽을 전부 PNG로 렌더해 글자 누락·잘림·겹침을 시각 검수했다. 본문은 별도로 실제 연동·저장 번역·후속 계획 구분을 대조했다. PDF 검토 기록은 `output/pdf/20261115/proposal-review.json`이다. 과거 `07-product-plan.md`와 `reference/` 문서는 보존한다. 네 파일은 약50.1MB이며 최종 전송 방식은 아직 확정하지 않았다.
 
 ## 실제 연동과 실행 조건
 
 - **실제 연결:** Pleos 전용 AVD의 SDK2.3.2 문 GET/개폐 callback, 앱 차량 그림 변경·복귀, 실제 CarUxRestrictions Drive/Park, 공식 2024 한국시장 아이오닉5 문 안내 연결. 실차나 VIN 자동 인증은 검증하지 않았다.
 - **실제 무료 AI:** 서버의 Ollama/qwen3:4b가 검토된 공식 자료 단위를 선택한다. 서버가 주의문과 출처를 조립한다. ANSWER/GUIDE는 저장 번역이며 추가 생성 호출이 없다. 유료 AI·자동 전환·생성 QUESTION 번역은 보류다.
 - **시각 자료:** 차량은 SDK 상태에 따라 사전 렌더 프레임을 전환한다. 안전벨트는 안내 이미지이며 센서와 연결하지 않았다. 원본 자산·음악 출처를 함께 제공한다.
+- **시각 자료 이용 범위:** 사용자 지정 Pleos 녹화 프레임의 외부 재배포 권한은 확인되지 않았다. 음악의 CC BY 4.0은 차량·벨트 그래픽에 적용되지 않는다. 기존 `PLEOS_VISUAL_SOURCE.md`의 출처·권리 범위를 그대로 유지한다.
 - **Mock:** demo APK의 차량 값, CI의 HTTP 대역과 합성 JVM 시험. 제출 후보의 pleos APK 및 실제 SDK 녹화와 구분한다.
 
 검증 APK는 Pleos 개발용 debug 빌드다. 일반 Android 폰에는 Vehicle Service가 없으므로 동일한 차량 연동을 재현할 수 없다. 시연 APK의 서버 주소는 `http://10.0.2.2:8001`이며, 무료 AI에는 별도 Mac 서버와 로컬 Ollama가 필요하다. SDK·모델·키·세션 DB는 배포 묶음에 포함하지 않는다. 구체적인 설정은 `RUNBOOK.md`, `LOCAL_AI_INTEGRATION.md`를 따른다.

@@ -2,6 +2,19 @@
 
 2026-11-14부터 기능·검증·Docs를 작업별 feature 브랜치와 커밋으로 관리한다. 실제 결과와 원격 반영 여부를 분리한다. 운영 규칙은 `05-git-flow.md`다.
 
+## 1차 제출 준비 · 2026-11-15
+
+사용자가 오늘 밤 APK·영상·GitHub·기획서를 메일로 제출하며, 최종 전달 위치와 발송 방법은 저녁에 알려주기로 했다. AVD 재시험은 뒤로 미루고, 단계6의 남은 429 응답 처리와 단계7의 재현 가능한 납품을 진행한다. 유료 AI/생성 질문 번역 보류·기존 원본·main을 유지한다.
+
+| 작업 | 브랜치 | 구현·검증 |
+| --- | --- | --- |
+| CI-002 Android 원격 빌드 | `feature/android-ci-validation` | `2209a65`. JDK17·Gradle8.10.2·API35, demo JVM/Mock APK·출처 메타데이터·7일 artifact. 실제원격success/JVM127, Pleos compile은명시적수동선택이며미실행 |
+| LC-003 429 재시도 대기 | `feature/http-retry-cooldown` | `852272f`, CI병합 `b016e12`. Retry-After·단조시계·세션/언어범위·전송/재시도차단·3언어남은초. JVM25/계약UI193/서버1, 원격Basic475·Androidsuccess. 새기기시험미완료 |
+| DV-002 제출 묶음 검증 | `feature/submission-bundle` | `a614082`/`8b5003f`. 네자산명시핀·증거연결·제품소스동일성·원본보존·덮어쓰기거절·ZIP/체크섬. 독립리뷰/합성27개, 원격Basic502·Androidsuccess |
+| PL-001 현재 기획서 | `feature/first-submission-plan` | 실제SDK시연과개발기능·후속기획구분. 편집원문은Docs, 검토PDF와전체페이지검수는output/pdf에서관리 |
+
+검증된 시연 APK5ef560ba…와 34초 영상638c1f54…를 한 쌍으로 고정한다. 제출 소스는 동일 제품 코드의 release 후보로 분리하며 429 새 개발본은 별도로 develop에 통합한다. 실제 진행 중 응답 세 경계는 미완료로 유지한다. 메일·최종 제출·main 병합·출시 태그는 실행하지 않는다. 최종 SHA/검증은 `VALIDATION_REPORT.md`, `FIRST_SUBMISSION_PACKAGE.md`를 따른다.
+
 | 작업 | 브랜치 | 범위와 완료 조건 | 상태 |
 | --- | --- | --- | --- |
 | 기준선 통합 | 기존 `feature/carcue-mvp` → develop | SDK/앱/영상/문서 전체 이력을 보존해 통합, main 보존 | 로컬 통합 `137e905`, MVP 기준 `0c7b39d` |

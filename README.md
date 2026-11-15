@@ -8,13 +8,14 @@ CarCue는 낯선 차량의 상태와 사용법을 자신의 언어로 확인하�
 
 ## 실행과 현황
 
+- [1차 제출 검토용 기획서](Docs/FIRST_SUBMISSION_PLAN.md) · [제출 묶음·실행 조건·남은 범위](Docs/FIRST_SUBMISSION_PACKAGE.md)
 - [실행 방법](Docs/RUNBOOK.md)
 - [구현 상태 및 Mock 구분](Docs/IMPLEMENTATION_STATUS.md)
 - [SDK 지원 조사](Docs/SDK_CAPABILITY_REPORT.md)
 - [검증 결과](Docs/VALIDATION_REPORT.md)
 - [최신 개발 순서](Docs/DEVELOPMENT_ORDER.md)
 - [Git Flow 작업 규칙](Docs/05-git-flow.md) · [작업별 개발 기록](Docs/DEVELOPMENT_LOG.md)
-- [기본 CI와 검증 범위](Docs/CI.md)
+- [백엔드·Android CI와 검증 범위](Docs/CI.md)
 - [아키텍처와 점진적 개발 구조](Docs/ARCHITECTURE.md)
 - [검수 가이드 등록·조회 절차](Docs/GUIDE_CONTENT_WORKFLOW.md)
 - [2024 한국 아이오닉 5 공식 매뉴얼 검토](Docs/MANUAL_REVIEW_IONIQ5_2024_KR.md)
@@ -27,7 +28,9 @@ CarCue는 낯선 차량의 상태와 사용법을 자신의 언어로 확인하�
 `android/`는 네이티브 Compose 앱, `backend/`는 서버, `content/`는 프로필·언어·가이드 데이터입니다. 공식 2024 한국시장 아이오닉 5 매뉴얼을 대조한 문 안내 1개를 한국어·영어·일본어로 등록했습니다. 기존 개발 프로필과 `contracts/guide.template.json`은 미검수/비게시로 보존합니다. 유료 AI 연결은 보류하고 Mac의 Ollama/Qwen3 로컬 모델을 사용합니다. 질문 답변은 공식 검수 단위 선택, 안내 번역은 저장된 검수 번역, 자유 질문 번역은 품질 미완료로 기본 보류합니다.
 
 ## 문서
-- [통합 제품 기획안](Docs/07-product-plan.md) · 사용자 시나리오, 기능 경계, 검증 계획
+
+- [현재 시제품과 후속 계획](Docs/FIRST_SUBMISSION_PLAN.md) · 실제 SDK·무료 AI·저장 번역과 남은 기기 시험
+- [초기 통합 제품 기획안](Docs/07-product-plan.md) · 당시 사용자 시나리오, 기능 경계, 검증 계획 이력
 - [기획 개요](Docs/01-product-concept.md)
 - [MVP 및 기술 설계](Docs/02-mvp-and-architecture.md)
 - [SDK 검증 기록](Docs/03-sdk-verification.md)

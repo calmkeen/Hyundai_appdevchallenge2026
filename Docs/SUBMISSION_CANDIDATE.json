@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "candidate_id": "CarCue-first-draft-20261115",
+  "candidate_type": "VALIDATED_SDK_SHOWCASE_BASELINE",
+  "inflight_boundaries_passed": false,
+  "paid_ai_enabled": false,
+  "delivery_status": "DRAFT_AWAITING_USER_DELIVERY_DETAILS",
+  "validated_source_ref": "07edb2ae408f8b0d6051fa49cf90af1d29c97108",
+  "repository_url": "https://github.com/calmkeen/Hyundai_appdevchallenge2026",
+  "assets": {
+    "apk": {
+      "source": "output/apk/carcue-pleos-session-boundaries-debug.apk",
+      "sha256": "5ef560ba1a24e3ce206aeeb6f4f336018b6e8a182bec7214aabc5dd4a261479f",
+      "filename": "CarCue-Pleos-SDK-debug.apk"
+    },
+    "video": {
+      "source": "output/qa/sdk-live-intro/live-sdk-intro-20261115-03/carcue-sdk-live-intro.mp4",
+      "sha256": "638c1f54d3e29ddba3212154c118267bcfc8be21a3dda0ad004066f3e600e18d",
+      "filename": "CarCue-intro-KO-EN-JA.mp4"
+    },
+    "proposal": {
+      "source": "output/pdf/20261115/CarCue-first-submission-plan.pdf",
+      "sha256": "3a9aece08a3a05f7e95307ec234063f923dc9a6a5dcb296d2d5ef18310c6fb22",
+      "filename": "CarCue-first-submission-plan.pdf"
+    },
+    "credits": {
+      "source": "output/qa/sdk-live-intro/live-sdk-intro-20261115-03/credits.txt",
+      "sha256": "bb6bc3021e214f0aafc17e4f5831677d1d0c179c246c8481155c6715a00af67c",
+      "filename": "CREDITS.txt"
+    }
+  },
+  "evidence": {
+    "sdk_showcase": {
+      "source": "output/qa/multilingual-session-20261115/sdk-session-showcase-20261115-03/validation.json",
+      "sha256": "7a85410a9db0ae54650e89e995c624686f7e5c572079f155a202398242c8ba31"
+    },
+    "native_review": {
+      "source": "output/qa/multilingual-session-20261115/sdk-session-showcase-20261115-03/visual-semantic-review.json",
+      "sha256": "99d6001bfb428c808f096c59d8e3eabb2669aded25a36bf18c30cc3315b9c226"
+    },
+    "video_render": {
+      "source": "output/qa/sdk-live-intro/live-sdk-intro-20261115-03/render-validation.json",
+      "sha256": "c145dffe3642d58c559c904e04d42a337f74d06c9e452ad2be01fff2a79cb582"
+    },
+    "video_review": {
+      "source": "output/qa/sdk-live-intro/live-sdk-intro-20261115-03/visual-review.json",
+      "sha256": "35a6ea072c40f4ed01cf892284458cac2285d8f4a99c67afec861f57306c6b4f"
+    },
+    "proposal_review": {
+      "source": "output/pdf/20261115/proposal-review.json",
+      "sha256": "0db1ef07bfaf6e81a09cf8a7898be8e26708941fcf62b0b5071c95b80aff7ad7"
+    }
+  }
+}

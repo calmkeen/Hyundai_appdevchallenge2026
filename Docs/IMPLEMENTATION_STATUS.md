@@ -2,6 +2,16 @@
 
 2026-11-15 (KST). 최종 검증 명령과 결과는 `VALIDATION_REPORT.md`를 따른다. 코드 작성과 실제 외부 연동 완료를 구분한다. 현재 확정된 SDK 시연은 `SDK_SESSION_VALIDATION.md`, 후속 in-flight 시험 복구와 호스트 부하로 남은 기기 검증은 `SDK_INFLIGHT_RECOVERY.md`, 새 소개 영상은 `SDK_LIVE_INTRO.md`에 기록한다.
 
+## 1차 제출 시제품과 추가 개발
+
+사용자 요청으로 AVD 재시험·유료 AI를 보류했다. 제출 검토 초안은 **기존 검증 APK5ef560ba… / 같은 SDK 앱의 34초 영상638c1f54… / 고정 GitHub 소스 / 현재 기획서**다. 네 파일의 묶음·해시·실행 조건은 `FIRST_SUBMISSION_PACKAGE.md`, 기획 내용은 `FIRST_SUBMISSION_PLAN.md`에서 관리한다. 메일 발송과 최종 전달 위치는 아직 사용자 지시 전이다.
+
+새 `feature/http-retry-cooldown`은 Retry-After에 따른 남은 초 표시와 전송·재시도 차단을 구현했다. 로컬 순수정책25개·서버 한도1개·UI193 계약, 실제 원격 Basic475와 Android demo JVM/Mock APK 빌드가 통과했다. 이 기능은 기존 시연 APK에 포함되지 않으며 새 화면/429의 기기 검증은 남아 있다. 상세는 [별도 개발 브랜치의 HTTP_RETRY_COOLDOWN.md](https://github.com/calmkeen/Hyundai_appdevchallenge2026/blob/feature/http-retry-cooldown/Docs/HTTP_RETRY_COOLDOWN.md)를 따른다.
+
+`feature/android-ci-validation`은 JDK17/Gradle8.10.2/API35의 원격 demo JVM/Mock APK 빌드·해시/메타데이터·보고서 artifact를 제공한다. 실제 첫 원격 JUnit127개를 확인했다. Pleos 컴파일은 수동 선택이며 이번에는 실행하지 않았다. SDK 수신/실제 모델/기기 시험을 대신하지 않는다. 제출 도구는 독립 리뷰·합성27개와 원격 Basic502/Android 빌드를 통과했다. 각 커밋의 실제 CI는 `VALIDATION_REPORT.md`를 따른다.
+
+현재 제출 준비와 전체 제품 완료를 구분한다. **처리 중 응답의 기기 경계3건**, 추가3주제×3언어의9개 안내, 모바일QR·RTL/접근성·추가 차종/실차 시험은 남아 있다. 아래 표와 날짜별 결과는 해당 시연 APK·당시 바이너리의 검증 범위이며 새 개발본 전체 기기 검증을 뜻하지 않는다.
+
 | 단계 | 구현 | 검증 / 남은 조건 |
 | --- | --- | --- |
 | 1 환경 | 기존 작업 보존, 인계 문서·자산·계약 보관, 분리한 빌드 SDK, Git feature 브랜치 | JDK 17·SDK 2.3.2·전용 AVD 준비 및 앱 설치·실행 확인 |

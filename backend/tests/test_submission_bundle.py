@@ -111,6 +111,7 @@ def test_build_copies_only_exact_pinned_assets_and_checksums_and_leaves_original
         assert bundle.sha256(destination / name) == digest
     assert result["source_commit"] == config["validated_source_ref"]
     assert result["inflight_boundaries_passed"] is False and not result["new_feature_build_included"]
+    assert result["pleos_visual_redistribution_permission_confirmed"] is False
 
 
 @pytest.mark.parametrize("role", ["apk", "video", "proposal", "credits"])
